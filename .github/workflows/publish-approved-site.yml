@@ -1,0 +1,42 @@
+name: Publish approved Trinity website
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out official website
+        uses: actions/checkout@v4
+        with:
+          path: official
+
+      - name: Check out approved website
+        uses: actions/checkout@v4
+        with:
+          repository: TrinityContinuum/trinitycontinuum-preview
+          path: approved
+
+      - name: Transfer approved website
+        run: |
+          rsync -av --delete \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='CNAME' \
+            --exclude='*.md' \
+            approved/ official/
+
+      - name: Commit website to official repository
+        working-directory: official
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if ! git diff --cached --quiet; then
+            git commit -m "Publish approved Trinity Continuum website"
+            git push
+          fi
