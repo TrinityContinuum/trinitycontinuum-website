@@ -26,3 +26,13 @@ document.addEventListener('DOMContentLoaded',()=>{
  const sel=document.querySelector('select[name="interest"]');
  if(sel && interest && [...sel.options].some(o=>o.value===interest)) sel.value=interest;
 });
+
+// Give skip-link users keyboard focus at the main content.
+document.addEventListener('DOMContentLoaded',()=>{
+  const main=document.getElementById('main');
+  const skip=document.querySelector('a.skip[href="#main"]');
+  if(main&&skip){
+    if(!main.hasAttribute('tabindex')) main.setAttribute('tabindex','-1');
+    skip.addEventListener('click',()=>main.focus());
+  }
+});
