@@ -17,6 +17,11 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mob
       });
       if (name === 'mobile') test(path + ' mobile navigation works', async ({ page }) => {
         await page.goto(base + '/' + path);
+        const introSkip = page.getByRole('button', { name: /Skip Intro/i });
+        if (await introSkip.isVisible().catch(() => false)) {
+          await introSkip.click();
+          await expect(page.getByRole('dialog', { name: /Trinity Continuum introduction film/i })).toBeHidden();
+        }
         const button = page.locator('button.menu');
         const nav = page.locator('nav.links');
         await expect(button).toBeVisible();
