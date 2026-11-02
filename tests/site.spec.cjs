@@ -45,3 +45,18 @@ test('publication section anchors resolve', async ({ page }) => {
   const bad = await page.evaluate(() => [...document.querySelectorAll('a[href^="#"]')].map(a => a.hash.slice(1)).filter(id => id && !document.getElementById(decodeURIComponent(id))));
   expect(bad).toEqual([]);
 });
+
+test('homepage and publications local links and assets resolve', async ({ request, page }) => {
+  for (const path of ['index.html', 'publications.html']) {
+    await page.goto(base + '/' + path);
+    const targets = await page.evaluate(() => [...document.querySelectorAll('[href], [src]')]
+      .map(el => el.getAttribute('href') || el.getAttribute('src'))
+      .filter(Boolean)
+      .filter(url => !/^(https?:|mailto:|tel:|data:|#|javascript:)/i.test(url))
+      .map(url => new URL(url, location.href).pathname));
+    for (const target of new Set(targets)) {
+      const response = await request.get(base + target);
+      expect(response.status(), path + ' -> ' + target).toBe(200);
+    }
+  }
+});
