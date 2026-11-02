@@ -27,9 +27,10 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mob
         await page.keyboard.press('Escape');
         await expect(button).toHaveAttribute('aria-expanded', 'false');
         await expect(nav).toBeHidden();
-        await button.click();
-        await nav.locator('a[href="publications.html"]').click();
-        await expect(page).toHaveURL(/publications\.html$/);
+        await button.click({ timeout: 5000 });
+        await expect(nav).toBeVisible({ timeout: 5000 });
+        await nav.locator('a[href="publications.html"]').click({ timeout: 5000 });
+        await expect(page).toHaveURL(/publications\.html$/, { timeout: 5000 });
       });
     }
   });
