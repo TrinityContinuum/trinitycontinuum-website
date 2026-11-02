@@ -4,39 +4,43 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: trinity-pages-production
+  cancel-in-progress: false
 
 jobs:
   publish:
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Check out official website
+      - name: Check out approved official main branch
         uses: actions/checkout@v4
         with:
-          path: official
+          ref: main
+          persist-credentials: false
 
-      - name: Check out approved website
-        uses: actions/checkout@v4
+      - name: Verify approved release assets
+        run: |
+          test -s index.html
+          test -s publications.html
+          test -s CNAME
+          grep -q 'trinitycontinuum.com' CNAME
+          grep -q 'publications.html' index.html
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload approved official website
+        uses: actions/upload-pages-artifact@v3
         with:
-          repository: TrinityContinuum/trinitycontinuum-preview
-          path: approved
+          path: .
 
-      - name: Transfer approved website
-        run: |
-          rsync -av --delete \
-            --exclude='.git/' \
-            --exclude='.github/' \
-            --exclude='CNAME' \
-            --exclude='*.md' \
-            approved/ official/
-
-      - name: Commit website to official repository
-        working-directory: official
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A
-          if ! git diff --cached --quiet; then
-            git commit -m "Publish approved Trinity Continuum website"
-            git push
-          fi
+      - name: Deploy approved website to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
