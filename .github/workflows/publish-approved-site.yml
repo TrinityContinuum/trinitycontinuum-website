@@ -2,6 +2,13 @@ name: Publish approved Trinity website
 
 on:
   workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - '**/*.html'
+      - 'assets/**'
+      - 'CNAME'
+      - '.github/workflows/publish-approved-site.yml'
 
 permissions:
   contents: read
