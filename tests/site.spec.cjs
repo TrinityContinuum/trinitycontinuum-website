@@ -28,8 +28,8 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mob
         await expect(button).toHaveAttribute('aria-expanded', 'false');
         await expect(nav).toBeHidden();
         await button.click();
-        await nav.locator('a').first().click();
-        await expect(page).toHaveURL(/index\.html$/);
+        await nav.locator('a[href="publications.html"]').click();
+        await expect(page).toHaveURL(/publications\.html$/);
       });
     }
   });
