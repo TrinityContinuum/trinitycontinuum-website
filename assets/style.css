@@ -21,3 +21,8 @@ body{font-family:Arial,Helvetica,sans-serif}.brand,.section h2,.page-hero h1,.he
 
 /* Keep unconfigured meeting booking controls hidden. */
 [data-booking][hidden] { display: none !important; }
+
+/* Publication release: small-screen navigation, keyboard access and readable content */
+@media(max-width:850px){.site-header .nav{align-items:center}.site-header .links{flex-direction:column;align-items:stretch;gap:0}.site-header .links a{display:block;padding:10px 4px;font-size:15px;border-bottom:1px solid var(--line)}.site-header .menu{min-height:44px;min-width:44px;cursor:pointer}}
+@media(max-width:570px){.wrap{padding-left:18px;padding-right:18px}.section h1{font-size:clamp(32px,9vw,48px);line-height:1.12;overflow-wrap:anywhere}.section h2{overflow-wrap:anywhere}.buttons{flex-wrap:wrap}.buttons .btn{max-width:100%;white-space:normal;text-align:center}}
+:focus-visible{outline:3px solid var(--gold);outline-offset:3px}html{scroll-padding-top:24px}img{max-width:100%}@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
