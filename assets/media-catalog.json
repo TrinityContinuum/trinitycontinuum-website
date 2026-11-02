@@ -258,7 +258,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-608",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold QA / Validation / Documentation",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "Continuum Closed-Loop Energy and Water System.png",
@@ -1293,7 +1295,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-482",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Manufacture → Global Continuum",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-540 Closed-Loop Resource Continuity.png",
@@ -1302,7 +1306,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-540",
     "status": "Source image",
-    "date": "2026-08-21"
+    "date": "2026-08-21",
+    "film_subject": "Gold Forward Build / Full-Plant & Doctrine Expansion",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-542: Mission-Ready Mobility.png",
@@ -1311,7 +1317,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-542",
     "status": "Source image",
-    "date": "2026-08-21"
+    "date": "2026-08-21",
+    "film_subject": "Gold Forward Build / Full-Plant & Doctrine Expansion",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-545 Continuum: Many Missions, Endless Impact.png",
@@ -1320,7 +1328,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-545",
     "status": "Source image",
-    "date": "2026-08-21"
+    "date": "2026-08-21",
+    "film_subject": "Gold Forward Build / Full-Plant & Doctrine Expansion",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-547 Continuum Network Vision.png",
@@ -1329,7 +1339,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-547",
     "status": "Source image",
-    "date": "2026-08-21"
+    "date": "2026-08-21",
+    "film_subject": "Gold Forward Build / Full-Plant & Doctrine Expansion",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-560 Continuum Gold Standard.png",
@@ -1338,7 +1350,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-560",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold Forward Build / Full-Plant & Doctrine Expansion",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-587 Modular Platform Blueprint.png",
@@ -1347,7 +1361,9 @@
     "category": "Components & engineering",
     "scene": "SH-587",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold Handoff / Delivery Continuation",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-588 Modular Mission Platform.png",
@@ -1356,7 +1372,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-588",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold Handoff / Delivery Continuation",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-590 Gold Quality Assurance Infographic.png",
@@ -1365,7 +1383,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-590",
     "status": "Illustration / storyboard",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold QA / Validation / Documentation",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-599: The Continuum Ecosystem.png",
@@ -1374,7 +1394,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-599",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold QA / Validation / Documentation",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-608: Engineered for Decades.png",
@@ -1383,7 +1405,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-608",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold QA / Validation / Documentation",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-609 Modular Maintenance Doctrine Poster.png",
@@ -1392,7 +1416,9 @@
     "category": "Testing, service & quality",
     "scene": "SH-609",
     "status": "Illustration / storyboard",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold QA / Validation / Documentation",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-610 Control Ecosystem Dashboard.png",
@@ -1401,7 +1427,9 @@
     "category": "Controls & electrical",
     "scene": "SH-610",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold Control Ecosystem",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-614 Self-Cleaning System Infographic.png",
@@ -1410,7 +1438,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-614",
     "status": "Illustration / storyboard",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold Control Ecosystem",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-617 Built to Last Engineering Poster.png",
@@ -1419,7 +1449,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-617",
     "status": "Illustration / storyboard",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold Control Ecosystem",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-618: Global Deployment, Local Impact.png",
@@ -1428,7 +1460,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-618",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold Control Ecosystem",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-645 Industrial Command Center.png",
@@ -1437,7 +1471,9 @@
     "category": "Controls & electrical",
     "scene": "SH-645",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Gold Legacy / Continuity",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-650 Continuum Process Infographic.png",
@@ -1446,7 +1482,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-650",
     "status": "Illustration / storyboard",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Continuum in Motion / Process",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-651 Integrated Continuum System Diagram.png",
@@ -1455,7 +1493,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-651",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Continuum in Motion / Process",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-655 Continuum Operations Infographic.png",
@@ -1464,7 +1504,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-655",
     "status": "Illustration / storyboard",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Continuum in Motion / Process",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-656 Continuum Energy Recovery System.png",
@@ -1473,7 +1515,9 @@
     "category": "Power & thermal",
     "scene": "SH-656",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Continuum in Motion / Process",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-658 Continuum System Overview.png",
@@ -1482,7 +1526,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-658",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Continuum in Motion / Process",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-660: The Continuum Mission Platform.png",
@@ -1491,7 +1537,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-660",
     "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Mission Platform / Configuration",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-661 Continuum: Pure Water, Clean Power.png",
@@ -1500,52 +1548,9 @@
     "category": "Water & treatment",
     "scene": "SH-661",
     "status": "Source image",
-    "date": "2026-08-22"
-  },
-  {
-    "title": "SH-665 Energy Performance Dashboard.png",
-    "url": "https://chatgpt.com/library?file_id=libfile_22bbb04fef188191915e1352124c5d31&account_id=personal",
-    "source": "Library",
-    "category": "Power & thermal",
-    "scene": "SH-665",
-    "status": "Source image",
-    "date": "2026-08-22"
-  },
-  {
-    "title": "SH-667: Live System Telemetry Dashboard.png",
-    "url": "https://chatgpt.com/library?file_id=libfile_08617fb7efd88191a7470e186a359990&account_id=personal",
-    "source": "Library",
-    "category": "Controls & electrical",
-    "scene": "SH-667",
-    "status": "Source image",
-    "date": "2026-08-22"
-  },
-  {
-    "title": "SH-668 Extremes Campaign Dashboard.png",
-    "url": "https://chatgpt.com/library?file_id=libfile_82f6e52dd8ec819183f0e574a98f07be&account_id=personal",
-    "source": "Library",
-    "category": "Film scenes & brand",
-    "scene": "SH-668",
-    "status": "Source image",
-    "date": "2026-08-22"
-  },
-  {
-    "title": "SH-670 Live System Integration Dashboard.png",
-    "url": "https://chatgpt.com/library?file_id=libfile_1fb78b2590fc81918afbc80b47ad6b38&account_id=personal",
-    "source": "Library",
-    "category": "Film scenes & brand",
-    "scene": "SH-670",
-    "status": "Source image",
-    "date": "2026-08-22"
-  },
-  {
-    "title": "SH-671 Continuum Engineering Dashboard.png",
-    "url": "https://chatgpt.com/library?file_id=libfile_f31c6c32919c8191a6a4c4e0748874ac&account_id=personal",
-    "source": "Library",
-    "category": "Film scenes & brand",
-    "scene": "SH-671",
-    "status": "Source image",
-    "date": "2026-08-22"
+    "date": "2026-08-22",
+    "film_subject": "Mission Platform / Configuration",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-675.png",
@@ -1554,7 +1559,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-675",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-675: Six Trailers Aligned.png",
@@ -1563,7 +1570,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-675",
     "status": "Source image",
-    "date": "2026-09-10"
+    "date": "2026-09-10",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-675_BRANDED.png",
@@ -1572,7 +1581,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-675",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-676.png",
@@ -1581,7 +1592,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-676",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-676_BRANDED.png",
@@ -1590,7 +1603,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-676",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-677.png",
@@ -1599,7 +1614,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-677",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-677_BRANDED.png",
@@ -1608,7 +1625,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-677",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-678.png",
@@ -1617,7 +1636,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-678",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-678_BRANDED.png",
@@ -1626,7 +1647,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-678",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-679.png",
@@ -1635,7 +1658,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-679",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-679_BRANDED.png",
@@ -1644,7 +1669,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-679",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-680.png",
@@ -1653,7 +1680,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-680",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-680_BRANDED.png",
@@ -1662,7 +1691,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-680",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-681.png",
@@ -1671,7 +1702,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-681",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-681_BRANDED.png",
@@ -1680,7 +1713,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-681",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-682.png",
@@ -1689,7 +1724,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-682",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-682_BRANDED.png",
@@ -1698,7 +1735,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-682",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-683.png",
@@ -1707,7 +1746,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-683",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-683_BRANDED.png",
@@ -1716,7 +1757,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-683",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-684.png",
@@ -1725,7 +1768,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-684",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-684_BRANDED.png",
@@ -1734,7 +1779,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-684",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-685.png",
@@ -1743,7 +1790,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-685",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-685_BRANDED.png",
@@ -1752,7 +1801,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-685",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-686.png",
@@ -1761,7 +1812,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-686",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-686_BRANDED.png",
@@ -1770,7 +1823,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-686",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-686_TC1_BYPASS_CONTROL_CLEAN.png",
@@ -1779,7 +1834,9 @@
     "category": "Controls & electrical",
     "scene": "SH-686",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-686_TC1_BYPASS_CONTROL_PRIMARY.png",
@@ -1788,7 +1845,9 @@
     "category": "Controls & electrical",
     "scene": "SH-686",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-687.png",
@@ -1797,7 +1856,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-687",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-687_BRANDED.png",
@@ -1806,7 +1867,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-687",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-687_TC1_FA1_QUALIFICATION_CLEAN.png",
@@ -1815,7 +1878,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-687",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-687_TC1_FA1_QUALIFICATION_PRIMARY.png",
@@ -1824,7 +1889,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-687",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-688.png",
@@ -1833,7 +1900,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-688",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-688_BRANDED.png",
@@ -1842,7 +1911,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-688",
     "status": "Source image",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-688_TC1_PROTECTED_FUEL_HOT_SECTION_CLEAN.png",
@@ -1851,7 +1922,9 @@
     "category": "Power & thermal",
     "scene": "SH-688",
     "status": "Source image",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH-688_TC1_PROTECTED_FUEL_HOT_SECTION_PRIMARY.png",
@@ -1860,16 +1933,9 @@
     "category": "Power & thermal",
     "scene": "SH-688",
     "status": "Source image",
-    "date": "2026-08-23"
-  },
-  {
-    "title": "SH672-SH688_ACTUAL_LOGO_INTEGRATED_REVIEW.png",
-    "url": "https://chatgpt.com/library?file_id=libfile_ab07522eef148191bf6fc84234138e24&account_id=personal",
-    "source": "Library",
-    "category": "Film scenes & brand",
-    "scene": "SH672-SH688",
-    "status": "Review source",
-    "date": "2026-08-24"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "SH675-SH688_BRANDED_FINAL_REVIEW.png",
@@ -1878,7 +1944,9 @@
     "category": "Film scenes & brand",
     "scene": "SH675-SH688",
     "status": "Review source",
-    "date": "2026-08-24"
+    "date": "2026-08-24",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "Six Silent Trailers Before Startup.png",
@@ -6333,7 +6401,9 @@
     "category": "Film scenes & brand",
     "scene": "SH-533",
     "status": "Source image",
-    "date": "2026-08-19"
+    "date": "2026-08-19",
+    "film_subject": "Six-Trailer Full Production",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "Trinity Continuum: Recovery in Motion.png",
@@ -6918,7 +6988,9 @@
     "category": "Film scenes & brand",
     "scene": "SH688",
     "status": "Review source",
-    "date": "2026-08-23"
+    "date": "2026-08-23",
+    "film_subject": "Gold Rev D Final Closeout / TC1 Extension",
+    "label_basis": "Original filename; subject from Film-01 assembly ledger"
   },
   {
     "title": "TRINITY_CONTINUUM_FILM_BUG_TRANSPARENT.png",
@@ -7224,7 +7296,12 @@
     "category": "Testing, service & quality",
     "scene": "",
     "status": "Review source",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH20_THERMAL_RECOVERY_MOTION_V3_REVIEW.mp4",
+      "url": "https://drive.google.com/file/d/1MzstnDDvNaP8_kDRFc0LosWlQ1-z5Xhi/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_CH21_MOTION_V3_QA_CONTACT.jpg",
@@ -7233,7 +7310,12 @@
     "category": "Testing, service & quality",
     "scene": "",
     "status": "Review source",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH21_WATER_PRODUCTION_MOTION_V3_REVIEW.mp4",
+      "url": "https://drive.google.com/file/d/1upluLe8c_GbYYja6SGmlGc_tozH1fsne/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_CH22_MOTION_V3_QA_CONTACT.jpg",
@@ -7269,7 +7351,12 @@
     "category": "Film scenes & brand",
     "scene": "",
     "status": "Source image",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH26_SERVICEABILITY_MOTION_V3.mp4",
+      "url": "https://drive.google.com/file/d/1w9XHSX1iIezIV5lokXh1wvFMl8jT60AO/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_CH27_QA.jpg",
@@ -7278,7 +7365,12 @@
     "category": "Film scenes & brand",
     "scene": "",
     "status": "Source image",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH27_SELF_CLEANING_MOTION_V3.mp4",
+      "url": "https://drive.google.com/file/d/1M2B3ghtWXEyyul8utSxXIP4bm3rmVA7b/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_CH28_QA.jpg",
@@ -7287,7 +7379,12 @@
     "category": "Film scenes & brand",
     "scene": "",
     "status": "Source image",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH28_WEATHER_FIELD_SURVIVABILITY_MOTION_V3.mp4",
+      "url": "https://drive.google.com/file/d/1g6CneF6xL0rqJUbvcldu_iXnL77NEY7a/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_CH29_QA.jpg",
@@ -7296,7 +7393,12 @@
     "category": "Film scenes & brand",
     "scene": "",
     "status": "Source image",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH29_MISSION_CONTROL_MOTION_V3.mp4",
+      "url": "https://drive.google.com/file/d/1Cam_g3WxVC0lHgBqdLWl9TVdgtzSqIOe/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_CH30_QA.jpg",
@@ -7305,7 +7407,12 @@
     "category": "Film scenes & brand",
     "scene": "",
     "status": "Source image",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH30_LIFECYCLE_RECORD_MOTION_V3.mp4",
+      "url": "https://drive.google.com/file/d/1c7ZCbvWRuoTY5YYf9uKD9_K5CM01Qnd9/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_CH31_QA.jpg",
@@ -7314,7 +7421,12 @@
     "category": "Film scenes & brand",
     "scene": "",
     "status": "Source image",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH31_TRANSPORT_CHASSIS_MOTION_V3.mp4",
+      "url": "https://drive.google.com/file/d/1YXKy8aeOwPtUq2gin3pxWW8Yw05yo2l7/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_CH32_QA.jpg",
@@ -7323,7 +7435,12 @@
     "category": "Film scenes & brand",
     "scene": "",
     "status": "Source image",
-    "date": "2026-08-25"
+    "date": "2026-08-25",
+    "related_video": {
+      "title": "TRINITY_FILM01_CH32_PRODUCT_LOADING_MOTION_V3.mp4",
+      "url": "https://drive.google.com/file/d/1pzsjnz89jnF1CstjRJ67eLPpmoRsRJRG/view?usp=drivesdk",
+      "basis": "Matching chapter ID; archive source"
+    }
   },
   {
     "title": "TRINITY_FILM01_PART1_CH02_CH04_CORRECTIVE_REV_B_QA_CONTACT.jpg",
@@ -7763,7 +7880,7 @@
     "source": "Drive",
     "category": "Film scenes & brand",
     "scene": "CH23",
-    "status": "Source image",
+    "status": "Still image · chapter motion source remains open",
     "date": "2026-08-27"
   },
   {
@@ -8097,7 +8214,8 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-11"
+    "date": "2026-08-11",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
   },
   {
     "title": "Four-Trailer Factory Acceptance Test Master Plan.png",
@@ -8106,7 +8224,8 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-12"
+    "date": "2026-08-12",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
   },
   {
     "title": "Four-Trailer Field Deployment Master Plan.png",
@@ -8115,7 +8234,8 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-12"
+    "date": "2026-08-12",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
   },
   {
     "title": "Four-Trailer Manufacturing Master Plan.png",
@@ -8124,7 +8244,8 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-12"
+    "date": "2026-08-12",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
   },
   {
     "title": "Four-Trailer PSSR Master Sheet.png",
@@ -8133,7 +8254,8 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-12"
+    "date": "2026-08-12",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
   },
   {
     "title": "Four-Trailer QA Shipping Master Plan.png",
@@ -8142,7 +8264,8 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-12"
+    "date": "2026-08-12",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
   },
   {
     "title": "Four-Trailer Site Placement Master Plan.png",
@@ -8151,7 +8274,8 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-12"
+    "date": "2026-08-12",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
   },
   {
     "title": "Four-Trailer Utility Deployment Master Plan.png",
@@ -8160,7 +8284,8 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-12"
+    "date": "2026-08-12",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
   },
   {
     "title": "Modular Four-Trailer Interconnect Master Drawing.png",
@@ -8169,6 +8294,1025 @@
     "category": "Four-trailer project · source review",
     "scene": "",
     "status": "Prior project source · applicability review",
-    "date": "2026-08-12"
+    "date": "2026-08-12",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "Different Demands, Connected Needs.png",
+    "display_title": "SH-412 · Different demands, connected needs",
+    "url": "https://chatgpt.com/library?file_id=libfile_4d54c986b2448191b4aec76e6bc2f5c5&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "SH-412",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-19",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "edd61e4877e08af96d49fe16faa6f11c5fea6b230b90f93b11e7c7bdae7c566b",
+    "film_subject": "Core / India-Global Extension"
+  },
+  {
+    "title": "Engineered to Move Onward.png",
+    "display_title": "SH-416–SH-418 · Deploy, mobilize and operate",
+    "url": "https://chatgpt.com/library?file_id=libfile_68bd5228f91c8191924e63ec7a027807&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "SH-416–SH-418",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-19",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "46648ecbd3749c73c6a88cb7a3df6f3a9be05033804627f005ed68131225be19",
+    "film_subject": "Core / India-Global Extension"
+  },
+  {
+    "title": "image-gen-1(1).png",
+    "display_title": "MFG-08 · Manufacturing facility drawing register",
+    "url": "https://chatgpt.com/library?file_id=libfile_39d0e5f7f4c48191a61520d92e0d67b9&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-08",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "72f176c027a04295a2d1316981a055e79dc6412296a528df3d22e67b252ef736"
+  },
+  {
+    "title": "image-gen-1(10).png",
+    "display_title": "MFG-09.13 · Customer delivery handoff: truck to storage",
+    "url": "https://chatgpt.com/library?file_id=libfile_9aec8ebd4bf08191b60281b959a39a8f&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.13",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "47bc47864f91dc1169e600a48c51d949f0b350916d72d83371d7d6272c628161"
+  },
+  {
+    "title": "image-gen-1(2).png",
+    "display_title": "MFG-08.7 · Foundation and structural plan",
+    "url": "https://chatgpt.com/library?file_id=libfile_2e4a5fced3c48191bbe227aebe6c2014&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-08.7",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "48b39ca4079685aa18d708bd2110040a66e7d61a3c731cc118f144a5dde9615d"
+  },
+  {
+    "title": "image-gen-1(20260811-214326).png",
+    "display_title": "MFG-09.15 · Cap-to-cap connection and transfer details",
+    "url": "https://chatgpt.com/library?file_id=libfile_45f7d4af8e4c8191a6688c9d3b1c40c8&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.15",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "4f20c50d4b9602ccf4b2ffbc04409aff88588fa9c82bf8b071b8498fb68b0dd7"
+  },
+  {
+    "title": "image-gen-1(20260811-215007).png",
+    "display_title": "MFG-09.18 · Utility header interconnections and tie-ins",
+    "url": "https://chatgpt.com/library?file_id=libfile_aaed715082208191869ee1675f287ae2&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.18",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "9d576627a8fe6c52af16504983fd9bec9c188ea64cf73185f8c45c1ad64dd26d"
+  },
+  {
+    "title": "image-gen-1(20260811-220824).png",
+    "display_title": "MFG-09.23 · Skid 3 condenser and vacuum piping arrangement",
+    "url": "https://chatgpt.com/library?file_id=libfile_140f7046f9f481919111dd8692231ca2&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.23",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "97ba8b6fe93cfb04845ffe95f7178e8ca4383145c08ca9439c3967f623c121c8"
+  },
+  {
+    "title": "image-gen-1(20260811-221234).png",
+    "display_title": "MFG-09.25 · Skid 1 instrumentation and controls layout",
+    "url": "https://chatgpt.com/library?file_id=libfile_e684fb08bc3081918a89eedbcb349b4b&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.25",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "1233798deedb6f168201ea66f100e544358f4e8d8d448e355945bd9ce9da312c"
+  },
+  {
+    "title": "image-gen-1(20260811-221412).png",
+    "display_title": "MFG-09.26 · Skid 1 instrumentation and controls diagram",
+    "url": "https://chatgpt.com/library?file_id=libfile_a131af0ba4248191b4f8c01f4b1d15e7&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.26",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "31fe960e6d9c3e5144a84b86c6a7febfcbf612d45064b466a26c115f93a96317"
+  },
+  {
+    "title": "image-gen-1(20260811-221940).png",
+    "display_title": "MFG-09.27 · Skid 1 P&ID, arrangement and supports",
+    "url": "https://chatgpt.com/library?file_id=libfile_c20a583e86b0819180dabb027c532118&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.27",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "9e33103835c635f37a7dfcd4e45d8b1961568f4dc2a59c3ba54e903546fef330"
+  },
+  {
+    "title": "image-gen-1(20260811-221940-1).png",
+    "display_title": "MFG-09.27 · Skid 1 single-line and control network",
+    "url": "https://chatgpt.com/library?file_id=libfile_eaf297f205808191aa6f71a4b4b5ec8d&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.27",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "e1675d568a304c2eb222986b0e9dade94d9ad45fb5674a09fc3a3cfd3d8252f8"
+  },
+  {
+    "title": "image-gen-1(20260811-224259).png",
+    "display_title": "MFG-09.34 · Manufacturing facility overview",
+    "url": "https://chatgpt.com/library?file_id=libfile_355b82d879548191b25beb935a695421&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.34",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "635a9ed60ca2d5f7e6a8d26edd00a375d057e6eabc9eec65610757f053594209"
+  },
+  {
+    "title": "image-gen-1(20260811-234510).png",
+    "display_title": "MFG-09.38 · Bay 1 receiving and cutting cell",
+    "url": "https://chatgpt.com/library?file_id=libfile_1f2dd0158874819184c3c4f15e2e3df9&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.38",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "ad78ebaa477a090aab5a5f2fe41bbdcc31ff307d1f8c39ee730bfff2a25cd48c"
+  },
+  {
+    "title": "image-gen-1(20260812-001332).png",
+    "display_title": "MFG-09.44 · Bay 7 electrical and instrumentation integration",
+    "url": "https://chatgpt.com/library?file_id=libfile_94d959187b24819185586f209aaf4e49&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.44",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "86cda376967d27de84b04897db8d53518961c897880f83bdf68e394c4463ac95"
+  },
+  {
+    "title": "image-gen-1(20260812-001704).png",
+    "display_title": "MFG-09.45 · Bay 8 calibration, loop verification and pre-FAT",
+    "url": "https://chatgpt.com/library?file_id=libfile_d476fc1aca748191b00565c5e4ab5eec&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.45",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "a8b322ab1f7ee17882b469f29505d041d072a63c3d7260a69f5ec9d2c05b01cd"
+  },
+  {
+    "title": "image-gen-1(20260812-002220).png",
+    "display_title": "MFG-09.47 · Bay 10 QA/QC, dimensional inspection and release",
+    "url": "https://chatgpt.com/library?file_id=libfile_8faf006e081481918b6a5aa937aae98c&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.47",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "d2adf0644471c2c1dfd2b7854c6abf13169c3f9e474e59599ce3796aab5d5d23"
+  },
+  {
+    "title": "image-gen-1(20260812-002720).png",
+    "display_title": "MFG-09.48 · Bay 11 surface preparation and finishing",
+    "url": "https://chatgpt.com/library?file_id=libfile_4185ed82fe6c81918067336fb09e113c&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.48",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "413918c5f3fc95dbb04539d24cc62e82b9a2ac81d13e1e4fe9da1b15e02acdbf"
+  },
+  {
+    "title": "image-gen-1(20260812-015137).png",
+    "display_title": "MFG-09.50 · Bay 13 shipping and final inspection",
+    "url": "https://chatgpt.com/library?file_id=libfile_1adc926b2e48819185af929904a79acb&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.50",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "26890826a4dfdda98807e5876366268df7bc2d790a654738e9f3ae3e55f4ea6e"
+  },
+  {
+    "title": "image-gen-1(20260812-015832).png",
+    "display_title": "MFG-09.51 · Tanker delivery to customer storage",
+    "url": "https://chatgpt.com/library?file_id=libfile_3c04383d02f48191ac35da07812df806&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.51",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "b814c8d02e687ce2be57bc518a813a9560ae34f084dd75f781d0fb9fe9a5770e"
+  },
+  {
+    "title": "image-gen-1(20260812-031937).png",
+    "display_title": "MFG-09.57 · Customer civil, foundation and drainage details",
+    "url": "https://chatgpt.com/library?file_id=libfile_63bb6061e6e88191901ab02ed173088f&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.57",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "b92518459cdf0af1dc653d29e8470b082d06347e28c35e0785cfb6247612dea3"
+  },
+  {
+    "title": "image-gen-1(20260812-032429).png",
+    "display_title": "MFG-09.58 · Customer electrical, controls and grounding",
+    "url": "https://chatgpt.com/library?file_id=libfile_356c9e7c4e748191810d2d23ced05de2&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.58",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "6d3eae85ccbf8b7017ece866b8767cce9e3736c8c2179e929ad66e54000e71b4"
+  },
+  {
+    "title": "image-gen-1(20260812-041253).png",
+    "display_title": "MFG-09.71 · Master drawing register and cross-reference map",
+    "url": "https://chatgpt.com/library?file_id=libfile_66eff92626a08191907d349c691bf05a&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.71",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "4621fc2b965c7aae12c3063fa7ba7143bedb0a275d3347535da31d2bbe4de85c"
+  },
+  {
+    "title": "image-gen-1(20260812-172517).png",
+    "display_title": "MFG-09.79 · Facility process-gas storage and distribution",
+    "url": "https://chatgpt.com/library?file_id=libfile_919b61b18d848191a733f7fe483cbc73&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.79",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "1baa92310e8743d91543eb7bebe705be40bb39961f55a1a7a24ce0ddd3c931d0"
+  },
+  {
+    "title": "image-gen-1(20260812-172958).png",
+    "display_title": "MFG-09.81 · Stainless fabrication, welding and NDE",
+    "url": "https://chatgpt.com/library?file_id=libfile_d018727249c88191b694445141bccd45&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.81",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "407710ef755c69d784a07e576e8271640a09d7eba9860415929029b2f682e331"
+  },
+  {
+    "title": "image-gen-1(20260812-182106).png",
+    "display_title": "MFG-09.91 · Energization, cold commissioning and safety interlocks",
+    "url": "https://chatgpt.com/library?file_id=libfile_b48418c628bc8191a4fccc0b32556e6b&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.91",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "7ed26141aec4f2a9689cc6f1690966a64f6de6603caee9d7cdae5ae14f525780"
+  },
+  {
+    "title": "image-gen-1(20260812-195105).png",
+    "display_title": "Earlier four-trailer integrated utility overview",
+    "url": "https://chatgpt.com/library?file_id=libfile_8b50b295b48081919eb02adf4d9a2ff4&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "8fffa002815b1f2353a9fa2a31dcc8d1560755bba61f49ab9576dd748ace7eeb",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-200829).png",
+    "display_title": "MFG-09.106 · Earlier four-trailer manufacturing cost roll-up",
+    "url": "https://chatgpt.com/library?file_id=libfile_c3b5d4da3cac8191823184b720df67f1&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MFG-09.106",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "19690dcb77a52a65707edbb684b1f60d1ab25f9d002ca17a2666e2e055a7b1ca",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-202626).png",
+    "display_title": "MFG-09.110 · Manufacturing package cover and publication roadmap",
+    "url": "https://chatgpt.com/library?file_id=libfile_d8551c0298788191b0d62931d94a7bf4&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.110",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "2341a9788cd7bb7c2ff919fcd3c48ade03696135c35150d887cc1bfc02511a6f"
+  },
+  {
+    "title": "image-gen-1(20260812-205435).png",
+    "display_title": "CINE-01 · Earlier four-trailer cinematic review",
+    "url": "https://chatgpt.com/library?file_id=libfile_849c31ca99cc81919075283ecc17cfa4&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "CINE-01",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "e44a8e34a6049bd814f84659d1f007c7ff2851b14880f15710da713646a5745f",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-205656).png",
+    "display_title": "CINE-01 · Earlier four-trailer cinematic review: alternate board",
+    "url": "https://chatgpt.com/library?file_id=libfile_01861feda60081918fd3c23a167c6a36&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "CINE-01",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "44ffd9e0aaf2969f5f1fa870d5fa1fd0885342245085e4bd8e9f2ca5207e295d",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-213054).png",
+    "display_title": "CINE-INV-090 · Earlier four-trailer cinema look",
+    "url": "https://chatgpt.com/library?file_id=libfile_eea9e73478648191a7fa47eec6e13137&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "CINE-INV-090",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "ff551de86fff127dcfcd99b36d2d820f1ce1fdaf2c057fc43f4b293ae8dc7a0f",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-225412).png",
+    "display_title": "CINE-INV-090 · Earlier four-trailer cinema master board",
+    "url": "https://chatgpt.com/library?file_id=libfile_cd87843cce4c8191a6a0814de718e8fe&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "CINE-INV-090",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "bdd8122b6af706c80781baab1a6001341f639673ec7f470a47f346219e2b372e",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-233113).png",
+    "display_title": "MR-001 · Earlier four-trailer motion review sequence: board A",
+    "url": "https://chatgpt.com/library?file_id=libfile_785918cba0848191aa48725d74427a8e&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MR-001",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "46ebd7d84ed677092727cdbcfc53dfaed7c926a7c456cfd42b6da86e0958592b",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-233303).png",
+    "display_title": "MR-001 · Earlier four-trailer motion review sequence: board B",
+    "url": "https://chatgpt.com/library?file_id=libfile_2ef41fb7854c8191bae50034f1ec0cce&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MR-001",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "a84278def3d9745779cdee68549a6c64030c3d15c75bdd442afdaf8dbf8096d4",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-233848).png",
+    "display_title": "MR-001 · Earlier four-trailer motion review sequence: board C",
+    "url": "https://chatgpt.com/library?file_id=libfile_bd690c6c49b48191b1fa508daca10827&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MR-001",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "92affbc092753516e3897efdf60e1a3c58b7464e862900ec2e50b924808a8c08",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-234425).png",
+    "display_title": "MR-001 · Earlier four-trailer motion review sequence: board D",
+    "url": "https://chatgpt.com/library?file_id=libfile_73b9846378c88191a5386e206ef67fb4&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MR-001",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "8d80f2fae6602e879b4ff93538dfb034e8dd02618367026f8275aaf468382ff6",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260812-235341).png",
+    "display_title": "MR-001 · Earlier four-trailer motion review sequence: board E",
+    "url": "https://chatgpt.com/library?file_id=libfile_318a1cb2393c8191be3eb84283abad1a&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MR-001",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-12",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "0b32e6a14e92bcc34f49af36d625ba13ec857567a5e28e8eaedb1cb1028f6208",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-000445).png",
+    "display_title": "Earlier four-trailer process and equipment storyboard: board A",
+    "url": "https://chatgpt.com/library?file_id=libfile_3b52f82de43081919bb7a9e886929030&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "e535cd9e8529c20a35c11f517055fb1fae88e3a5538954327c68adadfb2b2bce",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-000719).png",
+    "display_title": "Earlier four-trailer process and equipment storyboard: board B",
+    "url": "https://chatgpt.com/library?file_id=libfile_42084737a3048191ac52101a6cd40007&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "2c28848b894cfb719c748c36eaae769c46e8525622bc08f37f4e305984cd1847",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-001436).png",
+    "display_title": "MR-001 · Earlier four-trailer motion review sequence: board F",
+    "url": "https://chatgpt.com/library?file_id=libfile_c006e1d563188191a4f614864797270e&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MR-001",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "2a8c40fe6a7d736e3f99c07471154ec17ad73f4f73d7302ae9ba82a029d908cd",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-001450).png",
+    "display_title": "Earlier four-trailer process and equipment storyboard: board C",
+    "url": "https://chatgpt.com/library?file_id=libfile_549a15e1fab08191a20d409cda5d6944&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "67acb4a41e3362762e5530570e1298508a08474808bc3f78226ef026378abad4",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-001600).png",
+    "display_title": "MR-001 · Earlier four-trailer motion review sequence: board G",
+    "url": "https://chatgpt.com/library?file_id=libfile_12a89556482081919b7a1e6d53c4c99a&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MR-001",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "e7b3888aeaf58ab039a40a05cc40d2d75fc7f6381c3b660081fa7ebba55c8d2c",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-002234).png",
+    "display_title": "Earlier four-module integrated utility presentation",
+    "url": "https://chatgpt.com/library?file_id=libfile_6eeb5e3f06808191b3008d16b3c42590&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "557b117585fcefcda9646d83858dead3b3b80cffa31be909d81d7531ec582d26",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-005828).png",
+    "display_title": "MR-001 · Earlier four-trailer motion review sequence: board H",
+    "url": "https://chatgpt.com/library?file_id=libfile_acac105dcb488191b2cd228a90294b80&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "MR-001",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "b172803c18a94b116438aa6b7808010becad6bedd224fd3bb0f8bd3a212403ae",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-034057).png",
+    "display_title": "Earlier direct four-trailer architecture overview",
+    "url": "https://chatgpt.com/library?file_id=libfile_695635a92308819185e726f6572b0dc7&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "491b741c5cebfe15e007277672adf40f06c4cb52526043ac95086e3582dde596",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-183920).png",
+    "display_title": "Trinity 1.0 · Three-stage purification illustration",
+    "url": "https://chatgpt.com/library?file_id=libfile_88ed845ad35881919d5d23a7ed5628ed&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "8abea2edd71397f7257864b2513a0193110b902002d98f15ca188b34b08cd64b",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-184348).png",
+    "display_title": "Trinity 1.0 · Mobile water reclamation illustration",
+    "url": "https://chatgpt.com/library?file_id=libfile_b49709ee6ee081919715cff8defaca6a&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "fd3cc4198d5bf5a62b5c8ba2a9dabd0e73cd2d2f798ff4b38e81b3449697cb82",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260813-190957).png",
+    "display_title": "Trinity 1.0 · T1 thermal-core illustration",
+    "url": "https://chatgpt.com/library?file_id=libfile_2cda714a3ab881918d0ad76b632c6959&account_id=personal",
+    "source": "Library",
+    "category": "Four-trailer project · source review",
+    "scene": "",
+    "status": "Prior project illustration · applicability review",
+    "date": "2026-08-13",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "41abc98e597de2266e04112314cc3f00dc82fcea34b9a27877d3306a754b8f81",
+    "configuration": "Reopened project basis: four trailers, 12 million GPY, 6-inch pipe sizing; source applicability review"
+  },
+  {
+    "title": "image-gen-1(20260814-035312).png",
+    "display_title": "Brother · Engineering recovery tribute",
+    "url": "https://chatgpt.com/library?file_id=libfile_0760a6a8522481919adc8737ba7c4afb&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Brand illustration",
+    "date": "2026-08-14",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "7064a5b68593092948b558f3860adc295ff3c28a1c62996092046d9c8b5c06e4"
+  },
+  {
+    "title": "image-gen-1(20260816-204151).png",
+    "display_title": "From manufacturing to global continuum · Board A",
+    "url": "https://chatgpt.com/library?file_id=libfile_40d6a326c12c819187fced2471f40f42&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-16",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "009c24a9a8c6483fc0e55b51c2bed28c70bd39fc0e976ac763566e139a8ffbd1"
+  },
+  {
+    "title": "image-gen-1(20260816-205134).png",
+    "display_title": "From manufacturing to global continuum · Board B",
+    "url": "https://chatgpt.com/library?file_id=libfile_3b56c59c0c988191b88922365e5dd8f8&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-16",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "cb3d33219bec71f223d4489f7abc90fa58edd4fe07916033aed09368cd1317ff"
+  },
+  {
+    "title": "image-gen-1(20260816-211342).png",
+    "display_title": "From manufacturing to global continuum · Board C",
+    "url": "https://chatgpt.com/library?file_id=libfile_517822eba2708191889ed1c3f9b2017a&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-16",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "b848896165d41f9035b5c8412a3a1ddbe6687b183f92c80f023cf78d20e6f017"
+  },
+  {
+    "title": "image-gen-1(20260816-220601).png",
+    "display_title": "The Trinity journey · Global network storyboard A",
+    "url": "https://chatgpt.com/library?file_id=libfile_55e0811325248191bd2a7b2c0467ad2a&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-16",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "fea7c0eca13dddbcd13d824f2f67036b5e3595a1b792fc4bf491d7a61588460e"
+  },
+  {
+    "title": "image-gen-1(20260816-221737).png",
+    "display_title": "The Trinity journey · Global network storyboard B",
+    "url": "https://chatgpt.com/library?file_id=libfile_9d13f468a3648191b9c82b0335fee03e&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-16",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "8b0d8982687ebb7996e84b37293a12288e6eb55385fc48f5d78042fbfc17c318"
+  },
+  {
+    "title": "image-gen-1(20260816-221739).png",
+    "display_title": "The Trinity journey · Global network storyboard C",
+    "url": "https://chatgpt.com/library?file_id=libfile_2206f5048bf88191a7eac029034d74b2&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-16",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "932fbd4d8e9831ca30a2bb24bb1775ac23a0e312b23ede6cd1d1beea654da392"
+  },
+  {
+    "title": "image-gen-1(20260817-015141).png",
+    "display_title": "Film 01 · Bringing the machine to life: master storyboard A",
+    "url": "https://chatgpt.com/library?file_id=libfile_1298ba3325988191b3dd66387d806b69&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "c23e9988f3cad83dec9e40b8f7cfcc248c4d3122ae6f829a7585a50eab862eff"
+  },
+  {
+    "title": "image-gen-1(20260817-023753).png",
+    "display_title": "Film 01 · Bringing the machine to life: master storyboard B",
+    "url": "https://chatgpt.com/library?file_id=libfile_dfc6ac1ddf00819193035c03c16271f8&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "9aa27ca50c4372e0741124af5789985a86485e955272fb78528cea7a2a565e9c"
+  },
+  {
+    "title": "image-gen-1(20260817-030800).png",
+    "display_title": "Film 01 · Bringing the machine to life: master storyboard C",
+    "url": "https://chatgpt.com/library?file_id=libfile_c8b60a16b0c88191b568ecdadff54521&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "a2eb9b7c8adc47105b0c91d8932f0598aaf2b17bae207f95e7487412f8530f5c"
+  },
+  {
+    "title": "image-gen-1(20260817-034838).png",
+    "display_title": "Film 01 · Bringing the machine to life: opening storyboard A",
+    "url": "https://chatgpt.com/library?file_id=libfile_6a27c5fddef881919a29d46fe494b4fd&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "b424c72cf1cbb5630d5c51cdcbd3169e424f8ec1a051925391b1091869a74d18"
+  },
+  {
+    "title": "image-gen-1(20260817-035912).png",
+    "display_title": "Film 01 · Bringing the machine to life: opening storyboard B",
+    "url": "https://chatgpt.com/library?file_id=libfile_9398e5a9ecc48191b4b0dcb1ea4a2a77&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "4048386aa7542abf2b15d8b5cbe5f2e2beffe45ad719d1291a1c6a5a2ca1c801"
+  },
+  {
+    "title": "image-gen-1(20260817-041221).png",
+    "display_title": "SH-016–SH-030 · Factory, delivery and process storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_44f8d8efa98481918d12115edf09eb0a&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-016–SH-030",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "79f3373e56d36427e53d41b81f95e9a757b7ddcf2bc7122e39e5251aa9d640fe",
+    "film_subject": "Manufacturing-Facility Construction"
+  },
+  {
+    "title": "image-gen-1(20260817-042804).png",
+    "display_title": "SH-061–SH-075 · Recovery, water quality and delivery storyboard A",
+    "url": "https://chatgpt.com/library?file_id=libfile_62bb3c8f15ec81919782b1b6ddff976e&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-061–SH-075",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "11685e7933848448aebf11b527ec585234e21385914f7e38eb98316c76a04ddb",
+    "film_subject": "Factory Activation"
+  },
+  {
+    "title": "image-gen-1(20260817-042853).png",
+    "display_title": "SH-061–SH-075 · Recovery, water quality and delivery storyboard B",
+    "url": "https://chatgpt.com/library?file_id=libfile_1f69318115208191874197ed6779d9bc&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-061–SH-075",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "cc8a6c9e89b975ea8ae3882d28a76471bfa2858c4be873727fb6f4e9293371a5",
+    "film_subject": "Factory Activation"
+  },
+  {
+    "title": "image-gen-1(20260817-043225).png",
+    "display_title": "SH-076–SH-090 · Customer continuity and product-quality storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_3929783ac99881919cca982414d13f23&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-076–SH-090",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "4308f1487c3679a1a37d80cae58825cf467c8cd885f21c79584b7d52a5dce8f1",
+    "film_subject": "Manufacture of One Serialized Trinity Unit"
+  },
+  {
+    "title": "image-gen-1(20260817-045050).png",
+    "display_title": "SH-106–SH-120 · Customer verification and delivery storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_c65d9eed541c8191800d437716aa8b78&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-106–SH-120",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "df9ed4231fd45c59fbf5ca09d5470aee75fb3a1827767f4b3e8544d75d7e3908",
+    "film_subject": "Manufacture of One Serialized Trinity Unit"
+  },
+  {
+    "title": "image-gen-1(20260817-051816).png",
+    "display_title": "SH-201–SH-220 · Integrated operation and customer storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_ab76cb84539c819180e9e65d2d1710f9&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-201–SH-220",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "9a8f8e9dfe535034bbf2fdc33e0f7f1980b1b0910fed9f2d7361d43f36bd86ca",
+    "film_subject": "T1 Operation"
+  },
+  {
+    "title": "image-gen-1(20260817-144332).png",
+    "display_title": "SH-241–SH-260 · Startup, production and mission storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_156903a821c88191a8ba5642d81bad9a&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-241–SH-260",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "48ee3688eeff0577b6ecb979725418ae195126e8fa8eb4b44bd62b676e8be2a8",
+    "film_subject": "T3 Operation"
+  },
+  {
+    "title": "image-gen-1(20260817-162644).png",
+    "display_title": "SH-261–SH-280 · Safety, deployment and process storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_bd48eb5095448191b74603abf73460ba&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-261–SH-280",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "d5728cd4a52267039c00c46c9ac605aad7619995af7f816d1f138cce61fdae93",
+    "film_subject": "T4 Finishing / Storage"
+  },
+  {
+    "title": "image-gen-1(20260817-162904).png",
+    "display_title": "SH-281–SH-300 · Fault response and water-production storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_d2bdbb7843d481919e7aeb0e6e8a48f8&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-281–SH-300",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "4c51f00c39dfa1b7a192c1ef5f1ec3fd0bae1adaef4c4bddcb223ac1b0d19db5",
+    "film_subject": "Controls / Abnormal Response"
+  },
+  {
+    "title": "image-gen-1(20260817-164413).png",
+    "display_title": "SH-371–SH-400 · Global continuity and lifecycle storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_a93f95b419dc8191a2158788ea9526ec&account_id=personal",
+    "source": "Library",
+    "category": "Film scenes & brand",
+    "scene": "SH-371–SH-400",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "e77b4fa78993fe139e5dc74fdd7ca9cb13c6afa86e199d8dcb5c6bce7d81bd51",
+    "film_subject": "Customer Storage / Distribution Operation"
+  },
+  {
+    "title": "image-gen-1(20260817-173929).png",
+    "display_title": "One continuum, countless solutions · Nature and resource recovery",
+    "url": "https://chatgpt.com/library?file_id=libfile_aee6c5d840008191bb99edb560931f86&account_id=personal",
+    "source": "Library",
+    "category": "Applications & deployment",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "bb612edccd8e6f4fd4f8628729cecb26ce32ec048c262b264779c16f3acfc54d"
+  },
+  {
+    "title": "image-gen-1(20260817-174613).png",
+    "display_title": "We mimic nature · Applications and resource recovery",
+    "url": "https://chatgpt.com/library?file_id=libfile_7bbf1988d5a48191a972c1633db17615&account_id=personal",
+    "source": "Library",
+    "category": "Applications & deployment",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "1ccac03bf9a1d1006c8d2c207798e28da2d481258e264fb2abe66f59938cc8bf"
+  },
+  {
+    "title": "image-gen-1(20260817-184458).png",
+    "display_title": "Research heritage and documentary-evidence storyboard",
+    "url": "https://chatgpt.com/library?file_id=libfile_dfb5a58bbc7481918cf659ce4f4104ed&account_id=personal",
+    "source": "Library",
+    "category": "Applications & deployment",
+    "scene": "",
+    "status": "Illustration / storyboard",
+    "date": "2026-08-17",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "ad33e7373ab2b2c131f04c9eb9339142f45b1be620028079989246677f27fed8"
+  },
+  {
+    "title": "image-gen-1(3).png",
+    "display_title": "MFG-08.9 · Roof framing plan",
+    "url": "https://chatgpt.com/library?file_id=libfile_72fa3e6dc6248191b9768b435d301ce5&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-08.9",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "bc02fc1c441ace3b84cf269e169c8eb847274678d7c492fd4b3fe5e4f65a42af"
+  },
+  {
+    "title": "image-gen-1(4).png",
+    "display_title": "MFG-08.12 · Forklift and material-handling clearance study",
+    "url": "https://chatgpt.com/library?file_id=libfile_0e72fdcb03f8819198d38071a46e6726&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-08.12",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "c1720e2fb31b5ed46139fffe07ba597751b48958f9ef24ac36993d513b4b5435"
+  },
+  {
+    "title": "image-gen-1(5).png",
+    "display_title": "MFG-08.13 · Overhead crane details",
+    "url": "https://chatgpt.com/library?file_id=libfile_76a4c72e64288191954c8cdfd0bf010f&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-08.13",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "7b53c7d5bf75ae690e350f877b5c27eb69c0aef36c4decb4e7a60e224d67d2f0"
+  },
+  {
+    "title": "image-gen-1(6).png",
+    "display_title": "MFG-09.02 · Primary-loop and power-block P&ID illustration",
+    "url": "https://chatgpt.com/library?file_id=libfile_2beda3068a58819182723b66cae1917f&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.02",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "0fd2bf969b1ac6c578b5d0b13ed0cb9f8ab5987a05f7707be6c420f6f102abad"
+  },
+  {
+    "title": "image-gen-1(7).png",
+    "display_title": "MFG-09.03 · Distillation and condenser skid illustration",
+    "url": "https://chatgpt.com/library?file_id=libfile_1cd1fc0549808191bb2e4114d5478f65&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.03",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "5a0c100bd49499dc40331a41c67a1970f07adda5c791717d48d7cda424f823f9"
+  },
+  {
+    "title": "image-gen-1(8).png",
+    "display_title": "MFG-09.11 · Customer delivery routing handoff",
+    "url": "https://chatgpt.com/library?file_id=libfile_a43bb0d94f988191b38ab1735c9d4fa1&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.11",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "733c7feb8f02a47ff8594733679bd5a5362ee9bd1c602f2459a4af5225d542f3"
+  },
+  {
+    "title": "image-gen-1(9).png",
+    "display_title": "MFG-09.12 · Customer storage tanks and final-use interface",
+    "url": "https://chatgpt.com/library?file_id=libfile_b535f1d983508191bebc828ea3341b08&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-09.12",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "8675eda47093fa4d929e225a50c386084066bfbdd3937bab82671107ce1722cc"
+  },
+  {
+    "title": "image-gen-1.png",
+    "display_title": "MFG-08 · Manufacturing facility master layout illustration",
+    "url": "https://chatgpt.com/library?file_id=libfile_58c14156cf188191b2fceb43428a7f3e&account_id=personal",
+    "source": "Library",
+    "category": "Manufacturing & facilities",
+    "scene": "MFG-08",
+    "status": "Drawing illustration · not native CAD",
+    "date": "2026-08-11",
+    "label_basis": "Visible title and content inspected",
+    "sha256": "94798d48cf856307ebcbddc3b8275707a9cc6454c14e0f02d8b38ebbe9201ef6"
   }
 ]
