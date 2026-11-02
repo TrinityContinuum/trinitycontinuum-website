@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded',()=>{const b=document.querySelector
 const trinityModules={
   '1':['Thermal systems','Controlled combustion, thermal-energy transfer, and associated primary equipment.'],
   '2':['Power and energy recovery','Electrical generation, energy recovery, and coordinated power-system functions.'],
-  '3':['Vacuum distillation','Water purification through the proposed integrated vacuum-distillation process.'],
+  '3':['Vacuum distillation','Water purification through the integrated vacuum-distillation process.'],
   '4':['Water polishing and storage','Final water treatment, polishing, quality monitoring, and product-water handling.'],
   '5':['Control and auxiliary systems','Supporting controls, auxiliary equipment, system integration, and operating infrastructure. Final equipment allocation pending approved documentation.'],
   '6':['Control and auxiliary systems','Supporting controls, auxiliary equipment, system integration, and operating infrastructure. Final equipment allocation pending approved documentation.']
