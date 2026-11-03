@@ -84,6 +84,6 @@ test('media catalog data excludes account-specific private Library URLs', async 
   expect(Array.isArray(entries)).toBe(true);
   expect(entries.length).toBeGreaterThan(0);
   for (const entry of entries) {
-    expect(JSON.stringify(entry), 'private Library URL in media catalog entry').not.toMatch(/chatgpt\\.com\\/library/i);
+    expect(JSON.stringify(entry), 'private Library URL in media catalog entry').not.toMatch(/chatgpt\.com\/library/i);
   }
 });
