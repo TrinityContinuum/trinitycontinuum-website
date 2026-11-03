@@ -75,3 +75,15 @@ test('controlled source gateways and contact navigation remain safe', async ({ p
   await page.goto(base + '/engineering-packages.html');
   await expect(page.getByText('SCM_RECOVERY_CLOSURE_20261102', { exact: false })).toBeVisible();
 });
+
+
+test('media catalog data excludes account-specific private Library URLs', async ({ request }) => {
+  const response = await request.get(base + '/assets/media-catalog.json');
+  expect(response.status()).toBe(200);
+  const entries = await response.json();
+  expect(Array.isArray(entries)).toBe(true);
+  expect(entries.length).toBeGreaterThan(0);
+  for (const entry of entries) {
+    expect(JSON.stringify(entry), 'private Library URL in media catalog entry').not.toMatch(/chatgpt\\.com\\/library/i);
+  }
+});
