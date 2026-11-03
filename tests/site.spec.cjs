@@ -60,3 +60,18 @@ test('homepage and publications local links and assets resolve', async ({ reques
     }
   }
 });
+
+
+test('controlled source gateways and contact navigation remain safe', async ({ page }) => {
+  for (const path of ['index.html', 'media.html', 'engineering-packages.html', 'golden-library.html', 'manufacturing.html', 'investors.html']) {
+    const response = await page.goto(base + '/' + path);
+    expect(response.status(), path).toBe(200);
+    await expect(page.locator('nav.links a', { hasText: /^Contact$/ })).toHaveAttribute('href', 'contact.html');
+    const privateLinks = await page.locator('a[href*="chatgpt.com/library?"]').count();
+    expect(privateLinks, path + ' must not expose account-specific Library links').toBe(0);
+  }
+  await page.goto(base + '/manufacturing.html');
+  await expect(page.getByText('100 platforms per year', { exact: false })).toBeVisible();
+  await page.goto(base + '/engineering-packages.html');
+  await expect(page.getByText('SCM_RECOVERY_CLOSURE_20261102', { exact: false })).toBeVisible();
+});
