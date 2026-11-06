@@ -15,7 +15,8 @@
 - [x] Add API foundation with validation, rate limiting, restricted record listing, and durable database schema (`intake-api/server.js`, `schema.sql`).
 - [x] Add atomic inquiry + per-recipient notification-job writes and separate retry worker (`intake-api/mail-worker.js`).
 - [x] Add guarded HTTPS endpoint configuration and default-OFF release switch (`assets/inquiry-config.js`).
-- [x] Add fail-closed API configuration, strong admin token check and DB readiness endpoint; three startup regression tests committed; initial CI regressions fixed; intake workflow run 42293984225 PASS on commit 89b555a, including three startup regression tests.\n- [x] Add 12-gate acceptance ledger (`docs/trinity-release-acceptance-ledger.md`).
+- [x] Add fail-closed API configuration, strong admin token check and DB readiness endpoint; three startup regression tests committed; initial CI regressions fixed; intake workflow run 42293984225 PASS on commit 89b555a, including three startup regression tests.
+- [x] Add 12-gate acceptance ledger (`docs/trinity-release-acceptance-ledger.md`).
 - [x] Add CI syntax workflow (`.github/workflows/trinity-intake-checks.yml`); first inspected run FAILED at server.js SQL quoting; corrective commit 596c995 passed intake foundation checks (run 42293215996) and website browser smoke tests (run 42293215914). These are CI checks, not live delivery acceptance.
 - [ ] Find and approve **durable non-expiring** Trinity-only data storage with backup/restore and export, ideally $0 incremental.
 - [ ] Verify a host supports chosen email transport; Render free SMTP ports may be restricted.
@@ -71,7 +72,7 @@
 ## P5 — Trucker-owned relocatable Water + Power + Thermal concept
 - [x] Preserve as a **separate exploratory opportunity**, not the six-trailer Gold flagship or an approved commercial product.
 - [x] Add optional interest fields to category C: region, intended use, ownership/operating interest.
-- [ ] Draft owner-facing concept brief describing potential owner-operator roles, deployment scenarios, responsibilities and open engineering questions.
+- [x] Draft owner-facing concept brief describing potential owner-operator roles, deployment scenarios, responsibilities and open engineering questions (`docs/trucker-owned-relocatable-concept-brief.md`; internal draft, not owner-approved).
 - [ ] Compare feasible equipment size/weight, road legality, water sourcing/discharge, grid connection, thermal uses, service/maintenance, insurance, permits and operational staffing.
 - [ ] Build optional business-model scenarios (ownership, lease, revenue-sharing) clearly marked hypothetical, with no invented pricing or return guarantees.
 - [ ] Define decision gates for Jack: technical feasibility, regulatory review, economics, customer validation and pilot criteria.
@@ -87,6 +88,8 @@
 - [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
 
 ## Change log
+- **SMTP delivery verified in isolated CI:** commit 56c3f76, run 42295825204 SUCCESS and browser run 42295824710 SUCCESS. Authenticated SMTP sink receives message; worker persists sent state. No real external mailbox delivery claimed.
+- **Exploratory concept brief:** commit b7502bf, owner-facing internal draft with four possible roles, transport/process/regulatory questions, hypothetical economics input sheet and six OPEN decision gates. No product launch or solicitation.
 - **Verified seven-category PostgreSQL tests:** commit d95f827, run 42295170318 SUCCESS; browser run 42295170143 SUCCESS.
 - **Verified mail-worker retry integration:** commit 2576716, run 42295310177 SUCCESS; browser run 42295310117 SUCCESS. Deliberate SMTP failure leaves durable pending job with incremented attempt, error, and future retry. Successful outbound SMTP remains unverified.
 - **Verified real PostgreSQL CI success:** commit 6473f6e, intake workflow run 42294715972 SUCCESS, browser smoke workflow run 42294716011 SUCCESS. Test storage is disposable, not production.
