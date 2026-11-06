@@ -44,7 +44,8 @@
 - [x] Prepare unified factory open-items/RFI log for G01–G07, financial overlaps and original drawing lineage (`docs/manufacturing-facility-rev-a-open-items-log.md`). All release gates OPEN.
 - [ ] Recover controlling original architectural plan and revision authority; reconcile 250,000/312,000 sq ft and 10/12 bays.
 - [ ] Recover original MFG-09.35/.73/.75/.76/.78/.79/.85 drawings and editable/stamped equivalents, original kitchen 5,000-sf plan, dedicated lab, separate breakroom, showers and exterior test stands.
-- [ ] Reconcile MFG-09.73 equipment ID-to-bay-to-utility matrix, 3,000/4,000 kVA electrical bases and historical factory CAPEX allowances without double counting.
+- [x] Prepare equipment/plan/utility reconciliation crosswalk template, preserving conflicting values and source holds (`docs/manufacturing-facility-rev-a-equipment-utility-crosswalk.md`).
+- [ ] Populate and verify MFG-09.73 equipment ID-to-bay-to-utility matrix from originals, resolve 3,000/4,000 kVA electrical bases and factory CAPEX overlap.
 - [ ] Obtain/review controlled Gold Volume 24 Manufacturing Facility REV B, First Factory Build Sequence, replication playbook, controlled CAD reference, CAD master index and EBOM/MBOM crosswalk.
 - [ ] Create one controlled issue register with revision, NDA, access permissions, bid assumptions and exclusions.
 - [ ] Prepare uniform turnkey lump-sum GC bid package: site, design completion, permits, civil/building, utilities, equipment, installation, commissioning, training, as-builts and warranty.
@@ -94,6 +95,7 @@
 - [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
 
 ## Change log
+- **Factory crosswalk prepared:** commit 464adb5; source-conflict table and equipment-to-plan-to-utility fields established, but actual original equipment IDs and controlling values remain unverified. Library root does not expose a Google Drive mount, so handoff-reported Drive IDs cannot yet be treated as inspected originals.
 - **Manufacturing REV A handoff integrated:** Jack's 2026-11-06 management instructions reviewed; internal source/issue manifest commit 3ce785e and G01–G07 open-items log commit 0736cb6. These are management review drafts; original factory files not independently recovered, no IFC or GC release.
 - **Administrative updates verified:** commit 026e3dc, intake CI run 42296373934 SUCCESS and website browser run 42296373962 SUCCESS. Authenticated status, owner, follow-up changes tested. Live production acceptance remains 0/12.
 - **Checklist baseline at this review:** 14 of 60 checkbox items marked complete (P0 9/18; P1 0/5; P2 1/9; P3 0/10; P4 1/5; P5 3/7; common 0/6). This is task count, not percent of total effort.
