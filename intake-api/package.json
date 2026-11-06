@@ -17,5 +17,8 @@
     "nodemailer": "^6.10.0",
     "express-rate-limit": "^7.5.0",
     "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "smtp-server": "^3.13.6"
   }
 }
