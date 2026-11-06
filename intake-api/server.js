@@ -42,5 +42,23 @@ try{await client.query('BEGIN');await client.query('INSERT INTO inquiries(id,cat
 
 });
 app.get('/api/admin/inquiries',admin,async(req,res)=>{try{const {rows}=await db.query(`SELECT i.id,i.created_at,i.category,i.status,i.owner,i.next_follow_up,i.notified_at,i.acknowledged_at,i.payload,coalesce(jsonb_agg(jsonb_build_object('kind',j.kind,'state',j.state,'attempts',j.attempts,'last_error',j.last_error,'sent_at',j.sent_at)) FILTER (WHERE j.id IS NOT NULL),'[]'::jsonb) AS deliveries FROM inquiries i LEFT JOIN inquiry_mail_jobs j ON j.inquiry_id=i.id GROUP BY i.id ORDER BY i.created_at DESC LIMIT 500`);res.setHeader('Cache-Control','no-store');res.json({inquiries:rows})}catch{res.sendStatus(503)}});
+const adminUpdateSchema=z.object({status:z.enum(['new','reviewing','awaiting_customer','closed']),owner:z.string().trim().max(120).nullable().optional(),next_follow_up:z.string().datetime({offset:true}).nullable().optional()}).strict();
+app.patch('/api/admin/inquiries/:id',admin,async(req,res)=>{
+ const parsed=adminUpdateSchema.safeParse(req.body);
+ if(!parsed.success)return res.status(400).json({error:'Invalid administrative update'});
+ if(!Object.keys(parsed.data).length)return res.status(400).json({error:'No changes supplied'});
+ try{
+  const fields=[],values=[];
+  for(const [key,value] of Object.entries(parsed.data)){values.push(value);fields.push(key+'=,admin,async(req,res)=>{try{const {rowCount}=await db.query("UPDATE inquiry_mail_jobs SET state='pending',next_attempt_at=now(),last_error=NULL WHERE inquiry_id=$1 AND state='failed'",[req.params.id]);res.json({jobs_requeued:rowCount})}catch{res.sendStatus(503)}});
+app.listen(Number(process.env.PORT||10000),'0.0.0.0',()=>console.log('Trinity inquiry service started'));
++values.length)}
+  values.push(req.params.id);
+  const result=await db.query('UPDATE inquiries SET '+fields.join(',')+' WHERE id=,admin,async(req,res)=>{try{const {rowCount}=await db.query("UPDATE inquiry_mail_jobs SET state='pending',next_attempt_at=now(),last_error=NULL WHERE inquiry_id=$1 AND state='failed'",[req.params.id]);res.json({jobs_requeued:rowCount})}catch{res.sendStatus(503)}});
+app.listen(Number(process.env.PORT||10000),'0.0.0.0',()=>console.log('Trinity inquiry service started'));
++values.length+' RETURNING id,status,owner,next_follow_up',values);
+  if(!result.rowCount)return res.sendStatus(404);
+  res.setHeader('Cache-Control','no-store');res.json({inquiry:result.rows[0]});
+ }catch{res.sendStatus(503)}
+});
 app.post('/api/admin/inquiries/:id/retry',admin,async(req,res)=>{try{const {rowCount}=await db.query("UPDATE inquiry_mail_jobs SET state='pending',next_attempt_at=now(),last_error=NULL WHERE inquiry_id=$1 AND state='failed'",[req.params.id]);res.json({jobs_requeued:rowCount})}catch{res.sendStatus(503)}});
 app.listen(Number(process.env.PORT||10000),'0.0.0.0',()=>console.log('Trinity inquiry service started'));
