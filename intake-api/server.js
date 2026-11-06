@@ -27,11 +27,11 @@ const schema=z.object({
  honeypot:z.string().max(0).optional().default('')
 }).strict().superRefine((v,ctx)=>{if(v.contact_method==='callback'&&!v.phone)ctx.addIssue({code:'custom',path:['phone'],message:'Phone is required for callback'});if(v.trucker_interest&&v.category!=='C')ctx.addIssue({code:'custom',path:['trucker_interest'],message:'Trucker interest requires category C'})});
 const required=['DATABASE_URL','ADMIN_TOKEN'];
-for(const key of required)if(!process.env[key])console.error('Missing required configuration: '+key);
+for(const key of required)if(!process.env[key])throw new Error('Missing required configuration: '+key);\nif(process.env.ADMIN_TOKEN.length<32)throw new Error('ADMIN_TOKEN must contain at least 32 characters');
 const db=new pg.Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DB_SSL==='true'?{rejectUnauthorized:true}:undefined});
 
 function admin(req,res,next){const token=process.env.ADMIN_TOKEN;if(!token||token.length<32)return res.sendStatus(503);const received=(req.headers.authorization||'').replace(/^Bearer /,'');const a=Buffer.from(token),b=Buffer.from(received);if(a.length!==b.length||!timingSafeEqual(a,b))return res.sendStatus(401);next()}
-app.get('/health',(req,res)=>res.json({status:'up'}));
+app.get('/health',(req,res)=>res.json({status:'up'}));\napp.get('/ready',async(req,res)=>{try{await db.query('SELECT 1');res.json({status:'ready'})}catch{res.status(503).json({status:'unavailable'})}});
 app.post('/api/inquiries',rateLimit({windowMs:15*60*1000,limit:5,standardHeaders:'draft-7',legacyHeaders:false}),async(req,res)=>{
  const parsed=schema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:'Invalid inquiry',fields:parsed.error.flatten().fieldErrors});
  const d=parsed.data;const id=randomUUID();
