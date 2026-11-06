@@ -87,6 +87,7 @@
 - [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
 
 ## Change log
+- **2026-11-06 release guard tests:** added four default-off/HTTPS/disabled-submit/notice assertions and corrected the test selector; GitHub Actions intake run 42294292224 SUCCESS. The form remains disabled pending real infrastructure.
 - **Verified green intake CI:** commit 89b555a, GitHub Actions run 42293984225 SUCCESS; server, worker, browser-script syntax and npm tests passed. This is not a live end-to-end gate.
 - **Latest CI regression:** run 42293724388 failed on JavaScript syntax in new fail-closed configuration. Corrected in commit 2cc74d9; no passing outcome claimed yet.\n- **Current backend hardening:** fail-closed missing/weak configuration, DB readiness endpoint, three startup regression tests. New test run pending; live gate count remains 0/12.
 - **2026-11-06 baseline:** Prior website investigation, draft intake form, backend foundation, mail outbox and guarded activation documented in PR #27. No production release or verified end-to-end mail delivery.
