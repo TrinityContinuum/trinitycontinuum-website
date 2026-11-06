@@ -87,6 +87,8 @@
 - [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
 
 ## Change log
+- **Verified real PostgreSQL CI success:** commit 6473f6e, intake workflow run 42294715972 SUCCESS, browser smoke workflow run 42294716011 SUCCESS. Test storage is disposable, not production.
+- **Brotherchat status confirmed from earlier mailbox work:** brotherchat@trinitycontinuum.com Namecheap Private Email mailbox, 5 GB, Yahoo inbound delivery verified. Outbound/reply/ChatGPT persona sending not verified; keep separate from public jack@ address. Rotate exposed mailbox password before further use. No live customer notifications have been sent.
 - **Integration test expansion:** GitHub CI now provisions disposable PostgreSQL 17 and tests HTTP submission, persisted inquiry + both mail jobs, invalid callback rejection, and administrator authorization. Workflow run 42294496966 pending. Production database remains unprovisioned.
 - **2026-11-06 release guard tests:** added four default-off/HTTPS/disabled-submit/notice assertions and corrected the test selector; GitHub Actions intake run 42294292224 SUCCESS. The form remains disabled pending real infrastructure.
 - **Verified green intake CI:** commit 89b555a, GitHub Actions run 42293984225 SUCCESS; server, worker, browser-script syntax and npm tests passed. This is not a live end-to-end gate.
