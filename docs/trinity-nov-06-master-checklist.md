@@ -16,7 +16,7 @@
 - [x] Add atomic inquiry + per-recipient notification-job writes and separate retry worker (`intake-api/mail-worker.js`).
 - [x] Add guarded HTTPS endpoint configuration and default-OFF release switch (`assets/inquiry-config.js`).
 - [x] Add 12-gate acceptance ledger (`docs/trinity-release-acceptance-ledger.md`).
-- [x] Add CI syntax workflow (`.github/workflows/trinity-intake-checks.yml`); **passing run not yet verified**.
+- [x] Add CI syntax workflow (`.github/workflows/trinity-intake-checks.yml`); first inspected run FAILED at server.js SQL quoting. Fix committed; passing rerun not yet verified.
 - [ ] Find and approve **durable non-expiring** Trinity-only data storage with backup/restore and export, ideally $0 incremental.
 - [ ] Verify a host supports chosen email transport; Render free SMTP ports may be restricted.
 - [ ] Provision backend, database, secrets, and sender with no paid commitment or temporary account.
@@ -88,7 +88,7 @@
 
 ## Change log
 - **2026-11-06 baseline:** Prior website investigation, draft intake form, backend foundation, mail outbox and guarded activation documented in PR #27. No production release or verified end-to-end mail delivery.
-- **Current pass:** Consolidated all known Jack requests, including trucker ownership, into this tracked checklist. No external bids, messages, or deployments were sent by creating this file.
+- **Current pass:** Consolidated all known Jack requests, including trucker ownership, into this tracked checklist. No external bids, messages, or deployments were sent by creating this file.\n- **Current CI inspection:** Website browser smoke test passed; intake syntax workflow failed on SQL quoting. Corrective commits made, rerun outcome pending.
 
 ## Controlled source references (not verified as accessed)
 - Factory Gold Volume 24: https://drive.google.com/file/d/1gUWemjXJycjjthQOElc9rc26hJyax8JF/view
