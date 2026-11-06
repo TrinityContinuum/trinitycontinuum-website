@@ -88,6 +88,8 @@
 - [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
 
 ## Change log
+- **Administrative updates verified:** commit 026e3dc, intake CI run 42296373934 SUCCESS and website browser run 42296373962 SUCCESS. Authenticated status, owner, follow-up changes tested. Live production acceptance remains 0/12.
+- **Checklist baseline at this review:** 14 of 60 checkbox items marked complete (P0 9/18; P1 0/5; P2 1/9; P3 0/10; P4 1/5; P5 3/7; common 0/6). This is task count, not percent of total effort.
 - **SMTP delivery verified in isolated CI:** commit 56c3f76, run 42295825204 SUCCESS and browser run 42295824710 SUCCESS. Authenticated SMTP sink receives message; worker persists sent state. No real external mailbox delivery claimed.
 - **Exploratory concept brief:** commit b7502bf, owner-facing internal draft with four possible roles, transport/process/regulatory questions, hypothetical economics input sheet and six OPEN decision gates. No product launch or solicitation.
 - **Verified seven-category PostgreSQL tests:** commit d95f827, run 42295170318 SUCCESS; browser run 42295170143 SUCCESS.
