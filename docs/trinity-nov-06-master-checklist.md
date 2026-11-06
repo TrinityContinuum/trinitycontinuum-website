@@ -39,6 +39,12 @@
 
 ## P2 — ONE existing factory design; three comparable turnkey GC bids
 - [x] Record Jack's correction: **one existing controlled factory design**, not alternative capacity-tier factory designs; three comparable GC proposals.
+- [x] Review Jack's Manufacturing Facility Master Package REV A management handoff and preserve one-factory/three-identical-bid authority (received 2026-11-06).
+- [x] Prepare INTERNAL controlled bid issue manifest with source IDs, verification holds, A–M exhibits, common GC bid form and approval controls (`docs/manufacturing-facility-rev-a-bid-issue-manifest.md`). Source files/checksums not yet verified.
+- [x] Prepare unified factory open-items/RFI log for G01–G07, financial overlaps and original drawing lineage (`docs/manufacturing-facility-rev-a-open-items-log.md`). All release gates OPEN.
+- [ ] Recover controlling original architectural plan and revision authority; reconcile 250,000/312,000 sq ft and 10/12 bays.
+- [ ] Recover original MFG-09.35/.73/.75/.76/.78/.79/.85 drawings and editable/stamped equivalents, original kitchen 5,000-sf plan, dedicated lab, separate breakroom, showers and exterior test stands.
+- [ ] Reconcile MFG-09.73 equipment ID-to-bay-to-utility matrix, 3,000/4,000 kVA electrical bases and historical factory CAPEX allowances without double counting.
 - [ ] Obtain/review controlled Gold Volume 24 Manufacturing Facility REV B, First Factory Build Sequence, replication playbook, controlled CAD reference, CAD master index and EBOM/MBOM crosswalk.
 - [ ] Create one controlled issue register with revision, NDA, access permissions, bid assumptions and exclusions.
 - [ ] Prepare uniform turnkey lump-sum GC bid package: site, design completion, permits, civil/building, utilities, equipment, installation, commissioning, training, as-builts and warranty.
@@ -88,6 +94,7 @@
 - [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
 
 ## Change log
+- **Manufacturing REV A handoff integrated:** Jack's 2026-11-06 management instructions reviewed; internal source/issue manifest commit 3ce785e and G01–G07 open-items log commit 0736cb6. These are management review drafts; original factory files not independently recovered, no IFC or GC release.
 - **Administrative updates verified:** commit 026e3dc, intake CI run 42296373934 SUCCESS and website browser run 42296373962 SUCCESS. Authenticated status, owner, follow-up changes tested. Live production acceptance remains 0/12.
 - **Checklist baseline at this review:** 14 of 60 checkbox items marked complete (P0 9/18; P1 0/5; P2 1/9; P3 0/10; P4 1/5; P5 3/7; common 0/6). This is task count, not percent of total effort.
 - **SMTP delivery verified in isolated CI:** commit 56c3f76, run 42295825204 SUCCESS and browser run 42295824710 SUCCESS. Authenticated SMTP sink receives message; worker persists sent state. No real external mailbox delivery claimed.
