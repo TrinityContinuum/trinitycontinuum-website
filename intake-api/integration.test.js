@@ -11,7 +11,7 @@ integration('HTTP submission persists inquiry and both notification jobs atomica
  let server;
  try{
   await db.query(readFileSync(new URL('./schema.sql',import.meta.url),'utf8'));
-  server=spawn(process.execPath,['server.js'],{cwd:process.cwd(),env:{...process.env,DATABASE_URL:url,ADMIN_TOKEN:'integration-test-admin-token-at-least-32-chars',PORT:'19077',PUBLIC_ORIGIN:'https://trinitycontinuum.com'},stdio:'pipe'});
+  server=spawn(process.execPath,['server.js'],{cwd:process.cwd(),env:{...process.env,NODE_ENV:'test',DATABASE_URL:url,ADMIN_TOKEN:'integration-test-admin-token-at-least-32-chars',PORT:'19077',PUBLIC_ORIGIN:'https://trinitycontinuum.com'},stdio:'pipe'});
   let ready=false;
   for(let n=0;n<60;n++){
    if(server.exitCode!==null)throw Error('API process exited before readiness');
