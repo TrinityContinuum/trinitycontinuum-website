@@ -15,7 +15,7 @@
 - [x] Add API foundation with validation, rate limiting, restricted record listing, and durable database schema (`intake-api/server.js`, `schema.sql`).
 - [x] Add atomic inquiry + per-recipient notification-job writes and separate retry worker (`intake-api/mail-worker.js`).
 - [x] Add guarded HTTPS endpoint configuration and default-OFF release switch (`assets/inquiry-config.js`).
-- [x] Add fail-closed API configuration, strong admin token check and DB readiness endpoint; three startup regression tests committed; CI run 42293724388 failed on a literal newline escape in the new safeguard. Corrective commit 2cc74d9 made; rerun pending.\n- [x] Add 12-gate acceptance ledger (`docs/trinity-release-acceptance-ledger.md`).
+- [x] Add fail-closed API configuration, strong admin token check and DB readiness endpoint; three startup regression tests committed; initial CI regressions fixed; intake workflow run 42293984225 PASS on commit 89b555a, including three startup regression tests.\n- [x] Add 12-gate acceptance ledger (`docs/trinity-release-acceptance-ledger.md`).
 - [x] Add CI syntax workflow (`.github/workflows/trinity-intake-checks.yml`); first inspected run FAILED at server.js SQL quoting; corrective commit 596c995 passed intake foundation checks (run 42293215996) and website browser smoke tests (run 42293215914). These are CI checks, not live delivery acceptance.
 - [ ] Find and approve **durable non-expiring** Trinity-only data storage with backup/restore and export, ideally $0 incremental.
 - [ ] Verify a host supports chosen email transport; Render free SMTP ports may be restricted.
@@ -87,6 +87,7 @@
 - [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
 
 ## Change log
+- **Verified green intake CI:** commit 89b555a, GitHub Actions run 42293984225 SUCCESS; server, worker, browser-script syntax and npm tests passed. This is not a live end-to-end gate.
 - **Latest CI regression:** run 42293724388 failed on JavaScript syntax in new fail-closed configuration. Corrected in commit 2cc74d9; no passing outcome claimed yet.\n- **Current backend hardening:** fail-closed missing/weak configuration, DB readiness endpoint, three startup regression tests. New test run pending; live gate count remains 0/12.
 - **2026-11-06 baseline:** Prior website investigation, draft intake form, backend foundation, mail outbox and guarded activation documented in PR #27. No production release or verified end-to-end mail delivery.
 - **Current pass:** Consolidated all known Jack requests, including trucker ownership, into this tracked checklist. No external bids, messages, or deployments were sent by creating this file.\n- **Current CI inspection:** Intake foundation checks PASS on commit 596c995 (run 42293215996); website browser smoke tests PASS (run 42293215914). No live gateway acceptance gate is passed by these checks.
