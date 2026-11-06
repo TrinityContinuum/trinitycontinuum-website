@@ -46,6 +46,16 @@ integration('HTTP submission persists inquiry and both notification jobs atomica
   assert.equal(invalid.status,400);
   const count=await db.query('SELECT count(*)::int AS n FROM inquiries WHERE payload->>\'email\'=$1',['ci-example@example.com']);
   assert.equal(count.rows[0].n,7,'invalid inquiry must not persist');
+  // A failed SMTP connection must preserve the job and schedule a retry, not mark it sent.
+  const worker=spawn(process.execPath,['mail-worker.js'],{cwd:process.cwd(),env:{...process.env,DATABASE_URL:url,SMTP_HOST:'127.0.0.1',SMTP_PORT:'19999',SMTP_USER:'ci',SMTP_PASS:'ci',MAIL_FROM:'ci@example.com',MAIL_WORKER_ONCE:'true'},stdio:'pipe'});
+  const workerExit=await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>{worker.kill();reject(Error('mail worker timed out'))},12000);worker.once('error',reject);worker.once('exit',code=>{clearTimeout(timeout);resolve(code)})});
+  assert.equal(workerExit,0,'worker should handle SMTP delivery failures without crashing');
+  const retry=await db.query("SELECT attempts,state,last_error,next_attempt_at>now() AS scheduled FROM inquiry_mail_jobs WHERE attempts>0 LIMIT 1");
+  assert.equal(retry.rowCount,1);
+  assert.equal(retry.rows[0].attempts,1);
+  assert.equal(retry.rows[0].state,'pending');
+  assert.ok(retry.rows[0].last_error);
+  assert.equal(retry.rows[0].scheduled,true);
   const unauth=await fetch('http://127.0.0.1:19077/api/admin/inquiries');
   assert.equal(unauth.status,401);
   const auth=await fetch('http://127.0.0.1:19077/api/admin/inquiries',{headers:{authorization:'Bearer integration-test-admin-token-at-least-32-chars'}});
