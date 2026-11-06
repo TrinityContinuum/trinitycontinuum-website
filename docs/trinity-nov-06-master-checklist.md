@@ -87,6 +87,8 @@
 - [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
 
 ## Change log
+- **Verified seven-category PostgreSQL tests:** commit d95f827, run 42295170318 SUCCESS; browser run 42295170143 SUCCESS.
+- **Verified mail-worker retry integration:** commit 2576716, run 42295310177 SUCCESS; browser run 42295310117 SUCCESS. Deliberate SMTP failure leaves durable pending job with incremented attempt, error, and future retry. Successful outbound SMTP remains unverified.
 - **Verified real PostgreSQL CI success:** commit 6473f6e, intake workflow run 42294715972 SUCCESS, browser smoke workflow run 42294716011 SUCCESS. Test storage is disposable, not production.
 - **Brotherchat status confirmed from earlier mailbox work:** brotherchat@trinitycontinuum.com Namecheap Private Email mailbox, 5 GB, Yahoo inbound delivery verified. Outbound/reply/ChatGPT persona sending not verified; keep separate from public jack@ address. Rotate exposed mailbox password before further use. No live customer notifications have been sent.
 - **Integration test expansion:** GitHub CI now provisions disposable PostgreSQL 17 and tests HTTP submission, persisted inquiry + both mail jobs, invalid callback rejection, and administrator authorization. Workflow run 42294496966 pending. Production database remains unprovisioned.
