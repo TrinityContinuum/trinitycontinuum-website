@@ -1,7 +1,6 @@
 import express from 'express';
 import helmet from 'helmet';
 import pg from 'pg';
-import nodemailer from 'nodemailer';
 import {rateLimit} from 'express-rate-limit';
 import {z} from 'zod';
 import {randomUUID,timingSafeEqual} from 'node:crypto';
@@ -27,27 +26,18 @@ const schema=z.object({
  trucker_use:optional(1000),trucker_model:optional(1000),website_source:optional(150),
  honeypot:z.string().max(0).optional().default('')
 }).strict().superRefine((v,ctx)=>{if(v.contact_method==='callback'&&!v.phone)ctx.addIssue({code:'custom',path:['phone'],message:'Phone is required for callback'});if(v.trucker_interest&&v.category!=='C')ctx.addIssue({code:'custom',path:['trucker_interest'],message:'Trucker interest requires category C'})});
-const required=['DATABASE_URL','ADMIN_TOKEN','SMTP_HOST','SMTP_USER','SMTP_PASS','MAIL_FROM'];
+const required=['DATABASE_URL','ADMIN_TOKEN'];
 for(const key of required)if(!process.env[key])console.error('Missing required configuration: '+key);
 const db=new pg.Pool({connectionString:process.env.DATABASE_URL,ssl:process.env.DB_SSL==='true'?{rejectUnauthorized:true}:undefined});
-const transport=nodemailer.createTransport({host:process.env.SMTP_HOST,port:Number(process.env.SMTP_PORT||465),secure:Number(process.env.SMTP_PORT||465)===465,auth:{user:process.env.SMTP_USER,pass:process.env.SMTP_PASS}});
+
 function admin(req,res,next){const token=process.env.ADMIN_TOKEN;if(!token||token.length<32)return res.sendStatus(503);const received=(req.headers.authorization||'').replace(/^Bearer /,'');const a=Buffer.from(token),b=Buffer.from(received);if(a.length!==b.length||!timingSafeEqual(a,b))return res.sendStatus(401);next()}
-async function sendMail(row){const d=row.payload,subject='Trinity inquiry '+row.id+' · '+row.category;
- const tasks=[{to:'jack@trinitycontinuum.com',subject,replyTo:d.email,text:'New Trinity inquiry '+row.id+'\nCategory: '+row.category+'\nName: '+d.name+'\nOrganization: '+d.organization+'\nEmail: '+d.email+'\nProject: '+d.project_title+'\nDescription: '+d.description+'\nRetrieve full record from restricted administrator interface.'},
- {to:d.email,subject:'Trinity Continuum inquiry received · '+row.id,text:'Thank you for contacting Trinity Continuum. Your inquiry reference is '+row.id+'. Trinity will review your request. Please do not send confidential engineering documents in reply unless Trinity arranges a secure channel.'}];
- for(const t of tasks)await transport.sendMail({from:process.env.MAIL_FROM,...t});
- await db.query("UPDATE inquiries SET email_state='sent',notified_at=now(),acknowledged_at=now(),last_mail_error=NULL,mail_attempts=mail_attempts+1 WHERE id=$1",[row.id]);
-}
 app.get('/health',(req,res)=>res.json({status:'up'}));
 app.post('/api/inquiries',rateLimit({windowMs:15*60*1000,limit:5,standardHeaders:'draft-7',legacyHeaders:false}),async(req,res)=>{
  const parsed=schema.safeParse(req.body);if(!parsed.success)return res.status(400).json({error:'Invalid inquiry',fields:parsed.error.flatten().fieldErrors});
  const d=parsed.data;const id=randomUUID();try{
- await db.query('INSERT INTO inquiries(id,category,payload) VALUES($1,$2,$3)',[id,d.category,JSON.stringify({...d,email:d.email.toLowerCase(),submitted_at:new Date().toISOString()})]);
- res.status(202).json({id,status:'received'});
- // Deliberately async after durable save: errors remain visible for operator retries.
- const row={id,category:d.category,payload:d};try{await sendMail(row)}catch(e){console.error('mail delivery failed for inquiry',id);await db.query("UPDATE inquiries SET email_state='failed',mail_attempts=mail_attempts+1,last_mail_error=$2 WHERE id=$1",[id,String(e.message).slice(0,300)])}
- }catch(e){console.error('database write failed');if(!res.headersSent)res.status(503).json({error:'Submission unavailable. Please use Trinity contact email.'})}
+ const client=await db.connect();try{await client.query('BEGIN');await client.query('INSERT INTO inquiries(id,category,payload) VALUES($1,$2,$3)',[id,d.category,JSON.stringify({...d,email:d.email.toLowerCase(),submitted_at:new Date().toISOString()})]);await client.query("INSERT INTO inquiry_mail_jobs(inquiry_id,kind,recipient) VALUES($1,'notify',$2),($1,'ack',$3)",[id,'jack@trinitycontinuum.com',d.email.toLowerCase()]);await client.query('COMMIT');res.status(202).json({id,status:'received'});}catch(e){await client.query('ROLLBACK');console.error('inquiry transaction failed');res.status(503).json({error:'Submission unavailable. Please use Trinity contact email.'})}finally{client.release()}
+
 });
 app.get('/api/admin/inquiries',admin,async(req,res)=>{try{const {rows}=await db.query('SELECT id,created_at,category,status,owner,next_follow_up,email_state,mail_attempts,notified_at,acknowledged_at,payload FROM inquiries ORDER BY created_at DESC LIMIT 500');res.setHeader('Cache-Control','no-store');res.json({inquiries:rows})}catch{res.sendStatus(503)}});
-app.post('/api/admin/inquiries/:id/retry',admin,async(req,res)=>{try{const {rows}=await db.query("SELECT * FROM inquiries WHERE id=$1 AND email_state!='sent'",[req.params.id]);if(!rows.length)return res.sendStatus(404);await sendMail(rows[0]);res.json({status:'sent'})}catch(e){console.error('retry failed');res.status(502).json({error:'Mail retry failed'})}});
+app.post('/api/admin/inquiries/:id/retry',admin,async(req,res)=>{try{const {rowCount}=await db.query("UPDATE inquiry_mail_jobs SET state='pending',next_attempt_at=now(),last_error=NULL WHERE inquiry_id=$1 AND state='failed'",[req.params.id]);res.json({jobs_requeued:rowCount})}catch{res.sendStatus(503)}});
 app.listen(Number(process.env.PORT||10000),'0.0.0.0',()=>console.log('Trinity inquiry service started'));
