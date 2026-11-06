@@ -13,6 +13,22 @@ on:
 jobs:
   syntax-and-dependencies:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ci_test_only
+          POSTGRES_USER: trinity_ci
+          POSTGRES_DB: trinity_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd 'pg_isready -U trinity_ci -d trinity_ci'
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      INTEGRATION_DATABASE_URL: postgresql://trinity_ci:ci_test_only@127.0.0.1:5432/trinity_ci
     defaults:
       run:
         working-directory: intake-api
