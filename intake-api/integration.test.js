@@ -30,10 +30,22 @@ integration('HTTP submission persists inquiry and both notification jobs atomica
   assert.equal(jobs.rows.find(row=>row.kind==='notify').recipient,'jack@trinitycontinuum.com');
   assert.equal(jobs.rows.find(row=>row.kind==='ack').recipient,'ci-example@example.com');
   assert.ok(jobs.rows.every(row=>row.state==='pending'));
+  // Verify every public inquiry category uses the same durable transaction path.
+  for(const category of ['A','B','D','E','F','G']){
+   const categoryBody={...body,category,trucker_interest:false};
+   delete categoryBody.trucker_region;delete categoryBody.trucker_use;delete categoryBody.trucker_model;
+   const response=await fetch('http://127.0.0.1:19077/api/inquiries',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(categoryBody)});
+   const text=await response.text();assert.equal(response.status,202,'Category '+category+': '+text);
+   const accepted=JSON.parse(text);
+   const saved=await db.query('SELECT category FROM inquiries WHERE id=$1',[accepted.id]);
+   assert.equal(saved.rows[0]?.category,category);
+   const outbox=await db.query('SELECT kind FROM inquiry_mail_jobs WHERE inquiry_id=$1 ORDER BY kind',[accepted.id]);
+   assert.deepEqual(outbox.rows.map(x=>x.kind),['ack','notify']);
+  }
   const invalid=await fetch('http://127.0.0.1:19077/api/inquiries',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({...body,contact_method:'callback',phone:''})});
   assert.equal(invalid.status,400);
   const count=await db.query('SELECT count(*)::int AS n FROM inquiries WHERE payload->>\'email\'=$1',['ci-example@example.com']);
-  assert.equal(count.rows[0].n,1,'invalid inquiry must not persist');
+  assert.equal(count.rows[0].n,7,'invalid inquiry must not persist');
   const unauth=await fetch('http://127.0.0.1:19077/api/admin/inquiries');
   assert.equal(unauth.status,401);
   const auth=await fetch('http://127.0.0.1:19077/api/admin/inquiries',{headers:{authorization:'Bearer integration-test-admin-token-at-least-32-chars'}});
