@@ -21,7 +21,7 @@ integration('HTTP submission persists inquiry and both notification jobs atomica
   assert.ok(ready,'API should reach database readiness');
   const body={category:'C',name:'CI Sample',organization:'CI Test Organization',email:'ci-example@example.com',role:'Testing',project_title:'Automated Test',city:'Houston',state:'Texas',contact_method:'email',description:'CI only test inquiry. Not a real customer.',consent:true,trucker_interest:true,trucker_region:'Texas',trucker_use:'Mobile water use',trucker_model:'Owner operator'};
   const post=await fetch('http://127.0.0.1:19077/api/inquiries',{method:'POST',headers:{'content-type':'application/json',origin:'https://trinitycontinuum.com'},body:JSON.stringify(body)});
-  assert.equal(post.status,202,await post.text().catch(()=>''));const result=await post.json();
+  const responseText=await post.text();assert.equal(post.status,202,responseText);const result=JSON.parse(responseText);
   assert.match(result.id,/^[0-9a-f-]{36}$/);
   const inquiry=await db.query('SELECT category,payload FROM inquiries WHERE id=$1',[result.id]);
   assert.equal(inquiry.rowCount,1);assert.equal(inquiry.rows[0].category,'C');assert.equal(inquiry.rows[0].payload.trucker_interest,true);
