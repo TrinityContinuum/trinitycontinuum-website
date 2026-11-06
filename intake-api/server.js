@@ -49,15 +49,15 @@ app.patch('/api/admin/inquiries/:id',admin,async(req,res)=>{
  if(!Object.keys(parsed.data).length)return res.status(400).json({error:'No changes supplied'});
  try{
   const fields=[],values=[];
-  for(const [key,value] of Object.entries(parsed.data)){values.push(value);fields.push(key+'=,admin,async(req,res)=>{try{const {rowCount}=await db.query("UPDATE inquiry_mail_jobs SET state='pending',next_attempt_at=now(),last_error=NULL WHERE inquiry_id=$1 AND state='failed'",[req.params.id]);res.json({jobs_requeued:rowCount})}catch{res.sendStatus(503)}});
-app.listen(Number(process.env.PORT||10000),'0.0.0.0',()=>console.log('Trinity inquiry service started'));
-+values.length)}
+  for(const [key,value] of Object.entries(parsed.data)){
+   values.push(value);
+   fields.push(key+'=$'+values.length);
+  }
   values.push(req.params.id);
-  const result=await db.query('UPDATE inquiries SET '+fields.join(',')+' WHERE id=,admin,async(req,res)=>{try{const {rowCount}=await db.query("UPDATE inquiry_mail_jobs SET state='pending',next_attempt_at=now(),last_error=NULL WHERE inquiry_id=$1 AND state='failed'",[req.params.id]);res.json({jobs_requeued:rowCount})}catch{res.sendStatus(503)}});
-app.listen(Number(process.env.PORT||10000),'0.0.0.0',()=>console.log('Trinity inquiry service started'));
-+values.length+' RETURNING id,status,owner,next_follow_up',values);
+  const result=await db.query('UPDATE inquiries SET '+fields.join(',')+' WHERE id=$'+values.length+' RETURNING id,status,owner,next_follow_up',values);
   if(!result.rowCount)return res.sendStatus(404);
-  res.setHeader('Cache-Control','no-store');res.json({inquiry:result.rows[0]});
+  res.setHeader('Cache-Control','no-store');
+  res.json({inquiry:result.rows[0]});
  }catch{res.sendStatus(503)}
 });
 app.post('/api/admin/inquiries/:id/retry',admin,async(req,res)=>{try{const {rowCount}=await db.query("UPDATE inquiry_mail_jobs SET state='pending',next_attempt_at=now(),last_error=NULL WHERE inquiry_id=$1 AND state='failed'",[req.params.id]);res.json({jobs_requeued:rowCount})}catch{res.sendStatus(503)}});
