@@ -42,6 +42,20 @@ try{await client.query('BEGIN');await client.query('INSERT INTO inquiries(id,cat
 
 });
 app.get('/api/admin/inquiries',admin,async(req,res)=>{try{const {rows}=await db.query(`SELECT i.id,i.created_at,i.category,i.status,i.owner,i.next_follow_up,i.notified_at,i.acknowledged_at,i.payload,coalesce(jsonb_agg(jsonb_build_object('kind',j.kind,'state',j.state,'attempts',j.attempts,'last_error',j.last_error,'sent_at',j.sent_at)) FILTER (WHERE j.id IS NOT NULL),'[]'::jsonb) AS deliveries FROM inquiries i LEFT JOIN inquiry_mail_jobs j ON j.inquiry_id=i.id GROUP BY i.id ORDER BY i.created_at DESC LIMIT 500`);res.setHeader('Cache-Control','no-store');res.json({inquiries:rows})}catch{res.sendStatus(503)}});
+app.get('/api/admin/operations',admin,async(req,res)=>{
+ try{
+  const [queue,followups]=await Promise.all([
+   db.query(`SELECT state,count(*)::int AS count FROM inquiry_mail_jobs GROUP BY state`),
+   db.query(`SELECT count(*)::int AS overdue FROM inquiries WHERE next_follow_up < now() AND status <> 'closed'`)
+  ]);
+  const counts={pending:0,processing:0,sent:0,failed:0};
+  for(const row of queue.rows)counts[row.state]=row.count;
+  const stuck=await db.query("SELECT count(*)::int AS count FROM inquiry_mail_jobs WHERE state='processing' AND locked_at < now()-interval '15 minutes'");
+  const due=await db.query("SELECT count(*)::int AS count FROM inquiry_mail_jobs WHERE state='pending' AND next_attempt_at <= now()");
+  res.setHeader('Cache-Control','no-store');
+  res.json({queue:counts,due:due.rows[0].count,stuck:stuck.rows[0].count,overdue_followups:followups.rows[0].overdue,generated_at:new Date().toISOString()});
+ }catch{res.sendStatus(503)}
+});
 const adminUpdateSchema=z.object({status:z.enum(['new','reviewing','awaiting_customer','closed']),owner:z.string().trim().max(120).nullable().optional(),next_follow_up:z.string().datetime({offset:true}).nullable().optional()}).strict();
 app.patch('/api/admin/inquiries/:id',admin,async(req,res)=>{
  const parsed=adminUpdateSchema.safeParse(req.body);
