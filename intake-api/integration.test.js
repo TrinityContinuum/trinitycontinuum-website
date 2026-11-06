@@ -76,6 +76,16 @@ integration('HTTP submission persists inquiry and both notification jobs atomica
   const auth=await fetch('http://127.0.0.1:19077/api/admin/inquiries',{headers:{authorization:'Bearer integration-test-admin-token-at-least-32-chars'}});
   assert.equal(auth.status,200);
   assert.ok((await auth.json()).inquiries.some(i=>i.id===result.id));
+  const deniedOps=await fetch('http://127.0.0.1:19077/api/admin/operations');
+  assert.equal(deniedOps.status,401);
+  const ops=await fetch('http://127.0.0.1:19077/api/admin/operations',{headers:{authorization:'Bearer integration-test-admin-token-at-least-32-chars'}});
+  assert.equal(ops.status,200);
+  const metrics=await ops.json();
+  assert.equal(typeof metrics.queue.pending,'number');
+  assert.equal(typeof metrics.queue.sent,'number');
+  assert.equal(typeof metrics.due,'number');
+  assert.equal(typeof metrics.stuck,'number');
+  assert.equal(typeof metrics.overdue_followups,'number');
   const deniedUpdate=await fetch('http://127.0.0.1:19077/api/admin/inquiries/'+result.id,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({status:'reviewing'})});
   assert.equal(deniedUpdate.status,401);
   const update=await fetch('http://127.0.0.1:19077/api/admin/inquiries/'+result.id,{method:'PATCH',headers:{'content-type':'application/json',authorization:'Bearer integration-test-admin-token-at-least-32-chars'},body:JSON.stringify({status:'reviewing',owner:'Jack',next_follow_up:'2026-12-01T15:00:00Z'})});
