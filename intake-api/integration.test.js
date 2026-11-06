@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import {spawn} from 'node:child_process';
 import {readFileSync} from 'node:fs';
 import pg from 'pg';
+import {SMTPServer} from 'smtp-server';
 
 const url=process.env.INTEGRATION_DATABASE_URL;
 const integration=url?test:test.skip;
@@ -56,6 +57,20 @@ integration('HTTP submission persists inquiry and both notification jobs atomica
   assert.equal(retry.rows[0].state,'pending');
   assert.ok(retry.rows[0].last_error);
   assert.equal(retry.rows[0].scheduled,true);
+  // Local authenticated SMTP sink confirms real successful handoff without emailing anybody.
+  const received=[];
+  const smtp=new SMTPServer({secure:false,authOptional:false,disabledCommands:['STARTTLS'],onAuth(auth,session,callback){if(auth.username==='ci'&&auth.password==='ci')callback(null,{user:'ci'});else callback(new Error('Invalid credentials'))},onData(stream,session,callback){let raw='';stream.on('data',chunk=>{raw+=chunk.toString()});stream.on('end',()=>{received.push(raw);callback()});stream.on('error',callback)}});
+  await new Promise((resolve,reject)=>smtp.listen(19998,'127.0.0.1',error=>error?reject(error):resolve()));
+  try{
+   const delivered=spawn(process.execPath,['mail-worker.js'],{cwd:process.cwd(),env:{...process.env,DATABASE_URL:url,SMTP_HOST:'127.0.0.1',SMTP_PORT:'19998',SMTP_USER:'ci',SMTP_PASS:'ci',MAIL_FROM:'ci@example.com',MAIL_WORKER_ONCE:'true'},stdio:'pipe'});
+   const deliveredExit=await new Promise((resolve,reject)=>{const timeout=setTimeout(()=>{delivered.kill();reject(Error('successful mail worker timed out'))},12000);delivered.once('error',reject);delivered.once('exit',code=>{clearTimeout(timeout);resolve(code)})});
+   assert.equal(deliveredExit,0);
+   assert.equal(received.length,1,'SMTP sink must receive exactly one message');
+   assert.match(received[0],/X-Trinity-Inquiry-ID:/i);
+   const sent=await db.query("SELECT state,sent_at FROM inquiry_mail_jobs WHERE state='sent' LIMIT 1");
+   assert.equal(sent.rowCount,1);
+   assert.ok(sent.rows[0].sent_at);
+  }finally{await new Promise(resolve=>smtp.close(resolve))}
   const unauth=await fetch('http://127.0.0.1:19077/api/admin/inquiries');
   assert.equal(unauth.status,401);
   const auth=await fetch('http://127.0.0.1:19077/api/admin/inquiries',{headers:{authorization:'Bearer integration-test-admin-token-at-least-32-chars'}});
