@@ -11,7 +11,7 @@ test('release configuration defaults to disabled',()=>{
  assert.match(config,/TRINITY_INTAKE_API_URL\s*=\s*['"]['"]/);
 });
 test('submission button remains disabled in initial HTML',()=>{
- assert.match(html,/<button[^>]*id="submit-inquiry"[^>]*disabled/);
+ assert.match(html,/<button(?=[^>]*id="submit-inquiry")(?=[^>]*\bdisabled\b)[^>]*>/);
 });
 test('release requires HTTPS and explicit enablement',()=>{
  assert.match(script,/TRINITY_INTAKE_ENABLED===true/);
