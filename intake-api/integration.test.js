@@ -76,6 +76,17 @@ integration('HTTP submission persists inquiry and both notification jobs atomica
   const auth=await fetch('http://127.0.0.1:19077/api/admin/inquiries',{headers:{authorization:'Bearer integration-test-admin-token-at-least-32-chars'}});
   assert.equal(auth.status,200);
   assert.ok((await auth.json()).inquiries.some(i=>i.id===result.id));
+  const deniedUpdate=await fetch('http://127.0.0.1:19077/api/admin/inquiries/'+result.id,{method:'PATCH',headers:{'content-type':'application/json'},body:JSON.stringify({status:'reviewing'})});
+  assert.equal(deniedUpdate.status,401);
+  const update=await fetch('http://127.0.0.1:19077/api/admin/inquiries/'+result.id,{method:'PATCH',headers:{'content-type':'application/json',authorization:'Bearer integration-test-admin-token-at-least-32-chars'},body:JSON.stringify({status:'reviewing',owner:'Jack',next_follow_up:'2026-12-01T15:00:00Z'})});
+  assert.equal(update.status,200,await update.text().catch(()=>'')); 
+  const savedUpdate=await db.query('SELECT status,owner,next_follow_up FROM inquiries WHERE id=$1',[result.id]);
+  assert.equal(savedUpdate.rows[0].status,'reviewing');
+  assert.equal(savedUpdate.rows[0].owner,'Jack');
+  assert.ok(savedUpdate.rows[0].next_follow_up);
+  const invalidUpdate=await fetch('http://127.0.0.1:19077/api/admin/inquiries/'+result.id,{method:'PATCH',headers:{'content-type':'application/json',authorization:'Bearer integration-test-admin-token-at-least-32-chars'},body:JSON.stringify({status:'unapproved'})});
+  assert.equal(invalidUpdate.status,400);
+
  }finally{
   if(server){server.kill('SIGTERM');await new Promise(resolve=>{if(server.exitCode!==null)return resolve();server.once('exit',resolve);setTimeout(resolve,2000)})}
   await db.end();
