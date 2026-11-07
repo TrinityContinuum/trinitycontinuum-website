@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trinity | Correspondence Console (Preview)</title>
+<style>
+:root{color-scheme:dark;font-family:system-ui,sans-serif;background:#10191e;color:#e9f1f0}*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at 80% 0%,#20464a 0,transparent 40%),#10191e}
+main{max-width:1180px;margin:auto;padding:34px 22px}header{display:flex;justify-content:space-between;align-items:center;gap:18px;flex-wrap:wrap}
+a{color:#8ce4cf}h1{font-size:clamp(2rem,5vw,3.5rem);letter-spacing:-.04em;margin:.3em 0}
+h2{font-size:1.15rem}p{line-height:1.55;color:#b5c6c5}.eyebrow{color:#8ce4cf;letter-spacing:.13em;text-transform:uppercase;font-size:.8rem}
+.tag{border:1px solid #bd9565;color:#f6cfa2;border-radius:100px;padding:8px 12px;font-size:.8rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:28px 0}
+.card{border:1px solid #35515a;border-radius:16px;background:#1a292e;padding:22px}.metric{font-size:2.4rem;font-weight:700}
+label{display:block;margin:14px 0 6px;color:#d7e5e2}input,select,textarea,button{font:inherit}
+input,select,textarea{width:100%;padding:12px;border:1px solid #48626b;background:#101e23;color:white;border-radius:9px}
+button{border:0;border-radius:9px;background:#8ce4cf;color:#092320;font-weight:700;padding:12px 16px;cursor:pointer}
+button.secondary{background:#2e454a;color:#e9f1f0}.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:16px}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#0c181c;padding:16px;border-radius:9px;line-height:1.5}
+small{color:#b5c6c5}.notice{border-left:3px solid #d3a16b;padding-left:16px}
+</style></head><body><main>
+<header><div><div class="eyebrow">Trinity Continuum / Private project preview</div><h1>Correspondence Console</h1></div><span class="tag">DESIGN PREVIEW · SENDING DISABLED</span></header>
+<p>Review outreach templates, campaigns, inquiry triage and reporting without contacting prospects. Sender identity remains configurable pending management approval.</p>
+<div class="grid"><section class="card"><small>Daily sending ceiling</small><div class="metric">300</div><small>Proposed maximum; no active sender</small></section>
+<section class="card"><small>Actual emails sent</small><div class="metric">0</div><small>Preview contains no live data</small></section>
+<section class="card"><small>Connected inboxes</small><div class="metric">0</div><small>Awaiting approved integration</small></section>
+<section class="card"><small>Approval state</small><div class="metric">Hold</div><small>Jack's review required</small></section></div>
+<div class="two"><section class="card"><h2>Outreach message preview</h2>
+<label for="sender">Sender identity (proposed)</label><input id="sender" value="Trinity Continuum AI Correspondent">
+<label for="company">Prospect organization</label><input id="company" value="Example Industrial Partner">
+<label for="industry">Industry</label><select id="industry"><option>Industrial facilities</option><option>Data centers</option><option>Refineries</option><option>Mining</option><option>Ports and marine</option><option>Municipal utilities</option><option>Other</option></select>
+<label for="campaign">Campaign identifier</label><input id="campaign" value="industrial-2026" pattern="[a-zA-Z0-9_-]{1,64}">
+<div class="actions"><button id="preview" type="button">Generate sample</button><button id="copy" class="secondary" type="button">Copy sample</button></div>
+<pre id="sample" aria-live="polite"></pre><small>Samples use approved general positioning only; no invented specifications or promises.</small></section>
+<section class="card"><h2>Inquiry triage policy</h2><label for="category">Question category</label>
+<select id="category"><option value="general">General information</option><option value="project">Project application</option><option value="technical">Detailed technical question</option><option value="commercial">Pricing / contractual / performance commitments</option></select>
+<label for="detail">Question detail (preview only)</label><textarea id="detail" rows="5" placeholder="Describe the inquiry..."></textarea>
+<div class="actions"><button id="triage" type="button">Preview decision</button></div>
+<pre id="decision" aria-live="polite"></pre>
+<p class="notice">The preview does not submit information, send email, read mailboxes, import lists or connect to a database.</p></section></div>
+<section class="card" style="margin-top:16px"><h2>Planned management controls</h2><p>Campaign approval · CSV import and deduplication · Contact eligibility · Suppression list · Draft approval · Delivery schedule · Inbox threading · Reply review · Bounce/complaint monitoring · Source and industry analytics · Audit history.</p>
+<p><a href="https://trinitycontinuum.com/">Public website</a> · <a href="https://trinitycontinuum.com/project-interest.html">Project inquiry form</a></p></section>
+</main><script src="assets/brotherchat-console.js" defer></script></body></html>
