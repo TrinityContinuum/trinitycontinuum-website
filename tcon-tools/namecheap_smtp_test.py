@@ -5,7 +5,6 @@ Run locally on an authorized computer. Never commit or paste your password.
 No emails are sent until the operator confirms recipient and message.
 """
 import getpass
-import os
 import smtplib
 import ssl
 from email.message import EmailMessage
@@ -23,7 +22,7 @@ def main():
     print(f"From: {SENDER}\nTo: {recipient}\nSubject: TCON Namecheap connection test")
     if input("Send exactly one test message? Type SEND: ").strip() != "SEND":
         raise SystemExit("Cancelled. No email sent.")
-    password = getpass.getpass("Namecheap mailbox password (hidden, not saved): ")
+    password = getpass.getpass("Namecheap application password (hidden, not saved): ")
     if not password:
         raise SystemExit("No password entered.")
     message = EmailMessage()
