@@ -6,10 +6,21 @@ const db=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVI
 const approved='Trinity Continuum is developing an integrated modular water, power and thermal infrastructure platform. Actual system capabilities, engineering specifications, site suitability, delivery, pricing and performance require written confirmation from Trinity management.';
 Deno.serve(async req=>{
  if(req.method!=='POST'||req.headers.get('authorization')!=='Bearer '+Deno.env.get('TRINITY_WORKER_SECRET'))return new Response('Forbidden',{status:403});
- const {data, error}=await db.from('trinity_inquiries').select('*').eq('status','queued').lte('reply_due_at',new Date().toISOString()).order('reply_due_at').limit(10);
+ const request=await req.json().catch(()=>({}));
+ const prepareId=typeof request.prepare_id==='string' && /^[0-9a-f-]{36}$/.test(request.prepare_id)?request.prepare_id:null;
+ let query=db.from('trinity_inquiries').select('*');
+ if(prepareId)query=query.eq('id',prepareId).eq('status','queued');
+ else query=query.in('status',['draft_ready','needs_review']).lte('reply_due_at',new Date().toISOString()).order('reply_due_at');
+ const {data,error}=await query.limit(prepareId?1:10);
  if(error)return new Response('Queue unavailable',{status:503});
  let drafted=0, sent=0;
  for(const lead of data||[]){
+  if(!prepareId){
+    if(lead.status!=='draft_ready'||Deno.env.get('BROTHERCHAT_SEND_ENABLED')!=='true'||!Deno.env.get('RESEND_API_KEY'))continue;
+    const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{'Authorization':'Bearer '+Deno.env.get('RESEND_API_KEY'),'Content-Type':'application/json','Idempotency-Key':lead.id},body:JSON.stringify({from:'Trinity Continuum AI <brotherchat@trinitycontinuum.com>',to:[lead.email],reply_to:'jack@trinitycontinuum.com',subject:lead.draft_subject,text:lead.draft_body})});
+    if(response.ok){await db.from('trinity_inquiries').update({status:'sent',sent_at:new Date().toISOString()}).eq('id',lead.id).eq('status','draft_ready');sent++;}
+    continue;
+  }
   const sensitive=['Costs / commercial terms','Engineering specifications / validation','Procurement / availability','Site suitability / permitting'].includes(lead.question_category);
   let answer=`Hello ${lead.name},\n\nThank you for contacting Trinity Continuum about ${lead.applications.join(', ')||lead.reason}. We have recorded your interest in ${lead.city||lead.state||lead.country||'your proposed location'} and your questions concerning ${lead.question_category||'the platform'}.\n\n${approved}\n\nYour project description and questions have been recorded for review by Trinity. We welcome further details about your desired water, electrical and thermal requirements.\n\nBest regards,\nBrotherchat\nTrinity Continuum AI Correspondent\nThis is an automated response; project-specific commitments require confirmation by Trinity management.`;
   const key=Deno.env.get('OPENAI_API_KEY');
@@ -21,13 +32,6 @@ Deno.serve(async req=>{
   }
   const subject='Re: Your Trinity Continuum project inquiry';
   // Fail closed: sensitive categories always require human review.
-  const enabled=Deno.env.get('BROTHERCHAT_SEND_ENABLED')==='true'&&!sensitive;
-  const mailKey=Deno.env.get('RESEND_API_KEY');
-  if(enabled&&mailKey){
-   const response=await fetch('https://api.resend.com/emails',{method:'POST',headers:{'Authorization':'Bearer '+mailKey,'Content-Type':'application/json'},body:JSON.stringify({from:'Trinity Continuum AI <brotherchat@trinitycontinuum.com>',to:[lead.email],reply_to:'jack@trinitycontinuum.com',subject,text:answer})});
-   if(response.ok){await db.from('trinity_inquiries').update({status:'sent',draft_subject:subject,draft_body:answer,sent_at:new Date().toISOString()}).eq('id',lead.id).eq('status','queued');sent++;continue;}
-   console.error('Mail provider error',response.status);
-  }
   const {error:saveError}=await db.from('trinity_inquiries').update({status:sensitive?'needs_review':'draft_ready',draft_subject:subject,draft_body:answer}).eq('id',lead.id).eq('status','queued');
   if(!saveError)drafted++;
  }
