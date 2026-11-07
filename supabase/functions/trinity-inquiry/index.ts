@@ -28,8 +28,16 @@ Deno.serve(async req=>{
    organization:cut(d.organization,150),industry:cut(d.industry,120),source:cut(d.source,120),campaign:cut(d.campaign,120),
    city:cut(d.city,150),state:cut(d.state,100),country:cut(d.country,100),questions:cut(d.questions,4000),
    timeline:cut(d.timeline,80),reply_method:cut(d.reply_method,80)};
-  const {error}=await supabase.from('trinity_inquiries').insert(record);
+  const {data:saved,error}=await supabase.from('trinity_inquiries').insert(record).select('id').single();
   if(error&&error.code!=='23505'){console.error('Inquiry save failed',error.code);return new Response(JSON.stringify({error:'Submission unavailable. Please email Trinity directly.'}),{status:503,headers});}
+  if(saved?.id && Deno.env.get('TRINITY_WORKER_SECRET')){
+    try{
+      const prep=await fetch(Deno.env.get('SUPABASE_URL')+'/functions/v1/trinity-reply-worker',{
+        method:'POST',headers:{'Authorization':'Bearer '+Deno.env.get('TRINITY_WORKER_SECRET'),'Content-Type':'application/json'},
+        body:JSON.stringify({prepare_id:saved.id})});
+      if(!prep.ok)console.error('Immediate draft preparation unavailable',prep.status);
+    }catch(e){console.error('Immediate draft preparation error',String(e));}
+  }
   return new Response(JSON.stringify({ok:true,message:'Inquiry received.'}),{status:202,headers});
  }catch{return new Response(JSON.stringify({error:'Invalid request.'}),{status:400,headers});}
 });
