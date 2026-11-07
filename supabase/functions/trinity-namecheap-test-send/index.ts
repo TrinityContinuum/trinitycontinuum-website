@@ -13,7 +13,7 @@ Deno.serve(async(req)=>{
   if(!secret||req.headers.get('authorization')!==`Bearer ${secret}`)return json({error:'Forbidden'},403);
   if(env('TRINITY_SMTP_ENABLED')!=='true')return json({enabled:false,note:'SMTP sending disabled'},503);
   const from=env('TRINITY_SMTP_USERNAME'),password=env('TRINITY_SMTP_PASSWORD');
-  if(!address(from)||!password)return json({error:'Mailbox not configured'},503);
+  if(from.toLowerCase()!=='adam@trinitycontinuum.com'||!password)return json({error:'Mailbox not configured'},503);
   const raw=await req.text();
   if(raw.length>16000)return json({error:'Payload too large'},413);
   let body:Record<string,unknown>;
