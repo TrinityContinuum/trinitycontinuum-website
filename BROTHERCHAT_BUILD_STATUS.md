@@ -29,3 +29,6 @@ Use configuration `TRINITY_OUTREACH_FROM` and editable console sender name. The 
 
 ## Approval and safety
 Existing public website pages remain untouched by this staging work. No sending, provider setup, database migration, mailbox changes, or production activation is authorized by this branch.
+
+## November 7 implementation update
+Added authenticated admin API and staff management page, reviewed CSV import, draft approval, campaign creation disabled by default, serialized quota claims, HMAC-protected normalized mail-event intake and acceptance checklist. See `TCON_INSTALLATION_AND_ACCEPTANCE.md`. These are source implementations, not deployed or end-to-end tested. A provider-specific verified bridge, campaign activation UI, live analytics, abuse protection and installation remain pending.
