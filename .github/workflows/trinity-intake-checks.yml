@@ -1,0 +1,45 @@
+name: Trinity intake foundation checks
+on:
+  push:
+    branches:
+      - feature/secure-intake-foundation-20261106
+  pull_request:
+    paths:
+      - 'intake-api/**'
+      - 'assets/inquiry-preview.js'
+      - 'assets/inquiry-config.js'
+      - 'inquiry-preview.html'
+      - '.github/workflows/trinity-intake-checks.yml'
+jobs:
+  syntax-and-dependencies:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_PASSWORD: ci_test_only
+          POSTGRES_USER: trinity_ci
+          POSTGRES_DB: trinity_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd=pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      INTEGRATION_DATABASE_URL: postgresql://trinity_ci:ci_test_only@127.0.0.1:5432/trinity_ci
+    defaults:
+      run:
+        working-directory: intake-api
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: npm install --no-audit --no-fund
+      - run: node --check server.js
+      - run: node --check mail-worker.js
+      - run: node --check ../assets/inquiry-preview.js
+      - run: node --check ../assets/inquiry-config.js
+      - run: npm test

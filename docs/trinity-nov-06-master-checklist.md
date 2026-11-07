@@ -1,0 +1,121 @@
+# Trinity Continuum — Master Request & Delivery Checklist
+**Baseline:** Jack's November 6, 2026 requests and corrections. **Owner approval:** required for release, costs, external solicitations, and unverified claims. **Current status:** development branch only; no customer gateway live release.
+
+## How to maintain
+- `[x]` = demonstrably completed (include evidence/commit, receipt, or approval).
+- `[ ]` = still open. A commit is implementation evidence, not live acceptance.
+- Update this one file after every work pass. Add date, evidence, responsible party, and blockers in the change log. Do not mark a gate complete because a draft exists.
+- **Priority:** P0 intake gateway; P1 REV B website/qualification; P2 one-factory GC bid; P3 Gold 34 gates and six trailers; P4 Brotherchat; P5 trucker-owned concept (exploratory). Parallel work is allowed, but preserve P0.
+- **Budget:** $0 incremental recurring spend preferred; no temporary/expiring storage; no paid provisioning without explicit quoted-cost approval. No customer data in SHANE/SHON.
+
+## P0 — Secure website contact and project-requirements gateway
+- [x] Inspect existing website and confirm contact form is mailto-based, not stored server-side (GitHub Pages repo review).
+- [x] Build separate seven-category inquiry worksheet with conditional water/power/thermal, factory, and exploratory trucker fields (development branch `inquiry-preview.html`).
+- [x] Add state/DC/international selection and callback phone requirement (`assets/inquiry-preview.js`).
+- [x] Add API foundation with validation, rate limiting, restricted record listing, and durable database schema (`intake-api/server.js`, `schema.sql`).
+- [x] Add atomic inquiry + per-recipient notification-job writes and separate retry worker (`intake-api/mail-worker.js`).
+- [x] Add guarded HTTPS endpoint configuration and default-OFF release switch (`assets/inquiry-config.js`).
+- [x] Add fail-closed API configuration, strong admin token check and DB readiness endpoint; three startup regression tests committed; initial CI regressions fixed; intake workflow run 42293984225 PASS on commit 89b555a, including three startup regression tests.
+- [x] Add 12-gate acceptance ledger (`docs/trinity-release-acceptance-ledger.md`).
+- [x] Add CI syntax workflow (`.github/workflows/trinity-intake-checks.yml`); first inspected run FAILED at server.js SQL quoting; corrective commit 596c995 passed intake foundation checks (run 42293215996) and website browser smoke tests (run 42293215914). These are CI checks, not live delivery acceptance.
+- [ ] Find and approve **durable non-expiring** Trinity-only data storage with backup/restore and export, ideally $0 incremental.
+- [ ] Verify a host supports chosen email transport; Render free SMTP ports may be restricted.
+- [ ] Provision backend, database, secrets, and sender with no paid commitment or temporary account.
+- [ ] Add reliable failure alerts, abuse protection, persistent rate limiting, administration workflow, privacy/retention controls.
+- [ ] Test all seven categories and technical branches, invalid input, duplicate handling, failure/retry, mobile/keyboard.
+- [ ] Verify real inquiry saved, Jack notification received, customer acknowledgment received, reply delivery and SPF/DKIM/DMARC.
+- [ ] Add approved 'Tell Us What You Need' CTAs to homepage, contact, industries, manufacturing and outreach pages.
+- [ ] Obtain owner approval and publish only after all 12 acceptance gates have documented PASS evidence.
+- [ ] Verify production website and links after deployment; preserve previous version/rollback.
+**Evidence:** [Draft PR #27](https://github.com/TrinityContinuum/trinitycontinuum-website/pull/27). **Live gate count: 0/12 verified.**
+
+## P1 — REV B website and seven-page qualification materials
+- [ ] Compare Jack's already-published changes to requested REV B, avoiding duplicate edits.
+- [ ] Verify executive opening leads with integrated modular **Water + Power + Thermal** customer value, including UltraPure vacuum-distilled water, electricity and useful thermal recovery.
+- [ ] Audit claims, six-trailer flagship vs historical four-trailer material, planning vs verified performance, navigation, mobile, contact paths.
+- [ ] Check original seven-page Professional Qualification Package and REV B supporting documents against website; preserve previous versions.
+- [ ] Obtain Jack's approval for any remaining material change before updating published claims.
+**Important:** Jack indicated some REV B edits may already be on the site. Do not mark complete without page-by-page comparison.
+
+## P2 — ONE existing factory design; three comparable turnkey GC bids
+- [x] Record Jack's correction: **one existing controlled factory design**, not alternative capacity-tier factory designs; three comparable GC proposals.
+- [x] Review Jack's Manufacturing Facility Master Package REV A management handoff and preserve one-factory/three-identical-bid authority (received 2026-11-06).
+- [x] Prepare INTERNAL controlled bid issue manifest with source IDs, verification holds, A–M exhibits, common GC bid form and approval controls (`docs/manufacturing-facility-rev-a-bid-issue-manifest.md`). Source files/checksums not yet verified.
+- [x] Prepare unified factory open-items/RFI log for G01–G07, financial overlaps and original drawing lineage (`docs/manufacturing-facility-rev-a-open-items-log.md`). All release gates OPEN.
+- [ ] Recover controlling original architectural plan and revision authority; reconcile 250,000/312,000 sq ft and 10/12 bays.
+- [ ] Recover original MFG-09.35/.73/.75/.76/.78/.79/.85 drawings and editable/stamped equivalents, original kitchen 5,000-sf plan, dedicated lab, separate breakroom, showers and exterior test stands.
+- [x] Prepare equipment/plan/utility reconciliation crosswalk template, preserving conflicting values and source holds (`docs/manufacturing-facility-rev-a-equipment-utility-crosswalk.md`).
+- [ ] Populate and verify MFG-09.73 equipment ID-to-bay-to-utility matrix from originals, resolve 3,000/4,000 kVA electrical bases and factory CAPEX overlap.
+- [ ] Obtain/review controlled Gold Volume 24 Manufacturing Facility REV B, First Factory Build Sequence, replication playbook, controlled CAD reference, CAD master index and EBOM/MBOM crosswalk.
+- [ ] Create one controlled issue register with revision, NDA, access permissions, bid assumptions and exclusions.
+- [ ] Prepare uniform turnkey lump-sum GC bid package: site, design completion, permits, civil/building, utilities, equipment, installation, commissioning, training, as-builts and warranty.
+- [ ] Include manufacturing equipment only as supported by controlled source: CNC, machining, welding, robotics, cranes, QA/QC, testing, turbocharger-related scope if applicable.
+- [ ] Identify three qualified GC candidates, record qualifications and owner-approved recipients.
+- [ ] Jack approves the identical issue set and solicitation before any external sending.
+- [ ] Track all three bid receipts, RFIs, addenda and apples-to-apples comparison; report exclusions and risks.
+- [ ] Do not present 500/600/700/1000 capacity scenarios as alternative factory bids or guaranteed production.
+**Blocker:** controlled private source files not yet reviewed in this work session.
+
+## P3 — Gold engineering, six-trailer RFQs and interface control
+- [ ] Access Gold engineering master index, Onshape handoff, manufacturing handoff, drawing register, closure register and 34-gate certificate.
+- [ ] Independently test all **34 engineering gates** against controlled evidence; record PASS/OPEN/FAIL, owner, evidence and next action.
+- [ ] Keep design and fabrication release separate; no implied fabrication authorization.
+- [ ] Review six-trailer controlled RFQ master and TR01 pretreatment, TR02 primary thermal, TR03 power/recovery, TR04 secondary thermal, TR05 vacuum distillation, TR06 storage/distribution.
+- [ ] Prepare six consistent vendor response templates, drawing/BOM revision register, manufacturing-CAD conversion requirement and deviations log.
+- [ ] Verify owner-approved targets: **three quotes per trailer, 18 targeted quotes total**; do not claim 18 received.
+- [ ] Inspect six-trailer ICD and controlled P&IDs/drawings/BOMs; verify existing standardized mating connections and flow paths before proposing changes.
+- [ ] Record independent interface PASS/OPEN/FAIL for water, electrical, thermal, controls, mechanical, safety, transport and commissioning.
+- [ ] Clearly label illustrated ZIP and bird's-eye imagery **conceptual, not fabrication CAD**.
+- [ ] Keep 1-MW class and 30 million gallons/year as design/planning references until independently substantiated.
+**Blocker:** controlled source materials and actual vendor responses have not been independently reviewed here.
+
+## P4 — Brotherchat dedicated business mailbox
+- [x] Record dedicated `brotherchat@trinitycontinuum.com` mailbox creation and inbound Yahoo-to-Brotherchat test as previously reported.
+- [ ] Rotate any mailbox password previously exposed in conversation or screenshots.
+- [ ] Verify outbound sender, reply path, SPF/DKIM/DMARC and Spam/Trash behavior.
+- [ ] Confirm owner-approved routing, retention and role; do not use Brotherchat as customer intake destination.
+- [ ] Do not publish credentials or forward customer records without authorization.
+
+## P5 — Trucker-owned relocatable Water + Power + Thermal concept
+- [x] Preserve as a **separate exploratory opportunity**, not the six-trailer Gold flagship or an approved commercial product.
+- [x] Add optional interest fields to category C: region, intended use, ownership/operating interest.
+- [x] Draft owner-facing concept brief describing potential owner-operator roles, deployment scenarios, responsibilities and open engineering questions (`docs/trucker-owned-relocatable-concept-brief.md`; internal draft, not owner-approved).
+- [ ] Compare feasible equipment size/weight, road legality, water sourcing/discharge, grid connection, thermal uses, service/maintenance, insurance, permits and operational staffing.
+- [ ] Build optional business-model scenarios (ownership, lease, revenue-sharing) clearly marked hypothetical, with no invented pricing or return guarantees.
+- [ ] Define decision gates for Jack: technical feasibility, regulatory review, economics, customer validation and pilot criteria.
+- [ ] Obtain Jack's approval before public product claims, financing offers, or outreach.
+**No approved commercial offer or guaranteed performance exists in this checklist.**
+
+## Common release and communications controls
+- [ ] Establish a single controlled revision register across website, qualifications, factory, Gold, RFQs and concept materials.
+- [ ] Preserve original documents and deployed website before updates; maintain rollback path.
+- [ ] Keep confidential engineering sources behind approved NDA/data-room permissions.
+- [ ] Track every outbound solicitation by sender, recipient, issue revision, date, response and follow-up.
+- [ ] Verify that any requested actual external sends were authorized and delivered; drafts do not count.
+- [ ] Deliver Jack an evidence-based summary of what changed, what was tested, what was sent, and what still needs his approval.
+
+## Change log
+- **Factory crosswalk prepared:** commit 464adb5; source-conflict table and equipment-to-plan-to-utility fields established, but actual original equipment IDs and controlling values remain unverified. Library root does not expose a Google Drive mount, so handoff-reported Drive IDs cannot yet be treated as inspected originals.
+- **Manufacturing REV A handoff integrated:** Jack's 2026-11-06 management instructions reviewed; internal source/issue manifest commit 3ce785e and G01–G07 open-items log commit 0736cb6. These are management review drafts; original factory files not independently recovered, no IFC or GC release.
+- **Administrative updates verified:** commit 026e3dc, intake CI run 42296373934 SUCCESS and website browser run 42296373962 SUCCESS. Authenticated status, owner, follow-up changes tested. Live production acceptance remains 0/12.
+- **Checklist baseline at this review:** 14 of 60 checkbox items marked complete (P0 9/18; P1 0/5; P2 1/9; P3 0/10; P4 1/5; P5 3/7; common 0/6). This is task count, not percent of total effort.
+- **SMTP delivery verified in isolated CI:** commit 56c3f76, run 42295825204 SUCCESS and browser run 42295824710 SUCCESS. Authenticated SMTP sink receives message; worker persists sent state. No real external mailbox delivery claimed.
+- **Exploratory concept brief:** commit b7502bf, owner-facing internal draft with four possible roles, transport/process/regulatory questions, hypothetical economics input sheet and six OPEN decision gates. No product launch or solicitation.
+- **Verified seven-category PostgreSQL tests:** commit d95f827, run 42295170318 SUCCESS; browser run 42295170143 SUCCESS.
+- **Verified mail-worker retry integration:** commit 2576716, run 42295310177 SUCCESS; browser run 42295310117 SUCCESS. Deliberate SMTP failure leaves durable pending job with incremented attempt, error, and future retry. Successful outbound SMTP remains unverified.
+- **Verified real PostgreSQL CI success:** commit 6473f6e, intake workflow run 42294715972 SUCCESS, browser smoke workflow run 42294716011 SUCCESS. Test storage is disposable, not production.
+- **Brotherchat status confirmed from earlier mailbox work:** brotherchat@trinitycontinuum.com Namecheap Private Email mailbox, 5 GB, Yahoo inbound delivery verified. Outbound/reply/ChatGPT persona sending not verified; keep separate from public jack@ address. Rotate exposed mailbox password before further use. No live customer notifications have been sent.
+- **Integration test expansion:** GitHub CI now provisions disposable PostgreSQL 17 and tests HTTP submission, persisted inquiry + both mail jobs, invalid callback rejection, and administrator authorization. Workflow run 42294496966 pending. Production database remains unprovisioned.
+- **2026-11-06 release guard tests:** added four default-off/HTTPS/disabled-submit/notice assertions and corrected the test selector; GitHub Actions intake run 42294292224 SUCCESS. The form remains disabled pending real infrastructure.
+- **Verified green intake CI:** commit 89b555a, GitHub Actions run 42293984225 SUCCESS; server, worker, browser-script syntax and npm tests passed. This is not a live end-to-end gate.
+- **Latest CI regression:** run 42293724388 failed on JavaScript syntax in new fail-closed configuration. Corrected in commit 2cc74d9; no passing outcome claimed yet.\n- **Current backend hardening:** fail-closed missing/weak configuration, DB readiness endpoint, three startup regression tests. New test run pending; live gate count remains 0/12.
+- **2026-11-06 baseline:** Prior website investigation, draft intake form, backend foundation, mail outbox and guarded activation documented in PR #27. No production release or verified end-to-end mail delivery.
+- **Current pass:** Consolidated all known Jack requests, including trucker ownership, into this tracked checklist. No external bids, messages, or deployments were sent by creating this file.\n- **Current CI inspection:** Intake foundation checks PASS on commit 596c995 (run 42293215996); website browser smoke tests PASS (run 42293215914). No live gateway acceptance gate is passed by these checks.
+
+## Controlled source references (not verified as accessed)
+- Factory Gold Volume 24: https://drive.google.com/file/d/1gUWemjXJycjjthQOElc9rc26hJyax8JF/view
+- Factory build sequence: https://docs.google.com/document/d/1T36tnTm_FbkJoYa5-zAxJOcSi-Wb1kpl/edit
+- Gold engineering overview: https://docs.google.com/document/d/1oZ8rgfEKyPsDqlixoV3zu_BuMOwpuCUEHXmAWXptVLI/edit
+- 34-gate worksheet: https://docs.google.com/document/d/1rhuEP_vKbc5_JlG5maK-qyoDYhoILdHA8KOYM_UbvM0/edit
+- Six-trailer RFQ master: https://docs.google.com/document/d/1lFwZKHa9T_BvRIlSkLN8a4D1DtHniiqA_cNOeHGKQZ8/edit
+- Six-trailer ICD: https://docs.google.com/spreadsheets/d/1cIvmFmY3JbX_W3cn7Za-YR4JDbC_10X74UWCjIe_oX0/edit
