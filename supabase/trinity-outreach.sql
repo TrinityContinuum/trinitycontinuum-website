@@ -62,6 +62,8 @@ create or replace function public.trinity_claim_outbox(p_limit integer default 1
 returns setof public.trinity_outbox language plpgsql security invoker as $$
 declare campaign_row public.trinity_campaigns%rowtype;
 begin
+ -- Serialize all workers against a single global quota reservation lock.
+ perform pg_advisory_xact_lock(741002, 300);
  for campaign_row in
   select * from public.trinity_campaigns where enabled and approved_at is not null
   order by id for update
