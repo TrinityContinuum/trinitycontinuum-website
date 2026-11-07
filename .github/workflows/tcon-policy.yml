@@ -1,0 +1,19 @@
+name: TCON offline policy tests
+on:
+  pull_request:
+    paths:
+      - 'assets/tcon-policy.mjs'
+      - 'tests/tcon-policy.test.mjs'
+      - '.github/workflows/tcon-policy.yml'
+  workflow_dispatch:
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/tcon-policy.test.mjs
