@@ -5,6 +5,7 @@ on:
       - '**/*.html'
       - 'assets/**'
       - 'tests/**'
+      - 'scripts/check-factory-bid-release.cjs'
       - '.github/workflows/site-smoke.yml'
   workflow_dispatch:
 jobs:
@@ -16,6 +17,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Test controlled factory bid release guard
+        run: node --test tests/factory-bid-release.test.cjs
       - name: Install browser test runner
         run: npm install --no-save @playwright/test
       - name: Install Chromium
