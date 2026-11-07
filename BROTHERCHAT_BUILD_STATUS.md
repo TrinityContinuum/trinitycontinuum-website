@@ -32,3 +32,9 @@ Existing public website pages remain untouched by this staging work. No sending,
 
 ## November 7 implementation update
 Added authenticated admin API and staff management page, reviewed CSV import, draft approval, campaign creation disabled by default, serialized quota claims, HMAC-protected normalized mail-event intake and acceptance checklist. See `TCON_INSTALLATION_AND_ACCEPTANCE.md`. These are source implementations, not deployed or end-to-end tested. A provider-specific verified bridge, campaign activation UI, live analytics, abuse protection and installation remain pending.
+
+## November 7 hardening pass
+- Added global 300/day quota logic and a transaction-scoped advisory lock in `trinity_claim_outbox` to serialize worker reservations across campaigns. Requires real PostgreSQL concurrency tests before production claims.
+- Outbound eligibility now requires contact status `eligible`, preventing automatic repeat cold outreach after a contact becomes `contacted`.
+- Added pure policy module `assets/tcon-policy.mjs`, Node tests `tests/tcon-policy.test.mjs`, and an isolated GitHub Actions workflow. No claim is made that the workflow has passed until checks are observed.
+- Remaining: provider bridge, real database, auth deployment, production tests, full dashboard and reporting, security review, privacy policy and campaign activation controls.
