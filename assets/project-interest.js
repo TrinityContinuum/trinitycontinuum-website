@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const assemble=()=>{
     const d=new FormData(form);
     const applications=d.getAll('applications').join(', ') || 'Not specified';
-    const fields=[['Name','name'],['Organization','organization'],['Reply email','email'],['Reason','reason'],['Industry','industry'],['City / region','city'],['State / province','state'],['Country','country'],['Project description','project'],['Questions','questions'],['Timeline','timeline'],['Preferred response method','reply_method']];
+    const fields=[['Name','name'],['Organization','organization'],['Reply email','email'],['Reason','reason'],['How they heard of Trinity','source'],['Industry','industry'],['Primary question category','question_category'],['City / region','city'],['State / province','state'],['Country','country'],['Project description','project'],['Questions','questions'],['Timeline','timeline'],['Preferred response method','reply_method']];
     return 'Applications: '+applications+'\n'+fields.map(([label,key])=>label+': '+(d.get(key)||'')).join('\n\n');
   };
   const destination=()=>window.TRINITY_CONTACT_EMAIL || 'jack@trinitycontinuum.com';
