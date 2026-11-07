@@ -24,7 +24,12 @@ Deno.serve(async req=>{
   const supabase=createClient(Deno.env.get('SUPABASE_URL')!,Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
   const fingerprint=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(email+'|'+project+'|'+new Date().toISOString().slice(0,13)));
   const dedupe_key=Array.from(new Uint8Array(fingerprint)).map(v=>v.toString(16).padStart(2,'0')).join('');
-  const record={name,email,project,reason,question_category,applications,dedupe_key,
+  // Sensitive requests remain held by the reply worker even when due.
+  const detail=(project+' '+cut(d.questions,4000)).trim().split(/\s+/).length;
+  const base=question_category==='General evaluation'?20:question_category==='Other'?40:question_category==='Engineering specifications / validation'?75:45;
+  const delay=Math.min(90,base+(detail>80?15:detail>30?5:0));
+  const reply_due_at=new Date(Date.now()+delay*60000).toISOString();
+  const record={name,email,project,reason,question_category,applications,dedupe_key,reply_due_at,
    organization:cut(d.organization,150),industry:cut(d.industry,120),source:cut(d.source,120),campaign:cut(d.campaign,120),
    city:cut(d.city,150),state:cut(d.state,100),country:cut(d.country,100),questions:cut(d.questions,4000),
    timeline:cut(d.timeline,80),reply_method:cut(d.reply_method,80)};
