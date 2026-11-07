@@ -8,7 +8,7 @@ create table if not exists public.trinity_contacts (
  eligibility_confirmed boolean not null default false, eligible_at timestamptz,
  status text not null default 'new' check(status in ('new','eligible','contacted','replied','suppressed','bounced')),
  last_contacted_at timestamptz, notes text not null default '',
- unique(email)
+ unique(email), constraint trinity_contact_email_lower check(email=lower(email))
 );
 create table if not exists public.trinity_campaigns (
  id uuid primary key default gen_random_uuid(), code text not null unique, title text not null,
@@ -71,12 +71,14 @@ begin
    select o.id from public.trinity_outbox o
    join public.trinity_contacts t on t.id=o.contact_id
    where o.campaign_id=campaign_row.id and o.status='approved' and o.due_at<=now()
-   and t.eligibility_confirmed and t.status in ('eligible','contacted')
+   and t.eligibility_confirmed and t.status='eligible'
    and not exists(select 1 from public.trinity_suppressions s where lower(s.email)=lower(t.email))
    and not exists(select 1 from public.trinity_outbox x where x.contact_id=t.id and x.status in ('sent','sending'))
+   and (select count(*) from public.trinity_outbox x where x.status in ('sent','sending') and coalesce(x.claimed_at,x.sent_at)>=date_trunc('day',now() at time zone 'UTC') at time zone 'UTC') < 300
    order by o.due_at for update of o skip locked
    limit least(
     greatest(p_limit,0),
+    greatest(0,300-(select count(*) from public.trinity_outbox x where x.status in ('sent','sending') and coalesce(x.claimed_at,x.sent_at)>=date_trunc('day',now() at time zone 'UTC') at time zone 'UTC'))::integer,
     greatest(0,campaign_row.daily_limit-(
      select count(*) from public.trinity_outbox x where x.campaign_id=campaign_row.id
       and x.status in ('sent','sending') and coalesce(x.claimed_at,x.sent_at)>=date_trunc('day',now() at time zone 'UTC') at time zone 'UTC'
