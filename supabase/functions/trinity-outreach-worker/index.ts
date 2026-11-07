@@ -12,7 +12,8 @@ Deno.serve(async req=>{
  const sender=Deno.env.get('TRINITY_OUTREACH_FROM');
  const address=Deno.env.get('TRINITY_BUSINESS_POSTAL_ADDRESS');
  const unsubscribeBase=Deno.env.get('TRINITY_UNSUBSCRIBE_BASE_URL');
- if(!enabled||!providerKey||!sender||!address||!unsubscribeBase)
+ const unsubscribeSecret=Deno.env.get('TRINITY_UNSUBSCRIBE_SECRET');
+ if(!enabled||!providerKey||!sender||!address||!unsubscribeBase||!unsubscribeSecret)
    return Response.json({enabled:false,claimed:0,sent:0,note:'Outbound outreach is disabled or not configured'});
  // Do not claim any rows unless all required launch configuration is present.
  const {data:claimed,error}=await db.rpc('trinity_claim_outbox',{p_limit:5});
@@ -27,9 +28,12 @@ Deno.serve(async req=>{
    }
    const {data:suppression}=await db.from('trinity_suppressions').select('email').eq('email',contact.email).maybeSingle();
    if(suppression){await db.from('trinity_outbox').update({status:'cancelled'}).eq('id',item.id).eq('status','sending');continue;}
-   // Provider integration must be approved for the intended commercial outreach.
-   // Unsubscribe tokens should be signed and verified by an independent HTTPS endpoint.
-   const unsubscribeUrl=unsubscribeBase.replace(/\/$/,'')+'?token='+encodeURIComponent(item.id);
+   // HMAC token binds opt-out to the email; verification endpoint is required before activation.
+   const key=await crypto.subtle.importKey('raw',new TextEncoder().encode(unsubscribeSecret),'HMAC',false,['sign']);
+   const payload=btoa(contact.email).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+   const signature=new Uint8Array(await crypto.subtle.sign('HMAC',key,new TextEncoder().encode(payload)));
+   const sig=Array.from(signature).map(x=>x.toString(16).padStart(2,'0')).join('');
+   const unsubscribeUrl=unsubscribeBase+'?token='+encodeURIComponent(payload+'.'+sig);
    const body=item.body+'\n\nTrinity Continuum\n'+address+'\nOpt out: '+unsubscribeUrl;
    try{
      const response=await fetch('https://api.resend.com/emails',{method:'POST',
