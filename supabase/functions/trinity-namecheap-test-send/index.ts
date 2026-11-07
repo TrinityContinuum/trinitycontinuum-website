@@ -3,7 +3,7 @@
 import nodemailer from 'npm:nodemailer@6.9.16';
 
 const env=(key:string)=>Deno.env.get(key)?.trim()||'';
-const address=(v:unknown)=>typeof v==='string' && /^[^\\s@<>]+@[^\\s@<>]+\\.[^\\s@<>]+$/.test(v)&&v.length<=254;
+const address=(v:unknown)=>typeof v==='string' && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(v)&&v.length<=254;
 const json=(value:unknown,status=200)=>Response.json(value,{status,headers:{'Cache-Control':'no-store'}});
 const validId=(v:unknown)=>typeof v==='string' && /^[a-zA-Z0-9_-]{12,128}$/.test(v);
 
