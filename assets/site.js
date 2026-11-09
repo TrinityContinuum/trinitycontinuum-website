@@ -1,3 +1,17 @@
+// Optional first-party configured GA4 visitor measurement. No ID means no tracking.
+(function(){
+  const id=String(window.TRINITY_GA4_MEASUREMENT_ID||'').trim();
+  if(!/^G-[A-Z0-9]+$/.test(id))return;
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=function(){window.dataLayer.push(arguments);};
+  window.gtag('js',new Date());
+  window.gtag('config',id,{send_page_view:true});
+  const script=document.createElement('script');
+  script.async=true;
+  script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(id);
+  document.head.appendChild(script);
+})();
+
 document.addEventListener('DOMContentLoaded',()=>{const b=document.querySelector('.menu'),n=document.querySelector('.links');if(b&&n){if(!n.id)n.id='primary-navigation';b.setAttribute('aria-controls',n.id);b.setAttribute('aria-expanded',String(n.classList.contains('open')))}b?.addEventListener('click',()=>{if(!n)return;const open=n.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});n?.addEventListener('click',e=>{if(e.target.closest('a')&&n.classList.contains('open')){n.classList.remove('open');b?.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&n?.classList.contains('open')){n.classList.remove('open');b?.setAttribute('aria-expanded','false');b?.focus()}});const form=document.getElementById('inquiry');if(form)form.addEventListener('submit',e=>{e.preventDefault();const d=new FormData(form),email=(window.TRINITY_CONTACT_EMAIL||'').trim();if(!email){document.getElementById('form-feedback').textContent='Contact email is not configured yet. Please use the published contact information when available.';return;}const lines=['Name: '+d.get('name'),'Organization: '+d.get('organization'),'Reply email: '+d.get('email'),'Interest: '+d.get('interest'),'Preferred meeting times / time zone: '+d.get('times'),'Message: '+d.get('message')];location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent('Trinity Continuum inquiry: '+d.get('interest'))+'&body='+encodeURIComponent(lines.join('\n'));document.getElementById('form-feedback').textContent='Your email application should open with a prepared message. Please send it from there.';});const copyInquiry=document.getElementById('copy-inquiry');if(copyInquiry&&form)copyInquiry.addEventListener('click',async()=>{if(!form.reportValidity())return;const d=new FormData(form);const email=(window.TRINITY_CONTACT_EMAIL||'jack@trinitycontinuum.com').trim();const body=['To: '+email,'Subject: Trinity Continuum inquiry: '+d.get('interest'),'','Name: '+d.get('name'),'Organization: '+d.get('organization'),'Reply email: '+d.get('email'),'Interest: '+d.get('interest'),'Preferred meeting times / time zone: '+d.get('times'),'Message: '+d.get('message')].join('\n');const feedback=document.getElementById('form-feedback');try{await navigator.clipboard.writeText(body);feedback.textContent='Inquiry copied. Paste into your email and send it to '+email+'. No message has been sent automatically.'}catch{const t=document.createElement('textarea');t.value=body;t.readOnly=true;t.style.width='100%';t.rows=9;feedback.replaceChildren(document.createTextNode('Copy this inquiry into an email to '+email+':'),t);t.focus();t.select()}});const booking=document.querySelector('[data-booking]');if(booking&&window.TRINITY_BOOKING_URL){booking.href=window.TRINITY_BOOKING_URL;booking.hidden=false;}});
 
 // Public-facing architecture descriptions supplied in Trinity's Phase 3 brief.
