@@ -7,7 +7,7 @@ test('analytics is opt-in, reversible, and persists on return', async ({page}) =
  const analytics = [];
  page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/.test(r.url())) analytics.push(r.url()); });
  console.log('STAGE initial visit');
- await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
+ await page.goto(BASE+'/privacy.html',{waitUntil:'domcontentloaded'});
  await expect(page.locator('#trinity-consent-banner')).toBeVisible();
  expect(analytics).toHaveLength(0);
  console.log('STAGE decline');
