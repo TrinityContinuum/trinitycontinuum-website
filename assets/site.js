@@ -1,15 +1,43 @@
-// Optional first-party configured GA4 visitor measurement. No ID means no tracking.
+// Consent-gated analytics: no Google request before explicit acceptance.
 (function(){
-  const id=String(window.TRINITY_GA4_MEASUREMENT_ID||'').trim();
-  if(!/^G-[A-Z0-9]+$/.test(id))return;
+ const id=String(window.TRINITY_GA4_MEASUREMENT_ID||'').trim();
+ if(!/^G-[A-Z0-9]+$/.test(id))return;
+ const key='trinity_analytics_consent_v1';
+ let choice=null,loaded=false;
+ try{const v=localStorage.getItem(key);if(v==='accepted'||v==='declined')choice=v;}catch(e){}
+ function enable(){
+  if(loaded)return;
+  loaded=true;
   window.dataLayer=window.dataLayer||[];
   window.gtag=function(){window.dataLayer.push(arguments);};
   window.gtag('js',new Date());
   window.gtag('config',id,{send_page_view:true});
-  const script=document.createElement('script');
-  script.async=true;
+  const script=document.createElement('script');script.async=true;
   script.src='https://www.googletagmanager.com/gtag/js?id='+encodeURIComponent(id);
   document.head.appendChild(script);
+ }
+ function update(value){
+  const previous=choice;choice=value;
+  try{localStorage.setItem(key,value);}catch(e){}
+  if(value==='accepted')enable();
+  if(value==='declined'&&loaded){window.gtag?.('consent','update',{analytics_storage:'denied'});location.reload();return;}
+  render();
+ }
+ function render(){
+  document.getElementById('trinity-consent-banner')?.remove();
+  if(choice!==null)return;
+  const panel=document.createElement('section');panel.id='trinity-consent-banner';panel.className='trinity-consent-banner';panel.setAttribute('aria-label','Analytics privacy choices');
+  const p=document.createElement('p');p.textContent='May we use optional Google Analytics to understand website visits? Declining keeps analytics off. ';
+  const a=document.createElement('a');a.href='privacy.html';a.textContent='Privacy notice';p.append(a);
+  const actions=document.createElement('div');actions.className='trinity-consent-actions';
+  for(const [label,value] of [['Decline','declined'],['Accept analytics','accepted']]){
+   const b=document.createElement('button');b.type='button';b.textContent=label;b.addEventListener('click',()=>update(value));actions.append(b);
+  }
+  panel.append(p,actions);document.body.append(panel);
+ }
+ window.TRINITY_SET_ANALYTICS_CONSENT=update;
+ if(choice==='accepted')enable();
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',render);else render();
 })();
 
 document.addEventListener('DOMContentLoaded',()=>{const b=document.querySelector('.menu'),n=document.querySelector('.links');if(b&&n){if(!n.id)n.id='primary-navigation';b.setAttribute('aria-controls',n.id);b.setAttribute('aria-expanded',String(n.classList.contains('open')))}b?.addEventListener('click',()=>{if(!n)return;const open=n.classList.toggle('open');b.setAttribute('aria-expanded',String(open))});n?.addEventListener('click',e=>{if(e.target.closest('a')&&n.classList.contains('open')){n.classList.remove('open');b?.setAttribute('aria-expanded','false')}});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&n?.classList.contains('open')){n.classList.remove('open');b?.setAttribute('aria-expanded','false');b?.focus()}});const form=document.getElementById('inquiry');if(form)form.addEventListener('submit',e=>{e.preventDefault();const d=new FormData(form),email=(window.TRINITY_CONTACT_EMAIL||'').trim();if(!email){document.getElementById('form-feedback').textContent='Contact email is not configured yet. Please use the published contact information when available.';return;}const lines=['Name: '+d.get('name'),'Organization: '+d.get('organization'),'Reply email: '+d.get('email'),'Interest: '+d.get('interest'),'Preferred meeting times / time zone: '+d.get('times'),'Message: '+d.get('message')];location.href='mailto:'+encodeURIComponent(email)+'?subject='+encodeURIComponent('Trinity Continuum inquiry: '+d.get('interest'))+'&body='+encodeURIComponent(lines.join('\n'));document.getElementById('form-feedback').textContent='Your email application should open with a prepared message. Please send it from there.';});const copyInquiry=document.getElementById('copy-inquiry');if(copyInquiry&&form)copyInquiry.addEventListener('click',async()=>{if(!form.reportValidity())return;const d=new FormData(form);const email=(window.TRINITY_CONTACT_EMAIL||'jack@trinitycontinuum.com').trim();const body=['To: '+email,'Subject: Trinity Continuum inquiry: '+d.get('interest'),'','Name: '+d.get('name'),'Organization: '+d.get('organization'),'Reply email: '+d.get('email'),'Interest: '+d.get('interest'),'Preferred meeting times / time zone: '+d.get('times'),'Message: '+d.get('message')].join('\n');const feedback=document.getElementById('form-feedback');try{await navigator.clipboard.writeText(body);feedback.textContent='Inquiry copied. Paste into your email and send it to '+email+'. No message has been sent automatically.'}catch{const t=document.createElement('textarea');t.value=body;t.readOnly=true;t.style.width='100%';t.rows=9;feedback.replaceChildren(document.createTextNode('Copy this inquiry into an email to '+email+':'),t);t.focus();t.select()}});const booking=document.querySelector('[data-booking]');if(booking&&window.TRINITY_BOOKING_URL){booking.href=window.TRINITY_BOOKING_URL;booking.hidden=false;}});
