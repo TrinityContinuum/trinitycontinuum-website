@@ -1,0 +1,20 @@
+name: Analytics consent regression
+on:
+  pull_request:
+    paths:
+      - 'assets/site.js'
+      - 'assets/config.js'
+      - 'tests/analytics-consent.test.cjs'
+      - '.github/workflows/analytics-consent.yml'
+  workflow_dispatch:
+jobs:
+  consent:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/analytics-consent.test.cjs

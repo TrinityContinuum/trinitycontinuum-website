@@ -1,0 +1,50 @@
+const { test, expect } = require('@playwright/test');
+const BASE = 'http://127.0.0.1:8765';
+test('analytics is opt-in, reversible, and persists on return', async ({page}) => {
+ test.setTimeout(45000);
+ page.setDefaultTimeout(5000);
+ await page.route(/https:\/\/(?:www\.)?(?:googletagmanager\.com|google-analytics\.com|analytics\.google\.com)\//, route=>route.fulfill({status:200,contentType:'application/javascript',body:'/* network isolated for consent test */'}));
+ const analytics = [];
+ page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/.test(r.url())) analytics.push(r.url()); });
+ console.log('STAGE initial visit');
+ await page.goto(BASE+'/privacy.html',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#trinity-consent-banner')).toBeVisible();
+ expect(analytics).toHaveLength(0);
+ console.log('STAGE decline');
+ await page.getByRole('button',{name:'Decline',exact:true}).click();
+ expect(analytics).toHaveLength(0);
+ await page.reload({waitUntil:'domcontentloaded'});
+ expect(analytics).toHaveLength(0);
+ console.log('STAGE reopen');
+ await page.getByRole('button',{name:'Privacy choices'}).click();
+ await expect(page.locator('#trinity-consent-banner')).toBeVisible();
+ console.log('STAGE accept');
+ await page.locator('#trinity-consent-banner').getByRole('button',{name:'Accept analytics'}).click();
+ await expect.poll(()=>analytics.some(u=>u.includes('gtag/js'))).toBeTruthy();
+ console.log('STAGE privacy page');
+ await page.goto(BASE+'/privacy.html',{waitUntil:'domcontentloaded'});
+ console.log('STAGE withdraw');
+ await page.getByRole('button',{name:'Withdraw analytics consent'}).click();
+ await expect.poll(()=>page.evaluate(()=>localStorage.getItem('trinity_analytics_consent_v1'))).toBe('declined');
+ await page.reload({waitUntil:'domcontentloaded'});
+ const before=analytics.length;
+ await page.waitForTimeout(500);
+ expect(analytics.length).toBe(before);
+});
+test('consent banner is usable on narrow screens', async ({page})=>{
+ await page.setViewportSize({width:375,height:812});
+ await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
+ await expect(page.getByRole('button',{name:'Accept analytics'})).toBeVisible();
+ await expect(page.getByRole('button',{name:'Decline',exact:true})).toBeVisible();
+});
+
+test('homepage film can be skipped to reach privacy controls', async ({page}) => {
+ await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
+ await expect(page.locator('#trinity-film-intro')).toBeVisible();
+ await page.locator('#trinity-intro-skip').click();
+ await expect(page.locator('#trinity-film-intro')).toHaveCount(0);
+ await expect(page.locator('#trinity-consent-banner')).toBeVisible();
+ await page.locator('#trinity-consent-banner').getByRole('button',{name:'Decline'}).click();
+ await expect(page.locator('#trinity-consent-banner')).toHaveCount(0);
+ await expect(page.locator('#trinity-privacy-settings')).toBeVisible();
+});
