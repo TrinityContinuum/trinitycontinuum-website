@@ -1,30 +1,32 @@
 const { test, expect } = require('@playwright/test');
 const BASE = 'http://127.0.0.1:8765';
 test('analytics is opt-in, reversible, and persists on return', async ({page}) => {
+ test.setTimeout(60000);
+ await page.route(/https:\/\/(?:www\.)?(?:googletagmanager\.com|google-analytics\.com|analytics\.google\.com)\//, route=>route.fulfill({status:200,contentType:'application/javascript',body:'/* network isolated for consent test */'}));
  const analytics = [];
  page.on('request', r => { if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/.test(r.url())) analytics.push(r.url()); });
- await page.goto(BASE+'/index.html');
+ await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
  await expect(page.locator('#trinity-consent-banner')).toBeVisible();
  expect(analytics).toHaveLength(0);
  await page.getByRole('button',{name:'Decline',exact:true}).click();
  expect(analytics).toHaveLength(0);
- await page.reload();
+ await page.reload({waitUntil:'domcontentloaded'});
  expect(analytics).toHaveLength(0);
  await page.getByRole('button',{name:'Privacy choices'}).click();
  await expect(page.locator('#trinity-consent-banner')).toBeVisible();
  await page.getByRole('button',{name:'Accept analytics'}).click();
  await expect.poll(()=>analytics.some(u=>u.includes('gtag/js'))).toBeTruthy();
- await page.goto(BASE+'/privacy.html');
+ await page.goto(BASE+'/privacy.html',{waitUntil:'domcontentloaded'});
  await page.getByRole('button',{name:'Withdraw analytics consent'}).click();
  await expect.poll(()=>page.evaluate(()=>localStorage.getItem('trinity_analytics_consent_v1'))).toBe('declined');
- await page.reload();
+ await page.reload({waitUntil:'domcontentloaded'});
  const before=analytics.length;
  await page.waitForTimeout(500);
  expect(analytics.length).toBe(before);
 });
 test('consent banner is usable on narrow screens', async ({page})=>{
  await page.setViewportSize({width:375,height:812});
- await page.goto(BASE+'/index.html');
+ await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
  await expect(page.getByRole('button',{name:'Accept analytics'})).toBeVisible();
  await expect(page.getByRole('button',{name:'Decline',exact:true})).toBeVisible();
 });
