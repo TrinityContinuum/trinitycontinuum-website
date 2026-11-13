@@ -19,7 +19,7 @@ test('analytics is opt-in, reversible, and persists on return', async ({page}) =
  await page.getByRole('button',{name:'Privacy choices'}).click();
  await expect(page.locator('#trinity-consent-banner')).toBeVisible();
  console.log('STAGE accept');
- await page.getByRole('button',{name:'Accept analytics'}).click();
+ await page.locator('#trinity-consent-banner').getByRole('button',{name:'Accept analytics'}).click();
  await expect.poll(()=>analytics.some(u=>u.includes('gtag/js'))).toBeTruthy();
  console.log('STAGE privacy page');
  await page.goto(BASE+'/privacy.html',{waitUntil:'domcontentloaded'});
