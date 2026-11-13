@@ -9,11 +9,11 @@ function run(saved){
  function element(tag){
   return {tagName:tag,children:[],style:{},classList:{contains:()=>false},setAttribute(){},append(...items){for(const item of items){item.parent=this;this.children.push(item)}},appendChild(child){child.parent=this;this.children.push(child);if(child.src)requests.push(child.src)},remove(){if(this.parent)this.parent.children=this.parent.children.filter(x=>x!==this)},addEventListener(name,fn){this['on'+name]=fn},set textContent(v){this.text=v},get textContent(){return this.text}};
  }
- const document={readyState:'loading',cookie:'',head:element('head'),body:element('body'),createElement:element,getElementById:()=>null,querySelector:()=>null,querySelectorAll:()=>[],addEventListener(name,fn){handlers[name]=fn}};
+ const document={readyState:'loading',cookie:'',head:element('head'),body:element('body'),createElement:element,getElementById:()=>null,querySelector:()=>null,querySelectorAll:()=>[],addEventListener(name,fn){(handlers[name]??=[]).push(fn)}};
  const window={TRINITY_GA4_MEASUREMENT_ID:'G-Z94YQ4TYGZ'};
  const context={window,document,localStorage:{getItem:k=>storage.get(k)||null,setItem:(k,v)=>storage.set(k,v)},location:{hostname:'trinitycontinuum.com',reload(){requests.push('reload')},search:''},URLSearchParams,console};
  vm.runInNewContext(code,context);
- handlers.DOMContentLoaded();
+ for(const fn of handlers.DOMContentLoaded||[])fn();
  return {requests,storage,document,window};
 }
 test('no Google request before visitor consent',()=>{const s=run();assert.equal(s.requests.length,0);assert.ok(s.document.body.children.some(x=>x.id==='trinity-consent-banner'));});
