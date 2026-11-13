@@ -17,14 +17,28 @@
   document.head.appendChild(script);
  }
  function update(value){
-  const previous=choice;choice=value;
+  if(value!=='accepted'&&value!=='declined')return;
+  choice=value;
   try{localStorage.setItem(key,value);}catch(e){}
   if(value==='accepted')enable();
-  if(value==='declined'&&loaded){window.gtag?.('consent','update',{analytics_storage:'denied'});location.reload();return;}
+  if(value==='declined'){
+   // Clear first-party GA cookies for this host and common parent-domain scope.
+   const names=document.cookie.split(';').map(x=>x.trim().split('=')[0]).filter(n=>/^_ga(?:_|$)|^_gid$|^_gat(?:_|$)/.test(n));
+   const host=location.hostname;const domains=['',host,'.'+host];
+   const pieces=host.split('.');if(pieces.length>2)domains.push('.'+pieces.slice(-2).join('.'));
+   for(const name of names)for(const domain of domains)for(const path of ['/']){
+    document.cookie=name+'=; Max-Age=0; path='+path+'; SameSite=Lax'+(domain?'; domain='+domain:'');
+   }
+   if(loaded){location.reload();return;}
+  }
   render();
  }
  function render(){
   document.getElementById('trinity-consent-banner')?.remove();
+  document.getElementById('trinity-privacy-settings')?.remove();
+  const settings=document.createElement('button');settings.id='trinity-privacy-settings';settings.type='button';settings.className='trinity-privacy-settings';settings.textContent='Privacy choices';
+  settings.addEventListener('click',()=>{choice=null;render();});
+  document.body.append(settings);
   if(choice!==null)return;
   const panel=document.createElement('section');panel.id='trinity-consent-banner';panel.className='trinity-consent-banner';panel.setAttribute('aria-label','Analytics privacy choices');
   const p=document.createElement('p');p.textContent='May we use optional Google Analytics to understand website visits? Declining keeps analytics off. ';
