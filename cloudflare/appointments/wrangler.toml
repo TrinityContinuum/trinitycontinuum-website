@@ -1,0 +1,16 @@
+name = "trinity-appointments"
+main = "src/index.js"
+compatibility_date = "2026-11-14"
+workers_dev = true
+
+# Account owner must first create a NEW D1 database; do not bind the existing email-gateway database.
+# Fill in the generated database_id before deploying.
+[[d1_databases]]
+binding = "DB"
+database_name = "trinity-appointments-db"
+database_id = "REPLACE_WITH_NEW_APPOINTMENTS_D1_DATABASE_ID"
+
+# Destination must be verified on the Cloudflare account; sender must be on an onboarded domain.
+[[send_email]]
+name = "SEND_EMAIL"
+destination_address = "jack@trinitycontinuum.com"
