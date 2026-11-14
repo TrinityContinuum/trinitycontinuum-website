@@ -1,11 +1,11 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Request an appointment or join a Trinity Continuum virtual engineering discussion."><title>Appointments &amp; video meetings | Trinity Continuum</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/config.js"></script><script defer src="assets/site.js"></script><style>.meeting-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.meeting-grid input,.meeting-grid select,.meeting-grid textarea{width:100%;background:#091728;color:white;border:1px solid #52677d;border-radius:6px;padding:11px;font:inherit}.meeting-grid label{display:block;margin:12px 0;font-weight:700;font-size:14px}.meeting-grid button{cursor:pointer}.meeting-grid .btn{margin:7px 7px 7px 0}.meeting-grid .note{color:#c7d5df;font-size:14px}.meeting-grid .btn[hidden]{display:none}@media(max-width:800px){.meeting-grid{grid-template-columns:1fr}}</style><link rel="canonical" href="https://trinitycontinuum.com/meetings.html"><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Submit a meeting request to Trinity Continuum with two preferred appointment times. Trinity confirms all appointments before booking."><title>Appointments &amp; video meetings | Trinity Continuum</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/config.js"></script><script defer src="assets/site.js"></script><style>.meeting-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.meeting-grid input,.meeting-grid select,.meeting-grid textarea{width:100%;background:#091728;color:white;border:1px solid #52677d;border-radius:6px;padding:11px;font:inherit}.meeting-grid label{display:block;margin:12px 0;font-weight:700;font-size:14px}.meeting-grid button{cursor:pointer}.meeting-grid .btn{margin:7px 7px 7px 0}.meeting-grid .note{color:#c7d5df;font-size:14px}.meeting-grid .btn[hidden]{display:none}@media(max-width:800px){.meeting-grid{grid-template-columns:1fr}}</style><link rel="canonical" href="https://trinitycontinuum.com/meetings.html"><style>
 .meeting-layout{max-width:780px;margin:auto}.appointment-form label{display:block;font-size:14px;font-weight:700;margin:14px 0 6px}.appointment-form input,.appointment-form select,.appointment-form textarea{display:block;width:100%;background:#091728;color:#fff;border:1px solid #52677d;border-radius:6px;padding:12px;font:inherit}.appointment-form input:focus,.appointment-form select:focus,.appointment-form textarea:focus{outline:2px solid #d9b977;outline-offset:1px}.appointment-form .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.appointment-form .btn{cursor:pointer;margin-top:14px}.appointment-form .btn[disabled]{opacity:.55;cursor:wait}.appointment-form .note{color:#c7d5df}.appointment-form .notice{border:1px solid #52677d;padding:14px;border-radius:8px;margin-top:15px}.appointment-form .secondary-action{background:transparent;color:#fff}.appointment-form .card{min-height:0}@media(max-width:640px){.appointment-form .two{grid-template-columns:1fr}.appointment-form .btn{width:100%}}
 </style></head><body><a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="wrap nav"><a class="brand" href="index.html">TRINITY <span>CONTINUUM</span></a><button class="menu" type="button" aria-expanded="false" aria-label="Toggle navigation">Menu ☰</button><nav class="links" aria-label="Primary navigation" id="primary-navigation"><a href="index.html">Home</a><a href="technology.html">Technology</a><a href="water.html">Water</a><a href="energy.html">Power &amp; Thermal</a><a href="manufacturing.html">Manufacturing</a><a href="industries.html">Industries</a><a href="global.html">Global</a><a href="investors.html">Investors</a><a href="contact.html">Contact</a><a href="documents.html">Documents</a><a href="media.html">Media</a><a href="publications.html">Publications</a></nav></div></header>
 <main id="main">
 <section class="page-hero"><div class="wrap"><div class="eyebrow">Professional collaboration</div><h1>Request a meeting with Trinity Continuum</h1><p class="lead">Choose two convenient dates and times. Trinity will review your request, confirm an available time by email, and then send a private video-meeting link.</p></div></section>
 <section class="section"><div class="wrap meeting-layout"><div class="card appointment-form">
 <h2>Request an appointment</h2><p class="note">Submitting preferred times does not book an appointment. Trinity must confirm first.</p>
-<form id="appointment" novalidate>
+<form id="appointment" novalidate><input type="hidden" name="access_key" value="60955294-09e6-4ad5-be5d-6f1121883a5e"><input type="hidden" name="subject" value="Trinity Continuum — New Appointment Request"><input type="hidden" name="from_name" value="Trinity Website Appointments"><input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off" aria-hidden="true">
 <label for="app-name">Your name</label><input id="app-name" name="name" autocomplete="name" maxlength="120" required>
 <label for="app-email">Your email address</label><input id="app-email" name="email" type="email" autocomplete="email" maxlength="200" required>
 <label for="app-org">Organization (optional)</label><input id="app-org" name="organization" maxlength="150">
@@ -13,22 +13,63 @@
 <div class="two"><div><label for="date2">Second-choice date</label><input name="date2" id="date2" type="date" required></div><div><label for="time2">Second-choice time</label><input name="time2" id="time2" type="time" required></div></div>
 <label for="app-zone">Time zone</label><select id="app-zone" name="timezone" required><option value="America/Chicago (Central)">Central Time</option><option value="America/New_York (Eastern)">Eastern Time</option><option value="America/Denver (Mountain)">Mountain Time</option><option value="America/Los_Angeles (Pacific)">Pacific Time</option><option value="UTC">UTC</option><option value="Other (specify in message)">Other (specify in message)</option></select>
 <label for="app-topic">What would you like to discuss?</label><textarea id="app-topic" name="topic" maxlength="2500" rows="4" required></textarea>
-<p class="note"><strong>How sending works:</strong> Click the button below to open a prepared email. In your email app, press <strong>Send</strong> to deliver the request to Trinity. This website cannot send it automatically yet.</p>
-<button class="btn primary" type="submit">Open email to send request</button> <button class="btn secondary-action" type="button" id="copy-appointment">Copy request instead</button>
-<div class="notice" id="appointmentStatus" role="status" aria-live="polite">No request has been sent yet. You will need to press Send in your email application.</div>
+<p class="note"><strong>Submit your request directly.</strong> Trinity will review the suggested dates and email you a confirmation. Your appointment is not booked until Trinity responds.</p>
+<button class="btn primary" type="submit" id="submitAppointment">Submit Meeting Request</button>
+<div class="notice" id="appointmentStatus" role="status" aria-live="polite">Your request will be sent securely when you click Submit Meeting Request. No meeting is automatically booked.</div>
 </form>
-<p class="note">If your email app does not open, use “Copy request instead,” paste the details into a new message, and send it to <a href="mailto:jack@trinitycontinuum.com">jack@trinitycontinuum.com</a>.</p>
+<p class="note">If submitting fails, please email <a href="mailto:jack@trinitycontinuum.com">jack@trinitycontinuum.com</a> directly. Do not resubmit if you have already received a successful confirmation.</p>
 </div><div style="margin-top:24px"><h2>After Trinity confirms</h2><p class="lead">You'll receive a private Google Meet link in your confirmation email. Just click that link at the scheduled time. You do not need to create a room or set up video conferencing here.</p></div></div></section>
 </main>
 <footer class="footer"><div class="wrap footer-inner"><div>© 2026 Trinity Continuum · Jack Ray Coates</div><div><a href="contact.html">Contact</a> · <a href="privacy.html">Privacy</a></div></div><div class="wrap resource-footer" style="margin-top:16px"><a href="investor-packages.html">Investor packages</a> · <a href="engineering-packages.html">Engineering packages</a> · <a href="golden-library.html">Golden Library</a></div></footer>
 <script>(()=>{'use strict';
-const form=document.getElementById('appointment'),status=document.getElementById('appointmentStatus'),copy=document.getElementById('copy-appointment');
-const recipient='jack@trinitycontinuum.com';
+const form=document.getElementById('appointment');
+const status=document.getElementById('appointmentStatus');
+const submit=document.getElementById('submitAppointment');
+let busy=false,completed=false;
 const today=()=>{const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)};
-const compose=()=>{if(!form.reportValidity())return null;const d=new FormData(form);if(d.get('date1')<today()||d.get('date2')<today()){status.textContent='Choose dates that are today or later.';return null}if(d.get('date1')===d.get('date2')&&d.get('time1')===d.get('time2')){status.textContent='Please choose two different appointment options.';return null}
-const subject='Trinity Continuum meeting request';const body=['Meeting request — not a confirmed booking','','Name: '+d.get('name'),'Reply email: '+d.get('email'),'Organization: '+(d.get('organization')||'Not specified'),'First choice: '+d.get('date1')+' at '+d.get('time1'),'Second choice: '+d.get('date2')+' at '+d.get('time2'),'Time zone: '+d.get('timezone'),'Discussion topic: '+d.get('topic'),'','Trinity confirmation required before any appointment is booked.'].join('\n');return {subject,body}};
 function init(){for(const id of ['date1','date2'])document.getElementById(id).min=today()}
-form.addEventListener('submit',e=>{e.preventDefault();const a=compose();if(!a)return;status.textContent='Opening your email application. Please press Send there. This page cannot confirm delivery.';window.location.href='mailto:'+recipient+'?subject='+encodeURIComponent(a.subject)+'&body='+encodeURIComponent(a.body)});
-copy.addEventListener('click',async()=>{const a=compose();if(!a)return;const message='To: '+recipient+'\nSubject: '+a.subject+'\n\n'+a.body;try{await navigator.clipboard.writeText(message);status.textContent='Request copied. Paste it into an email to '+recipient+' and press Send. Nothing has been sent automatically.'}catch{const box=document.createElement('textarea');box.readOnly=true;box.rows=10;box.value=message;status.replaceChildren(document.createTextNode('Copy the following into your email and press Send:'),box);box.focus();box.select()}});
+function show(message){status.textContent=message}
+form.addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(busy||completed)return;
+ if(!form.reportValidity())return;
+ const data=new FormData(form);
+ if(data.get('date1')<today()||data.get('date2')<today()){show('Choose dates that are today or later.');return}
+ if(data.get('date1')===data.get('date2')&&data.get('time1')===data.get('time2')){show('Choose two different appointment options.');return}
+ busy=true;submit.disabled=true;submit.textContent='Sending request...';
+ show('Submitting your request. Please do not press the button again.');
+ // Web3Forms accepts browser-side JSON requests and returns a success boolean.
+ const payload=Object.fromEntries(data.entries());
+ payload.message=['Meeting request — NOT an appointment booking',
+ 'Name: '+data.get('name'),
+ 'Email: '+data.get('email'),
+ 'Organization: '+(data.get('organization')||'Not specified'),
+ 'First choice: '+data.get('date1')+' '+data.get('time1'),
+ 'Second choice: '+data.get('date2')+' '+data.get('time2'),
+ 'Time zone: '+data.get('timezone'),
+ 'Discussion topic: '+data.get('topic'),
+ 'Trinity confirmation is required.'].join('\n');
+ try{
+  const controller=new AbortController();
+  const timeout=setTimeout(()=>controller.abort(),15000);
+  let response;
+  try{response=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload),signal:controller.signal})}
+  finally{clearTimeout(timeout)}
+  const result=await response.json().catch(()=>({success:false}));
+  if(!response.ok||result.success!==true){
+    show('The request was not confirmed: '+(typeof result.message==='string'?result.message:'Please try again or email Trinity directly.'));
+    return;
+  }
+  completed=true;
+  show('Request submitted successfully. Thank you. Trinity will review your requested times and reply by email. Your meeting is NOT booked until Trinity confirms it.');
+  form.querySelectorAll('input:not([type=hidden]),select,textarea').forEach(el=>{el.disabled=true});
+  submit.textContent='Request Submitted';
+ }catch(err){
+  show(err&&err.name==='AbortError'?'The request timed out; delivery is uncertain. Please check with Trinity before retrying to avoid a duplicate request.':'Could not confirm the request. Please check your connection or email jack@trinitycontinuum.com directly.');
+ }finally{
+  busy=false;
+  if(!completed){submit.disabled=false;submit.textContent='Submit Meeting Request'}
+ }
+});
 init();
 })();</script></body></html>
