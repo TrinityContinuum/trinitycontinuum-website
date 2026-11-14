@@ -6,10 +6,14 @@
     if (document.body.dataset.page !== 'index') return;
     if (document.getElementById('trinity-film-intro')) return;
 
-    // Respect reduced-motion preferences: the website remains immediately usable.\n    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;\n\n    const root = document.createElement('div');
+    // Respect reduced-motion preferences: the website remains immediately usable.
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return;
+
+    const root = document.createElement('div');
     root.id = 'trinity-film-intro';
     root.setAttribute('role', 'dialog');
-    root.setAttribute('aria-label', 'Trinity Continuum introduction film');\n    root.setAttribute('aria-modal', 'true');
+    root.setAttribute('aria-label', 'Trinity Continuum introduction film');
+    root.setAttribute('aria-modal', 'true');
 
     root.innerHTML = `
       <video
@@ -118,7 +122,11 @@
       style.remove();
     };
 
-    skip.addEventListener('click', close);\n    root.addEventListener('keydown', (event) => {\n      if (event.key === 'Escape') close();\n    });\n    skip.focus();
+    skip.addEventListener('click', close);
+    root.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') close();
+    });
+    skip.focus();
     video.addEventListener('ended', close);
 
     fullscreen.addEventListener('click', async () => {
