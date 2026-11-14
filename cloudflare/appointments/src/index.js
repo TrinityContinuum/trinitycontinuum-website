@@ -50,8 +50,10 @@ export default {
   const lines=["New Trinity Continuum appointment request","Reference: "+id,"Not a confirmed booking","Name: "+name,"Email: "+email,"Organization: "+organization,"First choice: "+date1+" "+time1,"Second choice: "+date2+" "+time2,"Time zone: "+timezone,"Topic: "+topic,"Reply to visitor's email address above."];
   try{
     await env.SEND_EMAIL.send({to:"jack@trinitycontinuum.com",from:env.EMAIL_FROM,subject:"Trinity meeting request "+id.slice(0,8),text:lines.join("\n")});
-    await env.DB.prepare("UPDATE appointments SET notification_status='sent' WHERE id=?").bind(id).run();
-    return json({ok:true,reference:id,message:"Your request was submitted to Trinity. Your appointment is not confirmed until Trinity replies."},200,origin);
+    // A post-send database issue must not cause a visitor retry and duplicate email.
+    try { await env.DB.prepare("UPDATE appointments SET notification_status='sent' WHERE id=?").bind(id).run(); }
+    catch { console.error("Email submitted; notification status update failed",id); }
+    return json({ok:true,reference:id,message:"Your request was sent to Trinity's notification service. Your appointment is not confirmed until Trinity replies."},200,origin);
   }catch{
     try{await env.DB.prepare("UPDATE appointments SET notification_status='failed' WHERE id=?").bind(id).run()}catch{}
     // Request persists in D1 for recovery; never promise inbox delivery.
