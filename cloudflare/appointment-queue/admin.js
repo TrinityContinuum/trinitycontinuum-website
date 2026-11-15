@@ -81,7 +81,7 @@ export default {async fetch(req,env,ctx){
      const item=await env.DB.prepare("SELECT id,date1,time1,date2,time2,timezone FROM appointments WHERE id=?").bind(id).first();
      if(!item)return answer({error:"Appointment not found"},404);
      // Do not assert conflict-free availability without a connected calendar.
-     const update=await env.DB.prepare("INSERT OR IGNORE INTO appointment_decisions (request_id,choice,approved_by,notification_state) VALUES (?,?,?,'not_sent')").bind(id,choice,email).run();
+     const update=await env.DB.prepare("INSERT OR IGNORE INTO appointment_decisions (request_id,choice,approved_by,notification_state) VALUES (?,?,?,'not_sent')").bind(id,choice,identity.email.toLowerCase()).run();
      const saved=await env.DB.prepare("SELECT choice,approved_by,decided_at,notification_state FROM appointment_decisions WHERE request_id=?").bind(id).first();
      if(saved.choice!==choice)return answer({error:"A different decision was already recorded. Review with Jack before changing it."},409);
      return answer({ok:true,decision:saved,message:"Decision recorded internally. No email sent and no meeting booked."});
