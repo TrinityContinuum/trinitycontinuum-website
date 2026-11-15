@@ -13,6 +13,7 @@
 <div class="two"><div><label for="date2">Second-choice date</label><input name="date2" id="date2" type="date" required></div><div><label for="time2">Second-choice time</label><input name="time2" id="time2" type="time" required></div></div>
 <label for="app-zone">Time zone</label><select id="app-zone" name="timezone" required><option value="America/Chicago (Central)">Central Time</option><option value="America/New_York (Eastern)">Eastern Time</option><option value="America/Denver (Mountain)">Mountain Time</option><option value="America/Los_Angeles (Pacific)">Pacific Time</option><option value="UTC">UTC</option><option value="Other (specify in message)">Other (specify in message)</option></select>
 <label for="app-topic">What would you like to discuss?</label><textarea id="app-topic" name="topic" maxlength="2500" rows="4" required></textarea>
+<p class="note"><strong>Scheduling:</strong> Trinity does not offer appointments from 11:30 AM to 1:00 PM Central Time. Other times are requests, not guaranteed availability.</p>
 <p class="note"><strong>Submit your request directly.</strong> Trinity will review the suggested dates and email you a confirmation. Your appointment is not booked until Trinity responds.</p>
 <button class="btn primary" type="submit" id="submitAppointment">Submit Meeting Request</button>
 <div class="notice" id="appointmentStatus" role="status" aria-live="polite">Your request will be sent securely when you click Submit Meeting Request. No meeting is automatically booked.</div>
@@ -36,6 +37,11 @@ form.addEventListener('submit',async e=>{
  const data=new FormData(form);
  if(data.get('date1')<today()||data.get('date2')<today()){show('Choose dates that are today or later.');return}
  if(data.get('date1')===data.get('date2')&&data.get('time1')===data.get('time2')){show('Choose two different appointment options.');return}
+ // For Central Time, assume a standard 30-minute appointment to protect the lunch interval.
+ if(data.get('timezone')==='America/Chicago (Central)'){
+  const overlap=t=>{const [h,m]=String(t).split(':').map(Number);const start=h*60+m;return start<780&&start+30>690};
+  if(overlap(data.get('time1'))||overlap(data.get('time2'))){show('Please select times outside Trinity\'s 11:30 AM–1:00 PM Central lunch break. Allow at least 30 minutes per meeting.');return}
+ }
  busy=true;submit.disabled=true;submit.textContent='Sending request...';
  show('Submitting your request. Please do not press the button again.');
  // Web3Forms accepts browser-side JSON requests and returns a success boolean.
