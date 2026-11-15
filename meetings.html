@@ -1,4 +1,4 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Submit a meeting request to Trinity Continuum with two preferred appointment times. Trinity confirms all appointments before booking."><title>Appointments &amp; video meetings | Trinity Continuum</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/config.js"></script><script defer src="assets/site.js"></script><style>.meeting-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.meeting-grid input,.meeting-grid select,.meeting-grid textarea{width:100%;background:#091728;color:white;border:1px solid #52677d;border-radius:6px;padding:11px;font:inherit}.meeting-grid label{display:block;margin:12px 0;font-weight:700;font-size:14px}.meeting-grid button{cursor:pointer}.meeting-grid .btn{margin:7px 7px 7px 0}.meeting-grid .note{color:#c7d5df;font-size:14px}.meeting-grid .btn[hidden]{display:none}@media(max-width:800px){.meeting-grid{grid-template-columns:1fr}}</style><link rel="canonical" href="https://trinitycontinuum.com/meetings.html"><style>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Submit a meeting request to Trinity Continuum with two preferred appointment times. Trinity confirms all appointments before booking."><title>Appointments &amp; video meetings | Trinity Continuum</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/config.js"></script><script defer src="assets/site.js"></script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script><style>.meeting-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.meeting-grid input,.meeting-grid select,.meeting-grid textarea{width:100%;background:#091728;color:white;border:1px solid #52677d;border-radius:6px;padding:11px;font:inherit}.meeting-grid label{display:block;margin:12px 0;font-weight:700;font-size:14px}.meeting-grid button{cursor:pointer}.meeting-grid .btn{margin:7px 7px 7px 0}.meeting-grid .note{color:#c7d5df;font-size:14px}.meeting-grid .btn[hidden]{display:none}@media(max-width:800px){.meeting-grid{grid-template-columns:1fr}}</style><link rel="canonical" href="https://trinitycontinuum.com/meetings.html"><style>
 .meeting-layout{max-width:780px;margin:auto}.appointment-form label{display:block;font-size:14px;font-weight:700;margin:14px 0 6px}.appointment-form input,.appointment-form select,.appointment-form textarea{display:block;width:100%;background:#091728;color:#fff;border:1px solid #52677d;border-radius:6px;padding:12px;font:inherit}.appointment-form input:focus,.appointment-form select:focus,.appointment-form textarea:focus{outline:2px solid #d9b977;outline-offset:1px}.appointment-form .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.appointment-form .btn{cursor:pointer;margin-top:14px}.appointment-form .btn[disabled]{opacity:.55;cursor:wait}.appointment-form .note{color:#c7d5df}.appointment-form .notice{border:1px solid #52677d;padding:14px;border-radius:8px;margin-top:15px}.appointment-form .secondary-action{background:transparent;color:#fff}.appointment-form .card{min-height:0}@media(max-width:640px){.appointment-form .two{grid-template-columns:1fr}.appointment-form .btn{width:100%}}
 </style></head><body><a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="wrap nav"><a class="brand" href="index.html">TRINITY <span>CONTINUUM</span></a><button class="menu" type="button" aria-expanded="false" aria-label="Toggle navigation">Menu ☰</button><nav class="links" aria-label="Primary navigation" id="primary-navigation"><a href="index.html">Home</a><a href="technology.html">Technology</a><a href="water.html">Water</a><a href="energy.html">Power &amp; Thermal</a><a href="manufacturing.html">Manufacturing</a><a href="industries.html">Industries</a><a href="global.html">Global</a><a href="investors.html">Investors</a><a href="contact.html">Contact</a><a href="documents.html">Documents</a><a href="media.html">Media</a><a href="publications.html">Publications</a></nav></div></header>
 <main id="main">
@@ -15,6 +15,7 @@
 <label for="app-topic">What would you like to discuss?</label><textarea id="app-topic" name="topic" maxlength="2500" rows="4" required></textarea>
 <p class="note"><strong>Scheduling:</strong> Trinity does not offer appointments from 11:30 AM to 1:00 PM Central Time. Other times are requests, not guaranteed availability.</p>
 <p class="note"><strong>Submit your request directly.</strong> Trinity will review the suggested dates and email you a confirmation. Your appointment is not booked until Trinity responds.</p>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAGBTprzSAt5m98MQ" data-theme="dark"></div>
 <button class="btn primary" type="submit" id="submitAppointment">Submit Meeting Request</button>
 <div class="notice" id="appointmentStatus" role="status" aria-live="polite">Your request will be sent securely when you click Submit Meeting Request. No meeting is automatically booked.</div>
 </form>
@@ -34,6 +35,8 @@ form.addEventListener('submit',async e=>{
  e.preventDefault();
  if(busy||completed)return;
  if(!form.reportValidity())return;
+ const token=String(document.querySelector('[name="cf-turnstile-response"]')?.value||'');
+ if(!token){show('Complete the security check before submitting.');return}
  const data=new FormData(form);
  if(data.get('date1')<today()||data.get('date2')<today()){show('Choose dates that are today or later.');return}
  if(data.get('date1')===data.get('date2')&&data.get('time1')===data.get('time2')){show('Choose two different appointment options.');return}
@@ -44,35 +47,68 @@ form.addEventListener('submit',async e=>{
  }
  busy=true;submit.disabled=true;submit.textContent='Sending request...';
  show('Submitting your request. Please do not press the button again.');
- // Web3Forms accepts browser-side JSON requests and returns a success boolean.
- const payload=Object.fromEntries(data.entries());
- payload.replyto=String(data.get('email')||'').trim(); // Explicit visitor Reply-To for Web3Forms notifications.
- payload.message=['Meeting request — NOT an appointment booking',
- 'Name: '+data.get('name'),
- 'Email: '+data.get('email'),
- 'Organization: '+(data.get('organization')||'Not specified'),
- 'First choice: '+data.get('date1')+' '+data.get('time1'),
- 'Second choice: '+data.get('date2')+' '+data.get('time2'),
- 'Time zone: '+data.get('timezone'),
- 'Discussion topic: '+data.get('topic'),
- 'Trinity confirmation is required.'].join('\n');
+ // Register the request in the private D1 queue first. Reuse a stable id on retries.
+ // Keep Web3Forms email notification as the second delivery, not a replacement.
+ const id=form.dataset.appointmentId||(form.dataset.appointmentId=crypto.randomUUID());
+ const intake={
+  id,name:String(data.get('name')||''),email:String(data.get('email')||''),
+  organization:String(data.get('organization')||''),date1:String(data.get('date1')||''),
+  time1:String(data.get('time1')||''),date2:String(data.get('date2')||''),
+  time2:String(data.get('time2')||''),timezone:String(data.get('timezone')||''),
+  topic:String(data.get('topic')||''),turnstileToken:token
+ };
  try{
-  const controller=new AbortController();
-  const timeout=setTimeout(()=>controller.abort(),15000);
+  if(form.dataset.queueSaved!=='yes'){
+   const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),16000);
+   let queued;
+   try{queued=await fetch('https://trinity-appointments.jackspurewater.workers.dev/api/intake',
+    {method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(intake),signal:controller.signal})}
+   finally{clearTimeout(timeout)}
+   const result=await queued.json().catch(()=>({error:'Queue unavailable'}));
+   if(!queued.ok||result.ok!==true){
+    show('The private appointment queue could not confirm your request: '+(result.error||'Please try later')+'. No confirmation email has been sent.');
+    return;
+   }
+   form.dataset.queueSaved='yes';
+  }
+  show('Request recorded. Sending Trinity its email notification...');
+  // Original visitor Reply-To is preserved for the existing Web3Forms notification.
+  const payload=Object.fromEntries(data.entries());
+  delete payload['cf-turnstile-response'];
+  payload.replyto=String(data.get('email')||'').trim();
+  payload.message=['Meeting request — NOT an appointment booking',
+   'Reference: '+id,
+   'Name: '+data.get('name'),
+   'Email: '+data.get('email'),
+   'Organization: '+(data.get('organization')||'Not specified'),
+   'First choice: '+data.get('date1')+' '+data.get('time1'),
+   'Second choice: '+data.get('date2')+' '+data.get('time2'),
+   'Time zone: '+data.get('timezone'),
+   'Discussion topic: '+data.get('topic'),
+   'Trinity confirmation is required.'].join('\n');
+  const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),15000);
   let response;
   try{response=await fetch('https://api.web3forms.com/submit',{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},body:JSON.stringify(payload),signal:controller.signal})}
   finally{clearTimeout(timeout)}
   const result=await response.json().catch(()=>({success:false}));
   if(!response.ok||result.success!==true){
-    show('The request was not confirmed: '+(typeof result.message==='string'?result.message:'Please try again or email Trinity directly.'));
-    return;
+   show('Your request is recorded in Trinity’s private queue, but its email notification was not confirmed. Reference: '+id+'. Please contact jack@trinitycontinuum.com if you need to follow up. Do not resubmit.');
+   completed=true;
+   submit.textContent='Request Recorded';
+   return;
   }
   completed=true;
-  show('Request submitted successfully. Thank you. Trinity will review your requested times and reply by email. Your meeting is NOT booked until Trinity confirms it.');
+  show('Request submitted successfully. Trinity will review your times and reply by email. Your meeting is NOT booked until Trinity confirms it.');
   form.querySelectorAll('input:not([type=hidden]),select,textarea').forEach(el=>{el.disabled=true});
   submit.textContent='Request Submitted';
  }catch(err){
-  show(err&&err.name==='AbortError'?'The request timed out; delivery is uncertain. Please check with Trinity before retrying to avoid a duplicate request.':'Could not confirm the request. Please check your connection or email jack@trinitycontinuum.com directly.');
+  if(form.dataset.queueSaved==='yes'){
+   completed=true;submit.textContent='Request Recorded';
+   show('Your request is safely recorded in Trinity’s private queue, but email delivery is uncertain. Reference: '+form.dataset.appointmentId+'. Please contact Trinity if needed; do not resubmit.');
+  }else{
+   show(err&&err.name==='AbortError'?'The request timed out; delivery is uncertain. Contact Trinity before retrying to avoid duplicates.':'Could not record the request. Please check your connection or email jack@trinitycontinuum.com.');
+   if(window.turnstile)window.turnstile.reset();
+  }
  }finally{
   busy=false;
   if(!completed){submit.disabled=false;submit.textContent='Submit Meeting Request'}
