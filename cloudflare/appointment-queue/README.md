@@ -1,12 +1,13 @@
-# Trinity automatic appointment queue — staging checkpoint
+# Trinity appointment queue — controlled release status
 
-Current live request flow: browser -> Web3Forms free -> Jack's Namecheap inbox. Proven independently; do not disable.
-New staged queue code: `intake.js` and `admin.js`. Neither is deployed or active. Never expose the admin endpoint without Cloudflare Access.
+**Live and tested on November 14, 2026:** Public form -> Cloudflare D1 intake + Web3Forms -> Namecheap notification; private password-protected admin Worker for manual decisions and prepared email/calendar drafts. Both intake and admin Workers were deployed and tested. Keep them operational.
+
+**NOT LIVE:** Auto-approval email/Google Meet delivery added to GitHub only; external authorizations, migrations, security checks, and deployment are still required.
 
 ## Why this is separate
 Web3Forms free has no active webhook or submissions API, and its documented browser endpoint cannot be safely proxied by free server-side code. Therefore the new browser integration must post the appointment to an independent Cloudflare intake endpoint *and* keep the current Web3Forms browser submission, with clear partial-failure reporting and durable IDs.
 
-## Deployment gates
+## Historical deployment gates (initial setup completed, for reference)
 1. Deploy a separate Worker for `intake.js`. Bind existing `trinity-appointments-db` as DB and the already stored Turnstile Secret as TURNSTILE_SECRET in this new Worker, and test the Cloudflare Turnstile site token from the actual domain. Do not assume secrets from other workers propagate.
 2. Bind the D1 database to a separate `admin.js` Worker. Enable Cloudflare Access on the whole admin Worker hostname. Set APPROVER_EMAILS to Jack's verified login identity. Verify that anonymous requests, nonstaff logins, and direct `/api/requests` calls are forbidden.
 3. Verify both Workers with test requests, including duplicate submission IDs, failed Turnstile tokens, outside-origin rejection, and a private queue read. Ensure visitor PII is not written to public logs.
