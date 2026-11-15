@@ -1,5 +1,5 @@
 
-const PAGE=String.raw\`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+const PAGE=String.raw`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Trinity — Private Appointment Queue</title>
 <style nonce="trinity-approvals-v1">
 body{background:#07111e;color:white;font:16px/1.5 system-ui;margin:0}main{max-width:920px;margin:auto;padding:25px}h1{color:#e4c37f}
@@ -46,7 +46,7 @@ try{
  }
 }catch(e){status.textContent='Could not load appointment records. Confirm the private Cloudflare Access login and database binding.'}
 })();
-</script></html>\`;
+</script></html>`;
 // STAGING ONLY: separate admin Worker must be protected by Cloudflare Access.
 // Hard deny when Access is missing or identity is not explicitly allowlisted.
 const answer=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json","cache-control":"no-store"}});
