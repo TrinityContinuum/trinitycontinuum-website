@@ -33,7 +33,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#081624;padding:14px;
 <label>Private Google Meet link, if already created<input id="meet" type="url" placeholder="https://meet.google.com/xxx-xxxx-xxx"></label>
 </section>
 <section><h2>4. Review the prepared reply</h2><pre id="preview"></pre>
-<button id="emailButton">Open Email to Visitor</button><button id="copyButton">Copy Reply for Namecheap</button>
+<button id="emailButton">Open Email to Visitor</button><button id="copyButton">Copy Reply Text for Namecheap</button>
 <p id="status" aria-live="polite"></p><small>Selecting a time does not confirm an appointment until Jack sends the email. A calendar/Google Meet invitation is a separate step.</small>
 </section></main>
 <script>
@@ -89,7 +89,7 @@ el('parseButton').addEventListener('click',()=>{
 });
 
 el('emailButton').onclick=()=>{const x=render();if(!x)return;location.href='mailto:'+encodeURIComponent(x.email)+'?subject='+encodeURIComponent(x.subject)+'&body='+encodeURIComponent(x.body);el('status').textContent='Email app requested; nothing has been sent. Review and press Send.'};
-el('copyButton').onclick=async()=>{const x=render();if(!x)return;try{await navigator.clipboard.writeText('To: '+x.email+'\nSubject: '+x.subject+'\n\n'+x.body);el('status').textContent='Copied. Paste into Namecheap Compose and press Send.'}catch{el('status').textContent='Clipboard access unavailable; select and copy the preview.'}};
+el('copyButton').onclick=async()=>{const x=render();if(!x)return;try{await navigator.clipboard.writeText(x.body);el('status').textContent='Message text copied. In Namecheap, click Reply on the matching request, confirm the To address is the visitor, paste this text into the reply, and press Send after Jack approves.'}catch{el('status').textContent='Clipboard access unavailable; select and copy the preview.'}};
 render();
 })();
 </script></html>
