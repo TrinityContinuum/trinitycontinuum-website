@@ -57,7 +57,7 @@ try{
   };
   card.append(record);host.append(card);
  }
-}catch(e){status.textContent='Could not load appointment records. Confirm Jack's private Worker credentials and database binding.'}
+}catch(e){status.textContent='Could not load appointment records. Confirm your private Worker credentials and database binding.'}
 })();
 </script></html>`;
 // Staging: independent HTTP Basic Authentication over HTTPS.
