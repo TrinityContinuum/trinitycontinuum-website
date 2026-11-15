@@ -8,7 +8,7 @@ button{background:#e4c37f;border:0;border-radius:6px;padding:12px 18px;margin:10
 select{background:#07111e;color:white;padding:10px;width:100%;border:1px solid #536d87}small{color:#c4cdd7}pre{white-space:pre-wrap;background:#07111e;border-radius:8px;padding:12px}
 </style>
 <main><h1>Trinity — Private Appointment Queue</h1>
-<p>Only holders of Jack's administrator login can see these submissions. Select a decision and prepare a reply to the visitor. Jack must still send it from corporate email and separately arrange Google Meet.</p>
+<p>Only holders of Jack's administrator login can see these submissions. Select a decision and prepare a reply to the visitor. Reply drafts and calendar events can now be prefilled in one click. They still require final review, sending, and adding Google Meet.</p>
 <p id="message">Loading appointment requests...</p><div id="requests"></div>
 </main>
 <script nonce="trinity-approvals-v1">
@@ -43,6 +43,42 @@ try{
   select.addEventListener('change',create);create();
   const copy=document.createElement('button');copy.textContent='Copy reply text';copy.onclick=async()=>{const d=create();try{await navigator.clipboard.writeText(d.body);copy.textContent='Copied — paste into Namecheap Reply';}catch{copy.textContent='Copy failed; select text above';}};
   card.append(copy);
+  // No external mail service credential is configured. Pre-fill the visitor's message
+  // in the local email client instead of pretending that email was sent.
+  const compose=document.createElement('button');compose.textContent='Open addressed email draft';
+  compose.disabled=String(a.email||'').endsWith('.invalid');
+  compose.onclick=()=>{
+    const d=create();
+    if(!confirm('Open a draft addressed to '+d.email+'? Review it before sending. No email has been sent yet.'))return;
+    window.location.href='mailto:'+encodeURIComponent(d.email)+'?subject='+encodeURIComponent(d.subject)+'&body='+encodeURIComponent(d.body);
+  };
+  card.append(compose);
+  // The calendar event is an editable template, never automatically booked;
+  // the administrator must review availability and add Google Meet.
+  const calendar=document.createElement('button');calendar.textContent='Open Google Calendar event';
+  const zoneNames={'America/Chicago (Central)':'America/Chicago','America/New_York (Eastern)':'America/New_York','America/Denver (Mountain)':'America/Denver','America/Los_Angeles (Pacific)':'America/Los_Angeles','UTC':'UTC'};
+  calendar.disabled=String(a.email||'').endsWith('.invalid');
+  calendar.onclick=()=>{
+    const choice=select.value;
+    if(choice!=='first'&&choice!=='second'){alert('Select a proposed time first.');return}
+    const day=choice==='first'?a.date1:a.date2,time=choice==='first'?a.time1:a.time2;
+    const tz=zoneNames[a.timezone];
+    if(!tz){alert('Time zone needs manual confirmation before adding to a calendar.');return}
+    const [h,m]=String(time).split(':').map(Number);
+    const start=String(day).replace(/-/g,'')+'T'+String(h).padStart(2,'0')+String(m).padStart(2,'0')+'00';
+    const minutes=h*60+m+30;
+    if(minutes>=1440){alert('Meeting crosses midnight; create event manually.');return}
+    const end=String(day).replace(/-/g,'')+'T'+String(Math.floor(minutes/60)).padStart(2,'0')+String(minutes%60).padStart(2,'0')+'00';
+    const url=new URL('https://calendar.google.com/calendar/render');
+    url.searchParams.set('action','TEMPLATE');
+    url.searchParams.set('text','Trinity Continuum — '+a.name);
+    url.searchParams.set('dates',start+'/'+end);
+    url.searchParams.set('ctz',tz);
+    url.searchParams.set('details','Tentative meeting request. Check availability before saving. Contact: '+a.email+'. Topic: '+a.topic+'. Request ID: '+a.id+'. Add a unique Google Meet link before inviting the visitor.');
+    url.searchParams.set('add',a.email);
+    window.open(url.toString(),'_blank','noopener,noreferrer');
+  };
+  card.append(calendar);
   const record=document.createElement('button');record.textContent=a.recorded_choice?'Decision already recorded':'Record Jack’s decision (no email sent)';record.disabled=Boolean(a.recorded_choice);
   record.onclick=async()=>{
     if(!confirm('Record this decision internally? This does NOT send an email or book a meeting.'))return;
