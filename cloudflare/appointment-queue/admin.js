@@ -27,7 +27,7 @@ try{
   const topic=document.createElement('small');topic.textContent=a.topic;card.append(topic);
   const label=document.createElement('label');label.textContent=' Jack’s decision: ';const select=document.createElement('select');
   for(const [value,text] of [['first','Accept first time'],['second','Accept second time'],['alternate','Request alternative times'],['decline','Decline']]){const op=document.createElement('option');op.value=value;op.textContent=text;select.append(op)}
-  label.append(select);card.append(label);
+  label.append(select);card.append(label);if(a.recorded_choice){select.value=a.recorded_choice;select.disabled=true;const recorded=document.createElement('p');recorded.textContent='Decision recorded by '+a.decision_by+': '+a.recorded_choice+'. Response status: '+a.response_state+'.';card.append(recorded);}
   const preview=document.createElement('pre');card.append(preview);
   const create=()=>{
    const choice=select.value,dt=choice==='first'?a.date1+' '+a.time1:a.date2+' '+a.time2;
@@ -42,7 +42,20 @@ try{
   };
   select.addEventListener('change',create);create();
   const copy=document.createElement('button');copy.textContent='Copy reply text';copy.onclick=async()=>{const d=create();try{await navigator.clipboard.writeText(d.body);copy.textContent='Copied — paste into Namecheap Reply';}catch{copy.textContent='Copy failed; select text above';}};
-  card.append(copy);host.append(card);
+  card.append(copy);
+  const record=document.createElement('button');record.textContent=a.recorded_choice?'Decision already recorded':'Record Jack’s decision (no email sent)';record.disabled=Boolean(a.recorded_choice);
+  record.onclick=async()=>{
+    if(!confirm('Record this decision internally? This does NOT send an email or book a meeting.'))return;
+    record.disabled=true;
+    try{
+      const response=await fetch('/api/decisions',{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({id:a.id,choice:select.value})});
+      const result=await response.json();
+      if(!response.ok)throw Error(result.error||'Could not save');
+      record.textContent='Decision recorded — response not sent';
+      select.disabled=true;
+    }catch(e){record.disabled=false;record.textContent='Record decision (retry)';alert(e.message)}
+  };
+  card.append(record);host.append(card);
  }
 }catch(e){status.textContent='Could not load appointment records. Confirm the private Cloudflare Access login and database binding.'}
 })();
@@ -59,7 +72,22 @@ export default {async fetch(req,env,ctx){
  if(req.method==="GET"&&new URL(req.url).pathname==="/"){
   return new Response(PAGE,{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","content-security-policy":"default-src 'none'; script-src 'nonce-trinity-approvals-v1'; style-src 'nonce-trinity-approvals-v1'; connect-src 'self'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'"}});
  }
+ if(req.method==="POST"&&new URL(req.url).pathname==="/api/decisions"){
+   if(!/^application\/json/.test(req.headers.get("content-type")||""))return answer({error:"Expected JSON"},415);
+   let value;try{value=await req.json()}catch{return answer({error:"Invalid JSON"},400)}
+   const id=String(value?.id||""),choice=String(value?.choice||"");
+   if(!/^[0-9a-f-]{36}$/i.test(id)||!["first","second","alternate","decline"].includes(choice))return answer({error:"Invalid decision"},400);
+   try{
+     const item=await env.DB.prepare("SELECT id,date1,time1,date2,time2,timezone FROM appointments WHERE id=?").bind(id).first();
+     if(!item)return answer({error:"Appointment not found"},404);
+     // Do not assert conflict-free availability without a connected calendar.
+     const update=await env.DB.prepare("INSERT OR IGNORE INTO appointment_decisions (request_id,choice,approved_by,notification_state) VALUES (?,?,?,'not_sent')").bind(id,choice,email).run();
+     const saved=await env.DB.prepare("SELECT choice,approved_by,decided_at,notification_state FROM appointment_decisions WHERE request_id=?").bind(id).first();
+     if(saved.choice!==choice)return answer({error:"A different decision was already recorded. Review with Jack before changing it."},409);
+     return answer({ok:true,decision:saved,message:"Decision recorded internally. No email sent and no meeting booked."});
+   }catch{return answer({error:"Could not record decision (check 002_decisions.sql migration)"},503)}
+ }
  if(req.method!=="GET"||new URL(req.url).pathname!=="/api/requests")return answer({error:"Not found"},404);
- try{const q=await env.DB.prepare("SELECT id,name,email,organization,date1,time1,date2,time2,timezone,topic,notification_status,created_at FROM appointments ORDER BY created_at DESC LIMIT 100").all();return answer({requests:q.results})}
+ try{const q=await env.DB.prepare("SELECT a.id,a.name,a.email,a.organization,a.date1,a.time1,a.date2,a.time2,a.timezone,a.topic,a.notification_status,a.created_at,d.choice AS recorded_choice,d.approved_by AS decision_by,d.notification_state AS response_state FROM appointments a LEFT JOIN appointment_decisions d ON d.request_id=a.id ORDER BY a.created_at DESC LIMIT 100").all();return answer({requests:q.results})}
  catch{return answer({error:"Database unavailable"},503)}
 }};
