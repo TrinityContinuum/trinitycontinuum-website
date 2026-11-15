@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trinity — Appointment Approval</title>
+<style>
+body{background:#07111e;color:#fff;font:16px/1.5 system-ui;margin:0}main{max-width:780px;margin:auto;padding:25px}h1{color:#e4c37f}
+section{background:#17283c;border:1px solid #40546b;border-radius:12px;padding:22px;margin:18px 0}label{display:block;font-weight:650;margin:12px 0 4px}
+input:not([type=radio]),select,textarea{width:100%;box-sizing:border-box;border:1px solid #71849b;border-radius:6px;padding:12px;background:#0c1928;color:white;font:inherit}
+textarea{min-height:95px}fieldset{border:1px solid #51657a;border-radius:8px}fieldset label{font-weight:400;cursor:pointer}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+button{padding:13px 19px;margin:8px 8px 0 0;background:#e4c37f;border:0;border-radius:6px;color:#101822;font-weight:bold;cursor:pointer}
+pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#081624;padding:14px;border-radius:8px}small{color:#cbd4e0}
+@media(max-width:600px){.grid{grid-template-columns:1fr}}
+</style>
+<main><h1>Trinity Continuum — Jack's Appointment Decisions</h1>
+<p>This is a local reply helper, not a connected approval system. It does not store data, book meetings, or send emails. Jack must review the response and press Send in his email application.</p>
+<section><h2>1. Enter the visitor's request</h2>
+<label>Visitor name<input id="name" placeholder="Name from request"></label>
+<label>Visitor email<input id="email" type="email" placeholder="visitor@example.com"></label>
+<div class="grid"><label>First date<input id="d1" type="date"></label><label>First time<input id="t1" type="time"></label></div>
+<div class="grid"><label>Second date<input id="d2" type="date"></label><label>Second time<input id="t2" type="time"></label></div>
+<label>Visitor time zone<select id="zone"><option>Central Time</option><option>Eastern Time</option><option>Mountain Time</option><option>Pacific Time</option><option>UTC</option><option>Other (clarify in reply)</option></select></label>
+</section>
+<section><h2>2. Select Jack's decision</h2><fieldset><legend>Appointment decision</legend>
+<label><input name="choice" type="radio" value="first" checked> Accept first-choice time</label>
+<label><input name="choice" type="radio" value="second"> Accept second-choice time</label>
+<label><input name="choice" type="radio" value="alternate"> Propose another time</label>
+<label><input name="choice" type="radio" value="decline"> Decline appointment</label>
+</fieldset>
+<label>Private Google Meet link, if already created<input id="meet" type="url" placeholder="https://meet.google.com/xxx-xxxx-xxx"></label>
+</section>
+<section><h2>3. Review the prepared reply</h2><pre id="preview"></pre>
+<button id="emailButton">Open Email to Visitor</button><button id="copyButton">Copy Reply for Namecheap</button>
+<p id="status" aria-live="polite"></p><small>Selecting a time does not confirm an appointment until Jack sends the email. A calendar/Google Meet invitation is a separate step.</small>
+</section></main>
+<script>
+(()=>{'use strict';
+const el=id=>document.getElementById(id),v=id=>el(id).value.trim();
+const choice=()=>document.querySelector('input[name=choice]:checked').value;
+const time=x=>{const a=x.split(':');if(a.length!==2)return x;const h=+a[0];return ((h+11)%12+1)+':'+a[1]+' '+(h<12?'AM':'PM')};
+function build(){
+const name=v('name'),email=v('email'),pick=choice(),meet=v('meet');
+if(!name||!/^[^\s@]+@[^\s@]+\\.[^\s@]+$/.test(email))throw Error('Enter visitor name and valid email.');
+if(['first','second'].includes(pick)&&(!v('d1')||!v('d2')||!v('t1')||!v('t2')))throw Error('Enter both appointment choices.');
+if(meet){let url;try{url=new URL(meet)}catch{}if(!url||url.hostname!=='meet.google.com'||url.protocol!=='https:')throw Error('Use a valid Google Meet link or leave blank.')}
+const n=pick==='first'?'1':'2',subject='Trinity Continuum — '+(pick==='decline'?'Meeting Request':pick==='alternate'?'Alternative Meeting Times':'Meeting Confirmation');
+let body='Hello '+name+',\n\n';
+if(pick==='first'||pick==='second'){
+body+='Trinity Continuum approves your '+(pick==='first'?'first':'second')+' proposed appointment:\n\n'+v('d'+n)+' at '+time(v('t'+n))+' ('+v('zone')+').\n\n';
+body+=meet?'Private Google Meet link: '+meet+'\n\n':'A separate private Google Meet invitation will follow.\n\n';
+}else if(pick==='alternate')body+='Neither requested time is available. Please reply with two alternative dates and times and your time zone.\n\n';
+else body+='Thank you for your interest. We are unable to accommodate this appointment request at this time.\n\n';
+body+='Sincerely,\nJack Ray Coates\nTrinity Continuum\njack@trinitycontinuum.com';
+return {email,subject,body};}
+function render(){try{const x=build();el('preview').textContent='To: '+x.email+'\nSubject: '+x.subject+'\n\n'+x.body;return x}catch(e){el('preview').textContent=e.message;return null}}
+document.querySelectorAll('input,select').forEach(x=>{x.addEventListener('input',render);x.addEventListener('change',render)});
+el('emailButton').onclick=()=>{const x=render();if(!x)return;location.href='mailto:'+encodeURIComponent(x.email)+'?subject='+encodeURIComponent(x.subject)+'&body='+encodeURIComponent(x.body);el('status').textContent='Email app requested; nothing has been sent. Review and press Send.'};
+el('copyButton').onclick=async()=>{const x=render();if(!x)return;try{await navigator.clipboard.writeText('To: '+x.email+'\nSubject: '+x.subject+'\n\n'+x.body);el('status').textContent='Copied. Paste into Namecheap Compose and press Send.'}catch{el('status').textContent='Clipboard access unavailable; select and copy the preview.'}};
+render();
+})();
+</script></html>
