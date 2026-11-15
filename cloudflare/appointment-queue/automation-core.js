@@ -109,7 +109,7 @@ export async function runApproval(req,env,approver){
  let request;
  try{request=await env.DB.prepare("SELECT id,name,email,date1,time1,date2,time2,timezone,topic FROM appointments WHERE id=?").bind(id).first();}
  catch{return msg({error:"Appointment data could not be read"},503)}
- if(!request||!emailFormat.test(request.email)||request.email.endsWith(".invalid")||request.name.includes("DIAGNOSTIC"))return msg({error:"Unknown or diagnostic request; cannot send"},400);
+ if(!request||!emailFormat.test(request.email)||request.email.endsWith(".invalid")||/DIAGNOSTIC|SYSTEM TEST|DO NOT BOOK/i.test(request.name+" "+request.topic))return msg({error:"Unknown or diagnostic request; cannot send"},400);
  const accepted=choice==="first"||choice==="second";
  let window=null,token=null;
  try{
