@@ -8,7 +8,7 @@ button{background:#e4c37f;border:0;border-radius:6px;padding:12px 18px;margin:10
 select{background:#07111e;color:white;padding:10px;width:100%;border:1px solid #536d87}small{color:#c4cdd7}pre{white-space:pre-wrap;background:#07111e;border-radius:8px;padding:12px}
 </style>
 <main><h1>Trinity — Private Appointment Queue</h1>
-<p>Only authorized Trinity personnel can see these submissions. Select a decision and prepare a reply to the visitor. Jack must still send it from corporate email and separately arrange Google Meet.</p>
+<p>Only holders of Jack's administrator login can see these submissions. Select a decision and prepare a reply to the visitor. Jack must still send it from corporate email and separately arrange Google Meet.</p>
 <p id="message">Loading appointment requests...</p><div id="requests"></div>
 </main>
 <script nonce="trinity-approvals-v1">
@@ -57,17 +57,35 @@ try{
   };
   card.append(record);host.append(card);
  }
-}catch(e){status.textContent='Could not load appointment records. Confirm the private Cloudflare Access login and database binding.'}
+}catch(e){status.textContent='Could not load appointment records. Confirm Jack's private Worker credentials and database binding.'}
 })();
 </script></html>`;
-// STAGING ONLY: separate admin Worker must be protected by Cloudflare Access.
-// Hard deny when Access is missing or identity is not explicitly allowlisted.
-const answer=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json","cache-control":"no-store"}});
-export default {async fetch(req,env,ctx){
- if(!ctx.access)return answer({error:"Authentication required"},403);
- let identity;try{identity=await ctx.access.getIdentity()}catch{return answer({error:"Identity unavailable"},403)}
- const allowed=(env.APPROVER_EMAILS||"").toLowerCase().split(",").map(s=>s.trim()).filter(Boolean);
- if(!identity?.email||!allowed.includes(identity.email.toLowerCase()))return answer({error:"Not authorized"},403);
+// Staging: independent HTTP Basic Authentication over HTTPS.
+// Cloudflare Worker secret ADMIN_PASSWORD must be long and randomly generated.
+// This is a small-team interim alternative to Cloudflare Access, not SSO/MFA.
+const answer=(data,status=200,extra={})=>new Response(JSON.stringify(data),{status,headers:{"content-type":"application/json","cache-control":"no-store","x-content-type-options":"nosniff","referrer-policy":"no-referrer",...extra}});
+const realm='Basic realm="Trinity Private Appointments", charset="UTF-8"';
+const encoder=new TextEncoder();
+async function sameSecret(x,y){
+ const values=await Promise.all([crypto.subtle.digest("SHA-256",encoder.encode(x)),crypto.subtle.digest("SHA-256",encoder.encode(y))]);
+ let diff=0;const a=new Uint8Array(values[0]),b=new Uint8Array(values[1]);
+ for(let i=0;i<a.length;i++)diff|=a[i]^b[i];
+ return diff===0;
+}
+async function authorized(req,env){
+ if(typeof env.ADMIN_PASSWORD!=="string"||env.ADMIN_PASSWORD.length<24)return false;
+ const header=req.headers.get("Authorization")||"";
+ if(!header.startsWith("Basic ")||header.length>2048)return false;
+ let decoded;try{decoded=atob(header.slice(6))}catch{return false}
+ const colon=decoded.indexOf(":");if(colon<1)return false;
+ const username=decoded.slice(0,colon),password=decoded.slice(colon+1);
+ if(username!=="jack"||!password)return false;
+ return await sameSecret(password,env.ADMIN_PASSWORD);
+}
+export default {async fetch(req,env){
+ if(!(await authorized(req,env)))return answer({error:"Authentication required"},401,{"www-authenticate":realm});
+ const approver=(env.APPROVER_EMAILS||"").toLowerCase().trim();
+ if(approver!=="jack@trinitycontinuum.com")return answer({error:"Approver configuration missing"},503);
  if(!env.DB)return answer({error:"Missing database binding"},503);
  if(req.method==="GET"&&new URL(req.url).pathname==="/"){
   return new Response(PAGE,{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","content-security-policy":"default-src 'none'; script-src 'nonce-trinity-approvals-v1'; style-src 'nonce-trinity-approvals-v1'; connect-src 'self'; form-action 'none'; base-uri 'none'; frame-ancestors 'none'"}});
@@ -81,7 +99,7 @@ export default {async fetch(req,env,ctx){
      const item=await env.DB.prepare("SELECT id,date1,time1,date2,time2,timezone FROM appointments WHERE id=?").bind(id).first();
      if(!item)return answer({error:"Appointment not found"},404);
      // Do not assert conflict-free availability without a connected calendar.
-     const update=await env.DB.prepare("INSERT OR IGNORE INTO appointment_decisions (request_id,choice,approved_by,notification_state) VALUES (?,?,?,'not_sent')").bind(id,choice,identity.email.toLowerCase()).run();
+     const update=await env.DB.prepare("INSERT OR IGNORE INTO appointment_decisions (request_id,choice,approved_by,notification_state) VALUES (?,?,?,'not_sent')").bind(id,choice,approver).run();
      const saved=await env.DB.prepare("SELECT choice,approved_by,decided_at,notification_state FROM appointment_decisions WHERE request_id=?").bind(id).first();
      if(saved.choice!==choice)return answer({error:"A different decision was already recorded. Review with Jack before changing it."},409);
      return answer({ok:true,decision:saved,message:"Decision recorded internally. No email sent and no meeting booked."});
