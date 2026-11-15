@@ -22,3 +22,13 @@ The HTML page contains no access tokens, does not write localStorage, has no API
 - Test visitor submission -> queued request -> Jack approval -> email delivered -> calendar invitation accepted before representing the system as automated.
 
 Existing public Web3Forms intake remains unchanged and continues to work. Existing Trinity email gateway remains untouched.
+
+## REV 02: Paste-to-autofill (November 14, 2026)
+- Jack no longer has to retype each field: copy the Web3Forms notification body from Namecheap, paste it into the helper, then click **Fill Request Automatically**.
+- The parser reads **Name, Email, Date1, Time1, Date2, Time2, Timezone** from the verified Web3Forms notification layout.
+- Tested against the prior Trinity test-notification format; parsed Adam's two November 16/17 dates, times, visitor email, and Central time zone correctly. JavaScript syntax compilation passed.
+- Review the imported details before any reply; the helper still does not identify Jack, query Namecheap, send email, or book a calendar event.
+- Year/date checks and the 11:30 AM–1:00 PM Central lunch restriction remain in place.
+- If the email is formatted differently, the parser reports missing fields and keeps the original manual entry fallback.
+- Web3Forms' **free** tier does not provide active webhooks or Submissions API integration. True server-side automatic sync will require a different supported intake flow or a paid feature; do not claim it is active.
+- Do not paste confidential data into an untrusted site's lookalike. Use the known official Trinity website URL or download the helper locally.
