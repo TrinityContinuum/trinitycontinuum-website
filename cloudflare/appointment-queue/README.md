@@ -16,3 +16,9 @@ Web3Forms free has no active webhook or submissions API, and its documented brow
 
 ## Status and safety
 Code and documentation only. No paid plan, no change to Namecheap DNS/MX, no changes to existing gateway. Manual approval helper remains functional. Existing Web3Forms delivery stays live.
+
+## Interim private authentication — revision November 14
+
+`admin.js` now uses HTTPS HTTP Basic authentication (username `jack`) because Zero Trust Free activation in this account presented billing authorization. Before deploying, add Cloudflare Worker **secret** `ADMIN_PASSWORD` (generated unique random string of at least 32 characters, never copied into chat or GitHub). Keep existing plain text `APPROVER_EMAILS=jack@trinitycontinuum.com` and D1 binding `DB`. The admin Worker returns HTTP 401 unless the secret exists and is at least 24 characters long; all routes, including `/`, `/api/requests`, and `/api/decisions`, are protected. Use a password manager and do not share the password. Basic authentication has no built-in MFA or throttling; use a unique high-entropy password, rotate it if exposed, and migrate to SSO/Access when acceptable. Never paste the admin source or deploy until the secret exists.
+
+After deploying, test unauthenticated requests fail and authenticated requests succeed before treating the dashboard as live. No actual browser auth test has yet occurred. Do not confuse access to records with automatic sending or calendar booking; those are not integrated. Public Web3Forms intake remains live. The original Access code and documentation are superseded by this interim password design.
