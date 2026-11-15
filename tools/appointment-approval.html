@@ -34,11 +34,13 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#081624;padding:14px;
 (()=>{'use strict';
 const el=id=>document.getElementById(id),v=id=>el(id).value.trim();
 const choice=()=>document.querySelector('input[name=choice]:checked').value;
+const day=new Date();day.setHours(0,0,0,0);const end=new Date(day);end.setFullYear(end.getFullYear()+1);const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');for(const k of ['d1','d2']){el(k).min=iso(day);el(k).max=iso(end);}
 const time=x=>{const a=x.split(':');if(a.length!==2)return x;const h=+a[0];return ((h+11)%12+1)+':'+a[1]+' '+(h<12?'AM':'PM')};
 function build(){
 const name=v('name'),email=v('email'),pick=choice(),meet=v('meet');
 if(!name||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Enter visitor name and valid email.');
 if(['first','second'].includes(pick)&&(!v('d1')||!v('d2')||!v('t1')||!v('t2')))throw Error('Enter both appointment choices.');
+if(['first','second'].includes(pick)){const today=new Date();today.setHours(0,0,0,0);const max=new Date(today);max.setFullYear(max.getFullYear()+1);for(const key of ['d1','d2']){const date=new Date(v(key)+'T12:00:00');if(!Number.isFinite(date.getTime())||date<today||date>max)throw Error('Appointment dates must be from today through the next 12 months.');}if(v('d1')===v('d2')&&v('t1')===v('t2'))throw Error('The two proposed appointment times must be different.');}
 if(meet){let url;try{url=new URL(meet)}catch{}if(!url||url.hostname!=='meet.google.com'||url.protocol!=='https:')throw Error('Use a valid Google Meet link or leave blank.')}
 const n=pick==='first'?'1':'2',subject='Trinity Continuum — '+(pick==='decline'?'Meeting Request':pick==='alternate'?'Alternative Meeting Times':'Meeting Confirmation');
 let body='Hello '+name+',\n\n';
