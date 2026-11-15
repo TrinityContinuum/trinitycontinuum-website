@@ -11,14 +11,20 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#081624;padding:14px;
 </style>
 <main><h1>Trinity Continuum — Jack's Appointment Decisions</h1>
 <p>This is a local reply helper, not a connected approval system. It does not store data, book meetings, or send emails. Jack must review the response and press Send in his email application.</p>
-<section><h2>1. Enter the visitor's request</h2>
+<section><h2>1. Paste the appointment email — no retyping</h2>
+<p>Open the Web3Forms notification in Jack's Namecheap inbox, copy the message details, paste below and press Fill Request Automatically. Nothing here is uploaded or stored.</p>
+<label for="notification">Paste Web3Forms notification details</label>
+<textarea id="notification" rows="9" placeholder="Paste fields Name, Email, Date1, Time1, Date2, Time2, Timezone..."></textarea>
+<button id="parseButton" type="button">Fill Request Automatically</button>
+<p id="parseStatus" role="status" aria-live="polite"></p></section>
+<section><h2>2. Review imported details (edit only if necessary)</h2>
 <label>Visitor name<input id="name" placeholder="Name from request"></label>
 <label>Visitor email<input id="email" type="email" placeholder="visitor@example.com"></label>
 <div class="grid"><label>First date<input id="d1" type="date"></label><label>First time<input id="t1" type="time"></label></div>
 <div class="grid"><label>Second date<input id="d2" type="date"></label><label>Second time<input id="t2" type="time"></label></div>
 <label>Visitor time zone<select id="zone"><option>Central Time</option><option>Eastern Time</option><option>Mountain Time</option><option>Pacific Time</option><option>UTC</option><option>Other (clarify in reply)</option></select></label>
 </section>
-<section><h2>2. Select Jack's decision</h2><fieldset><legend>Appointment decision</legend>
+<section><h2>3. Select Jack's decision</h2><fieldset><legend>Appointment decision</legend>
 <label><input name="choice" type="radio" value="first" checked> Accept first-choice time</label>
 <label><input name="choice" type="radio" value="second"> Accept second-choice time</label>
 <label><input name="choice" type="radio" value="alternate"> Propose another time</label>
@@ -26,7 +32,7 @@ pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#081624;padding:14px;
 </fieldset>
 <label>Private Google Meet link, if already created<input id="meet" type="url" placeholder="https://meet.google.com/xxx-xxxx-xxx"></label>
 </section>
-<section><h2>3. Review the prepared reply</h2><pre id="preview"></pre>
+<section><h2>4. Review the prepared reply</h2><pre id="preview"></pre>
 <button id="emailButton">Open Email to Visitor</button><button id="copyButton">Copy Reply for Namecheap</button>
 <p id="status" aria-live="polite"></p><small>Selecting a time does not confirm an appointment until Jack sends the email. A calendar/Google Meet invitation is a separate step.</small>
 </section></main>
@@ -54,6 +60,34 @@ body+='Sincerely,\nJack Ray Coates\nTrinity Continuum\njack@trinitycontinuum.com
 return {email,subject,body};}
 function render(){try{const x=build();el('preview').textContent='To: '+x.email+'\nSubject: '+x.subject+'\n\n'+x.body;return x}catch(e){el('preview').textContent=e.message;return null}}
 document.querySelectorAll('input,select').forEach(x=>{x.addEventListener('input',render);x.addEventListener('change',render)});
+
+function parseNotification(input){
+ const lines=String(input).replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);
+ const keys={name:'name',email:'email',date1:'d1',time1:'t1',date2:'d2',time2:'t2',timezone:'zone'};
+ const values={};let key=null;
+ for(const line of lines){
+  const normalized=line.replace(/:$/,'').replace(/\s+/g,'').toLowerCase();
+  if(Object.prototype.hasOwnProperty.call(keys,normalized)){key=keys[normalized];continue;}
+  if(key&&!values[key]){values[key]=line;key=null;}
+ }
+ for(const k of ['name','email','d1','t1','d2','t2'])if(!values[k])throw Error('Missing '+k+'. Copy the notification body including both appointment choices.');
+ for(const k of ['d1','d2'])if(!/^\d{4}-\d{2}-\d{2}$/.test(values[k]))throw Error('Invalid date '+k+'. Check the original email.');
+ for(const k of ['t1','t2'])if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(values[k]))throw Error('Invalid time '+k+'. Check the original email.');
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email))throw Error('Invalid visitor email.');
+ const mapZone={'America/Chicago':'Central Time','America/New_York':'Eastern Time','America/Denver':'Mountain Time','America/Los_Angeles':'Pacific Time'};
+ let zone='Other (clarify in reply)';
+ if(values.zone){for(const [k,v] of Object.entries(mapZone)){if(values.zone.includes(k)){zone=v;break}}if(values.zone==='UTC')zone='UTC'}
+ return {...values,zone};
+}
+el('parseButton').addEventListener('click',()=>{
+ try{
+  const a=parseNotification(v('notification'));
+  for(const k of ['name','email','d1','t1','d2','t2','zone'])el(k).value=a[k];
+  const p=render();
+  el('parseStatus').textContent=p?'Details imported. Verify dates and time zone before selecting a decision.':'Values imported; check the warning below and verify the request.';
+ }catch(e){el('parseStatus').textContent=e.message;}
+});
+
 el('emailButton').onclick=()=>{const x=render();if(!x)return;location.href='mailto:'+encodeURIComponent(x.email)+'?subject='+encodeURIComponent(x.subject)+'&body='+encodeURIComponent(x.body);el('status').textContent='Email app requested; nothing has been sent. Review and press Send.'};
 el('copyButton').onclick=async()=>{const x=render();if(!x)return;try{await navigator.clipboard.writeText('To: '+x.email+'\nSubject: '+x.subject+'\n\n'+x.body);el('status').textContent='Copied. Paste into Namecheap Compose and press Send.'}catch{el('status').textContent='Clipboard access unavailable; select and copy the preview.'}};
 render();
