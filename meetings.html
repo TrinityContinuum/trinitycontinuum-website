@@ -40,6 +40,7 @@ form.addEventListener('submit',async e=>{
  show('Submitting your request. Please do not press the button again.');
  // Web3Forms accepts browser-side JSON requests and returns a success boolean.
  const payload=Object.fromEntries(data.entries());
+ payload.replyto=String(data.get('email')||'').trim(); // Explicit visitor Reply-To for Web3Forms notifications.
  payload.message=['Meeting request — NOT an appointment booking',
  'Name: '+data.get('name'),
  'Email: '+data.get('email'),
