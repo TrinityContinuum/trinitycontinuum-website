@@ -1,0 +1,44 @@
+name: Scheduler regression tests
+on:
+  pull_request:
+    paths:
+      - 'scheduler/**'
+      - '.github/workflows/scheduler-tests.yml'
+  push:
+    branches:
+      - 'feature/three-window-scheduler-20261115'
+    paths:
+      - 'scheduler/**'
+      - '.github/workflows/scheduler-tests.yml'
+permissions:
+  contents: read
+jobs:
+  scheduler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run isolated SQLite cancellation migration tests
+        run: python -m unittest discover -s scheduler -p 'test_cancellation_sqlite.py' -v
+      - name: Test branded guest meeting presentation
+        run: node --test scheduler/confirmed-meeting-presentation.test.mjs
+      - name: Test Coordination Desk event identity against SQLite migration
+        run: python -m unittest discover -s scheduler -p 'test_coordination_event_identity.py' -v
+      - name: Validate scheduler JavaScript
+        run: |
+          node --check scheduler/booking-rules.mjs
+          node --check scheduler/booking-rules.test.mjs
+          node --check scheduler/meeting-dossier-api.mjs
+          node --check scheduler/booking-admin-api.mjs
+          node --check scheduler/booking-admin-api.test.mjs
+          node --check scheduler/google-calendar-adapter.mjs
+          node --check scheduler/google-calendar-adapter.test.mjs
+          node --check scheduler/confirmed-meeting-presentation.mjs
+          node --check scheduler/confirmed-meeting-presentation.test.mjs
+      - name: Run scheduler regression tests
+        run: node --test scheduler/booking-rules.test.mjs scheduler/booking-admin-api.test.mjs scheduler/google-calendar-adapter.test.mjs scheduler/confirmed-meeting-presentation.test.mjs
