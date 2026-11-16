@@ -71,3 +71,22 @@ test('reconciliation queue is read-only and does not touch Google',async()=>{
  assert.deepEqual(data.reconciliation_required,[]);
  assert.equal(db.calls.some(x=>/INSERT|UPDATE|DELETE/.test(x.sql)),false);
 });
+
+test('calendar inspection requires trusted administrator',async()=>{
+ const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/cancellation-reconciliation/'+id+'/inspect'),{DB:dbFor(null)},'');
+ assert.equal(r.status,403);
+});
+test('calendar inspection reports missing ledger record without external calls',async()=>{
+ const db=dbFor(null);
+ const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/cancellation-reconciliation/'+id+'/inspect'),{DB:db},'jack');
+ assert.equal(r.status,404);
+});
+test('calendar inspection does not mutate missing-calendar-ID record',async()=>{
+ const db=dbFor(null);
+ db.prepare=(sql)=>({bind(){return this},async first(){return {booking_id:id,state:'needs_reconciliation',booking_status:'reserved',google_event_id:null}}});
+ const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/cancellation-reconciliation/'+id+'/inspect'),{DB:db},'jack');
+ assert.equal(r.status,200);
+ const data=await r.json();
+ assert.equal(data.calendar.state,'no_event_id');
+ assert.equal(data.read_only,true);
+});
