@@ -35,8 +35,8 @@ jobs:
           node --check scheduler/booking-admin-api.mjs
           node --check scheduler/booking-admin-api.test.mjs
           node --check scheduler/google-calendar-adapter.mjs
-          node --check scheduler/google-calendar-adapter.test.mjs scheduler/confirmed-meeting-presentation.test.mjs
+          node --check scheduler/google-calendar-adapter.test.mjs
           node --check scheduler/confirmed-meeting-presentation.mjs
           node --check scheduler/confirmed-meeting-presentation.test.mjs
       - name: Run scheduler regression tests
-        run: node --test scheduler/booking-rules.test.mjs scheduler/booking-admin-api.test.mjs scheduler/google-calendar-adapter.test.mjs
+        run: node --test scheduler/booking-rules.test.mjs scheduler/booking-admin-api.test.mjs scheduler/google-calendar-adapter.test.mjs scheduler/confirmed-meeting-presentation.test.mjs
