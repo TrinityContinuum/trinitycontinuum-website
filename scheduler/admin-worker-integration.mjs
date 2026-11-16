@@ -36,19 +36,15 @@ export default {
     }
     if(url.pathname==='/desk')return reply('Method not allowed',405);
     if(url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/')){
-      // Identity is derived only after the legacy authentication gate succeeds.
-      // Never accept an administrator identity from a request body or header.
-      let actor;
-      try{
-        const auth=req.headers.get('Authorization')||'';
-        const match=/^Basic ([A-Za-z0-9+/]+={0,2})$/.exec(auth);
-        if(!match)return reply('Unauthorized',401);
-        const decoded=atob(match[1]);
-        const separator=decoded.indexOf(':');
-        if(separator<1)return reply('Unauthorized',401);
-        actor=decoded.slice(0,separator);
-        if(!/^[A-Za-z0-9._-]{1,120}$/.test(actor))return reply('Unauthorized',401);
-      }catch{return reply('Unauthorized',401)}
+      // The legacy gate authenticates access, but may not bind the Basic username
+      // to the credential. Never record a client-controlled username as audit actor.
+      // For a single-admin deployment configure a server-side verified identity.
+      // Multi-admin deployments must replace this with an identity returned by
+      // the trusted authentication provider, not the request Authorization header.
+      const actor=env.ADMIN_AUDIT_IDENTITY;
+      if(typeof actor!=='string'||!/^[A-Za-z0-9._@-]{1,120}$/.test(actor)){
+        return reply('Trusted administrator audit identity not configured',503);
+      }
       return bookingAdminApi(req,env,actor);
     }
     if(url.pathname==='/api/scheduler/settings')return settingsApi(req,env);
