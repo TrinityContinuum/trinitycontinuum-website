@@ -16,6 +16,16 @@ export async function bookingApi(req,env){
  const name=safe(x?.name).slice(0,120),email=safe(x?.email).slice(0,200),org=safe(x?.organization).slice(0,150),topic=safe(x?.topic).slice(0,500);
  const start=Date.parse(x?.start),end=Date.parse(x?.end);
  if(!name||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!Number.isFinite(start)||!Number.isFinite(end)||end-start!==30*60000||start<Date.now()+3600000||start>Date.now()+90*86400000)return respond({error:'Invalid appointment request'},400);
+ // Public endpoint requires Turnstile and must also be rate-limited at the edge.
+ if(!env.TURNSTILE_SECRET_KEY)return respond({error:'Booking verification unavailable'},503);
+ const captcha=safe(x?.turnstile_token);
+ if(!captcha)return respond({error:'Verification required'},403);
+ try{
+  const form=new FormData();form.set('secret',env.TURNSTILE_SECRET_KEY);form.set('response',captcha);
+  const ip=req.headers.get('CF-Connecting-IP');if(ip)form.set('remoteip',ip);
+  const verify=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',body:form});
+  if(!verify.ok||(await verify.json()).success!==true)return respond({error:'Verification failed'},403);
+ }catch{return respond({error:'Verification unavailable'},503)}
  const key=safe(req.headers.get('Idempotency-Key'));if(!/^[a-zA-Z0-9_-]{16,100}$/.test(key))return respond({error:'Idempotency-Key required'},400);
  const startIso=new Date(start).toISOString(),endIso=new Date(end).toISOString(),a=local(startIso),b=local(endIso);
  if(a.date!==b.date)return respond({error:'Appointments must stay within one local day'},400);
