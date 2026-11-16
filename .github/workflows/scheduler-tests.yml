@@ -34,4 +34,4 @@ jobs:
           node --check scheduler/google-calendar-adapter.mjs
           node --check scheduler/google-calendar-adapter.test.mjs
       - name: Run scheduler regression tests
-        run: node --test scheduler/booking-rules.test.mjs scheduler/booking-admin-api.test.mjs
+        run: node --test scheduler/booking-rules.test.mjs scheduler/booking-admin-api.test.mjs scheduler/google-calendar-adapter.test.mjs
