@@ -19,7 +19,7 @@ export async function bookingAdminApi(req,env,actor){
   }catch{return json({error:'Reconciliation queue unavailable'},503)}
  }
  // Observe calendar state only. No D1 changes, no Google writes, no automatic retry.
- const inspection=/^\\/api\\/scheduler\\/cancellation-reconciliation\\/([0-9a-f-]{36})\\/inspect$/.exec(path);
+ const inspection=/^\/api\/scheduler\/cancellation-reconciliation\/([0-9a-f-]{36})\/inspect$/.exec(path);
  if(inspection&&req.method==='GET'){
   try{
    const record=await env.DB.prepare(
