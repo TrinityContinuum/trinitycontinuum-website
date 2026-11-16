@@ -9,6 +9,15 @@ export async function bookingAdminApi(req,env,actor){
   try{const data=await env.DB.prepare("SELECT id,requester_name,requester_email,organization,topic,start_utc,end_utc,status,google_meet_url FROM scheduler_bookings ORDER BY start_utc DESC LIMIT 150").all();return json({bookings:data.results||[]})}
   catch{return json({error:'Bookings unavailable'},503)}
  }
+ // Read-only reconciliation queue. Never retry external calendar mutations blindly.
+ if(path==='/api/scheduler/cancellation-reconciliation'&&req.method==='GET'){
+  try{
+   const data=await env.DB.prepare(
+    "SELECT c.booking_id,c.state,c.expected_status,c.reopen_requested,c.notification_state,c.started_at,c.updated_at,b.status AS booking_status,b.google_event_id,b.start_utc,b.end_utc FROM scheduler_cancellations c JOIN scheduler_bookings b ON b.id=c.booking_id WHERE c.state IN ('processing','calendar_removed','needs_reconciliation') ORDER BY c.updated_at ASC LIMIT 150"
+   ).all();
+   return json({reconciliation_required:data.results||[],read_only:true,calendar_state_verified:false});
+  }catch{return json({error:'Reconciliation queue unavailable'},503)}
+ }
  const match=/^\/api\/scheduler\/bookings\/([0-9a-f-]{36})\/cancel$/.exec(path);
  if(!match||req.method!=='POST')return json({error:'Not found'},404);
  let x;try{x=await req.json()}catch{return json({error:'Invalid JSON'},400)}
