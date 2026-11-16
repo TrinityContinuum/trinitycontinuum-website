@@ -3,15 +3,16 @@
 // D1 migration 003 is applied, and the staging auth/CSRF tests pass.
 // The legacy worker is the authoritative authentication gate for every route.
 import legacyAdmin from './legacy-admin-worker.mjs';
+import {settingsApi} from './settings-api.mjs';
 import {opportunityApi} from './opportunities-api.mjs';
 import {ADMIN_DESK_HTML} from './admin-desk-page.mjs';
 const reply=(body,status=200,headers={})=>new Response(body,{status,headers:{'cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer',...headers}});
 export default {
   async fetch(req,env,ctx){
     const url=new URL(req.url);
-    const enhanced=url.pathname==='/desk'||url.pathname==='/api/opportunities'||url.pathname.startsWith('/api/opportunities/');
+    const enhanced=url.pathname==='/api/scheduler/settings'||url.pathname==='/desk'||url.pathname==='/api/opportunities'||url.pathname.startsWith('/api/opportunities/');
     if(!enhanced)return legacyAdmin.fetch(req,env,ctx);
-    if(!['GET','POST','PATCH'].includes(req.method))return reply('Method not allowed',405,{'allow':'GET, POST, PATCH'});
+    if(!['GET','POST','PATCH','PUT'].includes(req.method))return reply('Method not allowed',405,{'allow':'GET, POST, PATCH, PUT'});
     // Authenticate with the existing private admin Worker. It checks the
     // administrator password and approved account before returning requests.
     const gate=await legacyAdmin.fetch(new Request(new URL('/api/requests',url),{
@@ -32,6 +33,7 @@ export default {
         'content-security-policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`});
     }
     if(url.pathname==='/desk')return reply('Method not allowed',405);
+    if(url.pathname==='/api/scheduler/settings')return settingsApi(req,env);
     return opportunityApi(req,env);
   }
 };
