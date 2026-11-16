@@ -129,3 +129,25 @@ test('reconciliation queue database failure returns 503 without modifying record
  assert.equal(r.status,503);
  assert.match((await r.json()).error,/unavailable/);
 });
+
+
+test('cancelled booking with unresolved ledger cannot claim success',async()=>{
+ const db={prepare(sql){return {bind(){return this},async first(){
+  if(sql.includes('FROM scheduler_bookings'))return booking('cancelled','tcvalidid');
+  if(sql.includes('FROM scheduler_cancellations'))return {state:'needs_reconciliation',notification_state:'requested'};
+  throw Error('unexpected query');
+ }}}};
+ const r=await bookingAdminApi(request({reopen_slot:false}),{DB:db},'verified-admin');
+ assert.equal(r.status,409);
+ const data=await r.json();
+ assert.equal(data.reconciliation_required,true);
+ assert.equal(data.ledger_state,'needs_reconciliation');
+});
+test('cancelled booking with unavailable ledger fails closed',async()=>{
+ const db={prepare(sql){return {bind(){return this},async first(){
+  if(sql.includes('FROM scheduler_bookings'))return booking('cancelled','tcvalidid');
+  throw Error('ledger offline');
+ }}}};
+ const r=await bookingAdminApi(request({reopen_slot:false}),{DB:db},'verified-admin');
+ assert.equal(r.status,503);
+});
