@@ -37,7 +37,10 @@ export async function bookingApi(req,env){
   const windows=override?JSON.parse(override.windows_json):null;
   let slot=evaluateSlot({week:DEFAULT_WEEK,weekday:a.weekday,start:a.time,end:b.time,overrides:windows});
   if(slot.status==='unavailable')return respond({error:'Time unavailable',reason:slot.reason||'outside_hours'},409);
-  const automatic=setting?.setting_value==='automatic'&&slot.status==='instant_eligible'&&calendarConfigured(env)&&mailConfigured(env);
+  // Jack must explicitly open this exact time range. Weekly templates alone
+  // never authorize instant booking, even when the preference is automatic.
+  const opened=await env.DB.prepare('SELECT id FROM scheduler_open_slots WHERE enabled=1 AND start_utc<=? AND end_utc>=? LIMIT 1').bind(startIso,endIso).first();
+  const automatic=setting?.setting_value==='automatic'&&Boolean(opened)&&slot.status==='instant_eligible'&&calendarConfigured(env)&&mailConfigured(env);
   // Fail closed if calendar cannot be read. Never offer instant confirmation from stale data.
   if(automatic){
    const busy=await calendarBusy(env,new Date(start-15*60000).toISOString(),new Date(end+15*60000).toISOString());
