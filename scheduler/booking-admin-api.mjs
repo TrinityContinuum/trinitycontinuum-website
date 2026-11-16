@@ -40,7 +40,15 @@ export async function bookingAdminApi(req,env,actor){
  try{b=await env.DB.prepare('SELECT id,status,google_event_id,start_utc,end_utc FROM scheduler_bookings WHERE id=?').bind(id).first()}
  catch{return json({error:'Booking lookup unavailable'},503)}
  if(!b)return json({error:'Booking not found'},404);
- if(b.status==='cancelled')return json({ok:true,status:'cancelled',already_cancelled:true});
+ if(b.status==='cancelled'){
+  // A terminal booking status does not prove that Google or the ledger finished.
+  try{
+   const ledger=await env.DB.prepare('SELECT state,notification_state FROM scheduler_cancellations WHERE booking_id=?').bind(id).first();
+   if(ledger&&ledger.state!=='completed')
+    return json({error:'Cancellation ledger unresolved; reconcile before confirming',reconciliation_required:true,ledger_state:ledger.state},409);
+   return json({ok:true,status:'cancelled',already_cancelled:true,notification_status:ledger?.notification_state||'not_verified'});
+  }catch{return json({error:'Cancellation ledger unavailable; cannot confirm completion'},503)}
+ }
  if(b.status==='completed')return json({error:'Completed meeting'},409);
  if(['calendar_created','confirmation_sent'].includes(b.status)&&!b.google_event_id)return json({error:'Missing calendar ID; reconciliation required'},409);
  // Unique ledger row acts as a durable exclusive cancellation claim.
