@@ -29,5 +29,7 @@ jobs:
         run: |
           node --check scheduler/booking-rules.mjs
           node --check scheduler/booking-rules.test.mjs
+          node --check scheduler/booking-admin-api.mjs
+          node --check scheduler/booking-admin-api.test.mjs
       - name: Run scheduler regression tests
-        run: node --test scheduler/booking-rules.test.mjs
+        run: node --test scheduler/booking-rules.test.mjs scheduler/booking-admin-api.test.mjs
