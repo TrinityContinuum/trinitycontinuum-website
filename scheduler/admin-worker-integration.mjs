@@ -12,7 +12,7 @@ const reply=(body,status=200,headers={})=>new Response(body,{status,headers:{'ca
 export default {
   async fetch(req,env,ctx){
     const url=new URL(req.url);
-    const enhanced=url.pathname==='/api/scheduler/cancellation-reconciliation'||url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/')||url.pathname==='/api/scheduler/settings'||url.pathname==='/api/scheduler/open-slots'||url.pathname.startsWith('/api/scheduler/open-slots/')||url.pathname==='/desk'||url.pathname==='/api/opportunities'||url.pathname.startsWith('/api/opportunities/');
+    const enhanced=(url.pathname==='/api/scheduler/cancellation-reconciliation'||url.pathname.startsWith('/api/scheduler/cancellation-reconciliation/'))||url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/')||url.pathname==='/api/scheduler/settings'||url.pathname==='/api/scheduler/open-slots'||url.pathname.startsWith('/api/scheduler/open-slots/')||url.pathname==='/desk'||url.pathname==='/api/opportunities'||url.pathname.startsWith('/api/opportunities/');
     if(!enhanced)return legacyAdmin.fetch(req,env,ctx);
     if(!['GET','POST','PATCH','PUT','DELETE'].includes(req.method))return reply('Method not allowed',405,{'allow':'GET, POST, PATCH, PUT, DELETE'});
     // Authenticate with the existing private admin Worker. It checks the
@@ -35,7 +35,7 @@ export default {
         'content-security-policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`});
     }
     if(url.pathname==='/desk')return reply('Method not allowed',405);
-    if(url.pathname==='/api/scheduler/cancellation-reconciliation'||url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/')){
+    if(url.pathname==='/api/scheduler/cancellation-reconciliation'||url.pathname.startsWith('/api/scheduler/cancellation-reconciliation/')||url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/')){
       // The legacy gate authenticates access, but may not bind the Basic username
       // to the credential. Never record a client-controlled username as audit actor.
       // For a single-admin deployment configure a server-side verified identity.
