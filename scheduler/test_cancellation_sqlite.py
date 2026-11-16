@@ -76,6 +76,29 @@ class CancellationMigrationTests(unittest.TestCase):
         self.db.execute("UPDATE scheduler_bookings SET updated_at='2026-11-21T00:00:00Z' WHERE id='book-1'")
         self.assertEqual(self.db.execute("SELECT status FROM scheduler_bookings").fetchone()[0], "cancelled")
 
+    def test_terminal_status_cannot_be_reactivated_without_cancellation_ledger(self):
+        self.db.execute("UPDATE scheduler_bookings SET status='cancelled' WHERE id='book-1'")
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "booking_terminal_status_immutable"):
+            self.db.execute("UPDATE scheduler_bookings SET status='approval_pending' WHERE id='book-1'")
+
+    def test_repeated_cancelled_status_update_is_allowed(self):
+        self.db.execute("UPDATE scheduler_bookings SET status='cancelled' WHERE id='book-1'")
+        self.db.execute("UPDATE scheduler_bookings SET status='cancelled' WHERE id='book-1'")
+        self.assertEqual(self.db.execute("SELECT status FROM scheduler_bookings").fetchone()[0], "cancelled")
+
+    def test_terminal_guard_rolls_back_multirow_status_update(self):
+        self.db.execute("UPDATE scheduler_bookings SET status='cancelled' WHERE id='book-1'")
+        self.db.execute(
+            """INSERT INTO scheduler_bookings
+            (id,idempotency_key,requester_name,requester_email,start_utc,end_utc,mode,status)
+            VALUES('book-2','key-2','Test','test2@example.invalid',
+            '2026-11-21T15:00:00Z','2026-11-21T15:30:00Z','instant','reserved')"""
+        )
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "booking_terminal_status_immutable"):
+            self.db.execute("UPDATE scheduler_bookings SET status='reserved'")
+        statuses = dict(self.db.execute("SELECT id,status FROM scheduler_bookings"))
+        self.assertEqual(statuses, {'book-1':'cancelled','book-2':'reserved'})
+
     def test_explicit_window_can_remain_closed(self):
         self.db.execute(
             """INSERT INTO scheduler_open_slots(id,start_utc,end_utc,enabled,created_by)
