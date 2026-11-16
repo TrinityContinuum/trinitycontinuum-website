@@ -56,3 +56,18 @@ test('booking list requires trusted actor',async()=>{
  const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/bookings'),{DB:dbFor(null)},'');
  assert.equal(r.status,403);
 });
+
+test('reconciliation queue requires trusted actor',async()=>{
+ const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/cancellation-reconciliation'),{DB:dbFor(null)},'');
+ assert.equal(r.status,403);
+});
+test('reconciliation queue is read-only and does not touch Google',async()=>{
+ const db=dbFor(null);
+ const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/cancellation-reconciliation'),{DB:db},'jack');
+ assert.equal(r.status,200);
+ const data=await r.json();
+ assert.equal(data.read_only,true);
+ assert.equal(data.calendar_state_verified,false);
+ assert.deepEqual(data.reconciliation_required,[]);
+ assert.equal(db.calls.some(x=>/INSERT|UPDATE|DELETE/.test(x.sql)),false);
+});
