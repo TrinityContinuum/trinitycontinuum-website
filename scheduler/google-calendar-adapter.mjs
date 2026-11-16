@@ -43,3 +43,21 @@ export async function cancelMeeting(env,eventId){
  try { await google(env,'/events/'+encodeURIComponent(eventId)+'?sendUpdates=all',{method:'DELETE'}); return {cancelled:true}; }
  catch(e){ if(['calendar_http_404','calendar_http_410'].includes(String(e.message)))return {cancelled:true,already_absent:true}; throw e; }
 }
+
+/** Read-only event inspection for reconciliation. A 404/410 is an observed absence,
+ * not proof that an attendee received a cancellation notification. */
+export async function inspectMeeting(env,eventId){
+ if(!/^[a-z0-9_]{5,1024}$/.test(eventId))throw Error('invalid_google_event_id');
+ try{
+  const event=await google(env,'/events/'+encodeURIComponent(eventId));
+  if(event.id!==eventId)throw Error('calendar_event_identity_mismatch');
+  return {state:event.status==='cancelled'?'cancelled':'present',event_id:eventId,
+   start:event.start?.dateTime||event.start?.date||null,
+   end:event.end?.dateTime||event.end?.date||null,
+   notification_verified:false};
+ }catch(e){
+  if(['calendar_http_404','calendar_http_410'].includes(String(e.message)))
+   return {state:'absent',event_id:eventId,notification_verified:false};
+  throw e;
+ }
+}
