@@ -1,4 +1,4 @@
-import {cancelMeeting} from './google-calendar-adapter.mjs';
+import {cancelMeeting,inspectMeeting} from './google-calendar-adapter.mjs';
 const json=(x,s=200)=>new Response(JSON.stringify(x),{status:s,headers:{'content-type':'application/json','cache-control':'no-store'}});
 // The caller must authenticate the actor, verify Origin, and pass a trusted identity.
 export async function bookingAdminApi(req,env,actor){
@@ -17,6 +17,19 @@ export async function bookingAdminApi(req,env,actor){
    ).all();
    return json({reconciliation_required:data.results||[],read_only:true,calendar_state_verified:false});
   }catch{return json({error:'Reconciliation queue unavailable'},503)}
+ }
+ // Observe calendar state only. No D1 changes, no Google writes, no automatic retry.
+ const inspection=/^\\/api\\/scheduler\\/cancellation-reconciliation\\/([0-9a-f-]{36})\\/inspect$/.exec(path);
+ if(inspection&&req.method==='GET'){
+  try{
+   const record=await env.DB.prepare(
+    "SELECT c.booking_id,c.state,c.expected_status,c.notification_state,b.status AS booking_status,b.google_event_id FROM scheduler_cancellations c JOIN scheduler_bookings b ON b.id=c.booking_id WHERE c.booking_id=?"
+   ).bind(inspection[1]).first();
+   if(!record)return json({error:'Cancellation record not found'},404);
+   if(!record.google_event_id)return json({record,calendar:{state:'no_event_id',notification_verified:false},read_only:true});
+   const calendar=await inspectMeeting(env,record.google_event_id);
+   return json({record,calendar,read_only:true,automatic_recovery:false});
+  }catch{return json({error:'Calendar inspection unavailable; no recovery action taken'},503)}
  }
  const match=/^\/api\/scheduler\/bookings\/([0-9a-f-]{36})\/cancel$/.exec(path);
  if(!match||req.method!=='POST')return json({error:'Not found'},404);
