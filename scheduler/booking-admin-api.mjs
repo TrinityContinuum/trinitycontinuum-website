@@ -24,7 +24,7 @@ export async function bookingAdminApi(req,env,actor){
  // Unique ledger row acts as a durable exclusive cancellation claim.
  // Competing cancellation requests cannot both own the operation.
  try{
-  await env.DB.prepare("INSERT INTO scheduler_cancellations(booking_id,state,actor,reopen_requested) VALUES(?,'processing',?,?)").bind(id,actor,Number(x.reopen_slot)).run();
+  await env.DB.prepare("INSERT INTO scheduler_cancellations(booking_id,state,actor,expected_status,reopen_requested) VALUES(?,'processing',?,?,?)").bind(id,actor,b.status,Number(x.reopen_slot)).run();
  }catch{
   return json({error:'Cancellation already underway; check reconciliation state before retrying'},409);
  }
