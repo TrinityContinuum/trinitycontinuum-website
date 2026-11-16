@@ -28,13 +28,17 @@ export function validateWeek(week) {
   }
   return true;
 }
-export function evaluateSlot({week,weekday,start,end,overrides=[],busy=[],bufferMinutes=15}){
+export function evaluateSlot({week,weekday,start,end,overrides=null,busy=[],bufferMinutes=15,lunchBlocked=true}){
   validateWeek(week);
   if(!Number.isInteger(weekday)||weekday<0||weekday>6) throw Error('Invalid weekday');
   const from=minute(start),to=minute(end);
   if(from>=to||to-from>240) throw Error('Invalid appointment duration');
   if(!Number.isInteger(bufferMinutes)||bufferMinutes<0||bufferMinutes>120) throw Error('Invalid buffer');
-  const windows=overrides.length?overrides:week[weekday].windows;
+  // Explicit [] means a date is closed. Null means use the weekly template.
+  const windows=overrides===null?week[weekday].windows:overrides;
+  if(!Array.isArray(windows)) throw Error('Invalid date override');
+  for(const w of windows){if(!MODES.includes(w.mode)||minute(w.start)>=minute(w.end)) throw Error('Invalid date window');}
+  if(lunchBlocked && from<13*60 && to>11*60+30) return {status:'unavailable',reason:'lunch_block'};
   const matching=windows.find(w=>from>=minute(w.start)&&to<=minute(w.end));
   if(!matching) return {status:'unavailable'};
   for(const b of busy){
