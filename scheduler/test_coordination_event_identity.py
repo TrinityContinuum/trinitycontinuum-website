@@ -37,7 +37,7 @@ class CoordinationEventIdentityTests(unittest.TestCase):
 
     def test_reopen_and_recomplete_are_distinct_events(self):
         source = (ROOT / "meeting-dossier-api.mjs").read_text()
-        self.assertIn("transition_id:crypto.randomUUID()", source)
+        self.assertIn("transition_id:transitionId", source)\n        self.assertIn("const transitionId=crypto.randomUUID()", source)
         migration = (ROOT / "migrations" / "011_coordination_events.sql").read_text()
         db = sqlite3.connect(":memory:")
         db.execute("PRAGMA foreign_keys=ON")
