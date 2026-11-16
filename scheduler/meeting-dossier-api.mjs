@@ -20,7 +20,9 @@ export async function meetingDossierApi(request,env,actor){
    const result=await env.DB.batch([
     env.DB.prepare("UPDATE scheduler_follow_up_tasks SET status=?,completed_at=CASE WHEN ?='done' THEN strftime('%Y-%m-%dT%H:%M:%fZ','now') ELSE NULL END,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND status=?").bind(input.status,input.status,current.id,current.status),
     env.DB.prepare("INSERT INTO scheduler_audit(entity_type,entity_id,action,actor,detail_json) VALUES('scheduler_follow_up',?,'status_change',?,?)").bind(current.id,actor,JSON.stringify({from:current.status,to:input.status})),
-    coordination(env.DB,current.booking_id,'follow_up_updated',current.id,actor,{from:current.status,to:input.status})
+    // Each committed transition is a distinct business event, even after reopen/recomplete.
+    // Delivery retries reuse the persisted event id rather than creating a new event.
+    coordination(env.DB,current.booking_id,'follow_up_updated',current.id,actor,{from:current.status,to:input.status,transition_id:crypto.randomUUID()})
    ]);
    if(result[0]?.meta?.changes!==1)return json({error:'Task changed concurrently; reload'},409);
    return json({ok:true,id:current.id,status:input.status});
