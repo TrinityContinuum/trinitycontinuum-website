@@ -151,3 +151,15 @@ test('cancelled booking with unavailable ledger fails closed',async()=>{
  const r=await bookingAdminApi(request({reopen_slot:false}),{DB:db},'verified-admin');
  assert.equal(r.status,503);
 });
+
+test('inspection route matches and returns a record without a Google event',async()=>{
+ const db={prepare(sql){return {bind(...params){assert.equal(params[0],id);return this},async first(){
+  assert.match(sql,/FROM scheduler_cancellations/);
+  return {booking_id:id,state:'needs_reconciliation',booking_status:'reserved',google_event_id:null};
+ }}}};
+ const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/cancellation-reconciliation/'+id+'/inspect'),{DB:db},'verified-admin');
+ assert.equal(r.status,200);
+ const data=await r.json();
+ assert.equal(data.calendar.state,'no_event_id');
+ assert.equal(data.read_only,true);
+});
