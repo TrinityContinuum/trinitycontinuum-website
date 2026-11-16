@@ -1,0 +1,28 @@
+name: Scheduler regression tests
+on:
+  pull_request:
+    paths:
+      - 'scheduler/**'
+      - '.github/workflows/scheduler-tests.yml'
+  push:
+    branches:
+      - 'feature/three-window-scheduler-20261115'
+    paths:
+      - 'scheduler/**'
+      - '.github/workflows/scheduler-tests.yml'
+permissions:
+  contents: read
+jobs:
+  scheduler:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate scheduler JavaScript
+        run: |
+          node --check scheduler/booking-rules.mjs
+          node --check scheduler/booking-rules.test.mjs
+      - name: Run scheduler regression tests
+        run: node --test scheduler/booking-rules.test.mjs
