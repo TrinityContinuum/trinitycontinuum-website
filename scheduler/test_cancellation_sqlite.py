@@ -15,7 +15,8 @@ class CancellationMigrationTests(unittest.TestCase):
         self.db.execute("PRAGMA foreign_keys=ON")
         self.db.execute("CREATE TABLE appointments(id TEXT PRIMARY KEY)")
         for name in ("003_scheduler.sql", "006_atomic_slot_claims.sql",
-                     "007_explicit_open_slots.sql", "008_cancellation_tracking.sql"):
+                     "007_explicit_open_slots.sql", "008_cancellation_tracking.sql",
+                     "009_terminal_booking_status_guard.sql"):
             self.db.executescript((ROOT / name).read_text(encoding="utf-8"))
         self.db.execute(
             """INSERT INTO scheduler_bookings
@@ -56,6 +57,25 @@ class CancellationMigrationTests(unittest.TestCase):
                 (booking_id,state,actor,expected_status,reopen_requested)
                 VALUES('book-1','processing',NULL,'reserved',1)"""
             )
+    def test_cancelled_booking_cannot_be_reactivated(self):
+        self.claim()
+        self.db.execute("UPDATE scheduler_bookings SET status='cancelled' WHERE id='book-1'")
+        self.db.execute("UPDATE scheduler_cancellations SET state='completed' WHERE booking_id='book-1'")
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "booking_terminal_status_immutable"):
+            self.db.execute("UPDATE scheduler_bookings SET status='reserved' WHERE id='book-1'")
+        self.assertEqual(self.db.execute("SELECT status FROM scheduler_bookings WHERE id='book-1'").fetchone()[0], "cancelled")
+
+    def test_completed_booking_cannot_be_reactivated(self):
+        self.db.execute("UPDATE scheduler_bookings SET status='completed' WHERE id='book-1'")
+        with self.assertRaisesRegex(sqlite3.IntegrityError, "booking_terminal_status_immutable"):
+            self.db.execute("UPDATE scheduler_bookings SET status='calendar_created' WHERE id='book-1'")
+
+    def test_terminal_booking_nonstatus_update_is_allowed(self):
+        self.claim()
+        self.db.execute("UPDATE scheduler_bookings SET status='cancelled' WHERE id='book-1'")
+        self.db.execute("UPDATE scheduler_bookings SET updated_at='2026-11-21T00:00:00Z' WHERE id='book-1'")
+        self.assertEqual(self.db.execute("SELECT status FROM scheduler_bookings").fetchone()[0], "cancelled")
+
     def test_explicit_window_can_remain_closed(self):
         self.db.execute(
             """INSERT INTO scheduler_open_slots(id,start_utc,end_utc,enabled,created_by)
