@@ -11,7 +11,7 @@ export const DEFAULT_WEEK = Object.freeze(Array.from({length:7},(_,day)=>({
   ]
 })));
 const minute = value => {
-  if(typeof value!=='string'||!/^([01]\\d|2[0-3]):[0-5]\\d$/.test(value)) throw Error('Invalid local time');
+  if(typeof value!=='string'||!/^([01][0-9]|2[0-3]):[0-5][0-9]$/.test(value)) throw Error('Invalid local time');
   const [h,m]=value.split(':').map(Number); return h*60+m;
 };
 export function validateWeek(week) {
