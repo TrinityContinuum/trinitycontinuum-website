@@ -8,7 +8,7 @@ SELECT 'lead-inl-moorehead-20261115','Idaho National Laboratory','John Moorehead
 WHERE NOT EXISTS(SELECT 1 FROM scheduling_opportunities WHERE lower(contact_email)='john.moorehead@inl.gov');
 INSERT INTO scheduling_opportunities
 (id,organization,contact_name,contact_email,subject,status,next_action,source_reference,notes,phone,location,proposed_times)
-SELECT 'lead-sfwmd-vitani-20261115','South Florida Water Management District','Nicholas Vitani','nvitani@sfwmd.gov','Water-use pre-application discussion','scheduling','Select offered slot with Jack; avoid DeSoto conflict','Gmail: South Florida water-use pre-application inquiry','Times offered in Eastern Time; Nov 16 3 PM ET conflicts with DeSoto County meeting.',NULL,'South Florida, USA','Nov 18 2:30 or 3 PM ET; Nov 19 9:30–11 AM ET'
+SELECT 'lead-sfwmd-vitani-20261115','South Florida Water Management District','Nicholas Vitani','nvitani@sfwmd.gov','Water-use pre-application discussion','scheduling','Select offered slot with Jack; avoid DeSoto conflict','Gmail: South Florida water-use pre-application inquiry','Times offered in Eastern Time; Nov 16 3 PM ET is immediately before DeSoto County meeting; avoid back-to-back scheduling.',NULL,'South Florida, USA','Nov 18 2:30 or 3 PM ET; Nov 19 9:30–11 AM ET'
 WHERE NOT EXISTS(SELECT 1 FROM scheduling_opportunities WHERE lower(contact_email)='nvitani@sfwmd.gov');
 INSERT INTO scheduling_opportunities
 (id,organization,contact_name,contact_email,subject,status,next_action,source_reference,notes,phone,location)
