@@ -13,7 +13,7 @@ test('Trinity Central is displayed before guest Eastern',()=>{
 test('four existing film embeds are included without autoplay or external page navigation',()=>{
  const page=renderConfirmedMeetingPage(meeting);
  assert.equal((page.match(/class="film"/g)||[]).length,4);
- assert.equal((page.match(/data-embed=/g)||[]).length,5); // 4 buttons plus selector in script
+ assert.equal((page.match(/data-embed=/g)||[]).length,4); // one button per film
  assert.match(page,/film-presentations.html#four-visions/);
  assert.doesNotMatch(page,/autoplay=1/);
 });
