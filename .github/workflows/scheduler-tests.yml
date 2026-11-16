@@ -25,10 +25,13 @@ jobs:
           python-version: '3.12'
       - name: Run isolated SQLite cancellation migration tests
         run: python -m unittest discover -s scheduler -p 'test_cancellation_sqlite.py' -v
+      - name: Test Coordination Desk event identity against SQLite migration
+        run: python -m unittest discover -s scheduler -p 'test_coordination_event_identity.py' -v
       - name: Validate scheduler JavaScript
         run: |
           node --check scheduler/booking-rules.mjs
           node --check scheduler/booking-rules.test.mjs
+          node --check scheduler/meeting-dossier-api.mjs
           node --check scheduler/booking-admin-api.mjs
           node --check scheduler/booking-admin-api.test.mjs
           node --check scheduler/google-calendar-adapter.mjs
