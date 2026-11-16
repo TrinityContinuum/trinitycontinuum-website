@@ -20,6 +20,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run isolated SQLite cancellation migration tests
+        run: python -m unittest discover -s scheduler -p 'test_cancellation_sqlite.py' -v
       - name: Validate scheduler JavaScript
         run: |
           node --check scheduler/booking-rules.mjs
