@@ -90,3 +90,42 @@ test('calendar inspection does not mutate missing-calendar-ID record',async()=>{
  assert.equal(data.calendar.state,'no_event_id');
  assert.equal(data.read_only,true);
 });
+
+
+test('reconciliation queue shows unresolved states oldest-first and excludes completed',async()=>{
+ const rows=[
+  {booking_id:'a',state:'processing',expected_status:'reserved',reopen_requested:0,notification_state:'not_verified',updated_at:'2026-11-16T01:00:00Z',booking_status:'reserved',google_event_id:'tcfirst'},
+  {booking_id:'b',state:'calendar_removed',expected_status:'calendar_created',reopen_requested:1,notification_state:'requested',updated_at:'2026-11-16T02:00:00Z',booking_status:'calendar_created',google_event_id:'tcsecond'},
+  {booking_id:'c',state:'needs_reconciliation',expected_status:'reserved',reopen_requested:0,notification_state:'not_verified',updated_at:'2026-11-16T03:00:00Z',booking_status:'reserved',google_event_id:'tcthird'}
+ ];
+ const calls=[];
+ const db={prepare(sql){
+  calls.push(sql);
+  return {async all(){
+   assert.match(sql,/WHERE c.state IN/);
+   assert.match(sql,/ORDER BY c.updated_at ASC/);
+   assert.match(sql,/LIMIT 150/);
+   return {results:rows};
+  }};
+ }};
+ const original=globalThis.fetch;
+ let networkCalls=0;
+ globalThis.fetch=async()=>{networkCalls++;throw Error('unexpected external call')};
+ try{
+  const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/cancellation-reconciliation'),{DB:db},'verified-admin');
+  assert.equal(r.status,200);
+  const data=await r.json();
+  assert.deepEqual(data.reconciliation_required,rows);
+  assert.equal(data.read_only,true);
+  assert.equal(data.calendar_state_verified,false);
+  assert.equal(networkCalls,0);
+  assert.equal(calls.length,1);
+  assert.doesNotMatch(calls[0],/^(INSERT|UPDATE|DELETE)/i);
+ }finally{globalThis.fetch=original}
+});
+test('reconciliation queue database failure returns 503 without modifying records',async()=>{
+ const db={prepare(){return {async all(){throw Error('sqlite failure')}}}};
+ const r=await bookingAdminApi(new Request('https://admin.example.test/api/scheduler/cancellation-reconciliation'),{DB:db},'verified-admin');
+ assert.equal(r.status,503);
+ assert.match((await r.json()).error,/unavailable/);
+});
