@@ -17,12 +17,16 @@ export async function meetingDossierApi(request,env,actor){
    const current=await env.DB.prepare('SELECT id,booking_id,status FROM scheduler_follow_up_tasks WHERE id=?').bind(taskMatch[1]).first();
    if(!current)return json({error:'Task not found'},404);
    if(current.status===input.status)return json({ok:true,id:current.id,status:input.status,unchanged:true});
+   // D1 batch executes on one SQLite connection in a transaction. changes()
+   // from the preceding statement gates both audit and event insertion.
+   // A stale compare-and-swap writes zero rows and creates no side effects.
+   const transitionId=crypto.randomUUID();
+   const eventId=crypto.randomUUID();
+   const payload=JSON.stringify({from:current.status,to:input.status,transition_id:transitionId});
    const result=await env.DB.batch([
     env.DB.prepare("UPDATE scheduler_follow_up_tasks SET status=?,completed_at=CASE WHEN ?='done' THEN strftime('%Y-%m-%dT%H:%M:%fZ','now') ELSE NULL END,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND status=?").bind(input.status,input.status,current.id,current.status),
-    env.DB.prepare("INSERT INTO scheduler_audit(entity_type,entity_id,action,actor,detail_json) VALUES('scheduler_follow_up',?,'status_change',?,?)").bind(current.id,actor,JSON.stringify({from:current.status,to:input.status})),
-    // Each committed transition is a distinct business event, even after reopen/recomplete.
-    // Delivery retries reuse the persisted event id rather than creating a new event.
-    coordination(env.DB,current.booking_id,'follow_up_updated',current.id,actor,{from:current.status,to:input.status,transition_id:crypto.randomUUID()})
+    env.DB.prepare("INSERT INTO scheduler_audit(entity_type,entity_id,action,actor,detail_json) SELECT 'scheduler_follow_up',?,'status_change',?,? WHERE changes()=1").bind(current.id,actor,JSON.stringify({from:current.status,to:input.status})),
+    env.DB.prepare("INSERT INTO scheduler_coordination_events(id,booking_id,event_type,source_id,actor,payload_json) SELECT ?,?,'follow_up_updated',?,?,? WHERE changes()=1").bind(eventId,current.booking_id,current.id,actor,payload)
    ]);
    if(result[0]?.meta?.changes!==1)return json({error:'Task changed concurrently; reload'},409);
    return json({ok:true,id:current.id,status:input.status});
