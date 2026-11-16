@@ -35,7 +35,19 @@ export default {
         'content-security-policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`});
     }
     if(url.pathname==='/desk')return reply('Method not allowed',405);
-    if(url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/'))return bookingAdminApi(req,env);
+    if(url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/')){
+      // Identity is derived only after the legacy authentication gate succeeds.
+      // Never accept an administrator identity from a request body or header.
+      let actor;
+      try{
+        const auth=req.headers.get('Authorization')||'';
+        if(!auth.startsWith('Basic '))return reply('Unauthorized',401);
+        const decoded=atob(auth.slice(6));
+        actor=decoded.slice(0,decoded.indexOf(':'));
+        if(!actor||actor.length>120)return reply('Unauthorized',401);
+      }catch{return reply('Unauthorized',401)}
+      return bookingAdminApi(req,env,actor);
+    }
     if(url.pathname==='/api/scheduler/settings')return settingsApi(req,env);
     if(url.pathname==='/api/scheduler/open-slots'||url.pathname.startsWith('/api/scheduler/open-slots/'))return openSlotsApi(req,env);
     return opportunityApi(req,env);
