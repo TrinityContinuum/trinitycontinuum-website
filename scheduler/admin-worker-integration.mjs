@@ -41,10 +41,13 @@ export default {
       let actor;
       try{
         const auth=req.headers.get('Authorization')||'';
-        if(!auth.startsWith('Basic '))return reply('Unauthorized',401);
-        const decoded=atob(auth.slice(6));
-        actor=decoded.slice(0,decoded.indexOf(':'));
-        if(!actor||actor.length>120)return reply('Unauthorized',401);
+        const match=/^Basic ([A-Za-z0-9+/]+={0,2})$/.exec(auth);
+        if(!match)return reply('Unauthorized',401);
+        const decoded=atob(match[1]);
+        const separator=decoded.indexOf(':');
+        if(separator<1)return reply('Unauthorized',401);
+        actor=decoded.slice(0,separator);
+        if(!/^[A-Za-z0-9._-]{1,120}$/.test(actor))return reply('Unauthorized',401);
       }catch{return reply('Unauthorized',401)}
       return bookingAdminApi(req,env,actor);
     }
