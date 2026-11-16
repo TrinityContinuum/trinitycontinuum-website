@@ -25,8 +25,8 @@ export async function opportunityApi(req,env){
     if(!organization||!allowed(status)||email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:'Invalid opportunity'},400);
     const id=crypto.randomUUID();
     try{
-      await env.DB.prepare('INSERT INTO scheduling_opportunities(id,organization,contact_name,contact_email,subject,status,next_action,owner,source_reference,notes) VALUES(?,?,?,?,?,?,?,?,?,?)')
-        .bind(id,organization,contact,email,clean(a?.subject,250),status,clean(a?.next_action,500),clean(a?.owner,120),clean(a?.source_reference,250),clean(a?.notes,1500)).run();
+      await env.DB.prepare('INSERT INTO scheduling_opportunities(id,organization,contact_name,contact_email,subject,status,next_action,owner,source_reference,notes,phone,location,website,contact_title,proposed_times) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)')
+        .bind(id,organization,contact,email,clean(a?.subject,250),status,clean(a?.next_action,500),clean(a?.owner,120),clean(a?.source_reference,250),clean(a?.notes,1500),clean(a?.phone,100),clean(a?.location,250),clean(a?.website,300),clean(a?.contact_title,150),clean(a?.proposed_times,600)).run();
       return json({ok:true,id},201);
     }catch{return json({error:'Could not save opportunity'},503)}
   }
