@@ -37,3 +37,9 @@ export async function createMeeting(env,booking){
   throw e;
  }
 }
+
+export async function cancelMeeting(env,eventId){
+ if(!/^[a-z0-9_]{5,1024}$/.test(eventId))throw Error('invalid_google_event_id');
+ try { await google(env,'/events/'+encodeURIComponent(eventId)+'?sendUpdates=all',{method:'DELETE'}); return {cancelled:true}; }
+ catch(e){ if(['calendar_http_404','calendar_http_410'].includes(String(e.message)))return {cancelled:true,already_absent:true}; throw e; }
+}
