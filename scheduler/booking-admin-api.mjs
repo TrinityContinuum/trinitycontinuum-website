@@ -2,6 +2,11 @@ import {cancelMeeting} from './google-calendar-adapter.mjs';
 const reply=(x,s=200)=>new Response(JSON.stringify(x),{status:s,headers:{'content-type':'application/json','cache-control':'no-store'}});
 // Call only from the private admin worker after authentication and same-origin checks.
 export async function bookingAdminApi(req,env){
+ const path=new URL(req.url).pathname;
+ if(path==='/api/scheduler/bookings'&&req.method==='GET'){
+  if(!env.DB)return reply({error:'Database unavailable'},503);
+  try{const data=await env.DB.prepare("SELECT id,requester_name,requester_email,organization,topic,start_utc,end_utc,status,google_meet_url FROM scheduler_bookings ORDER BY start_utc DESC LIMIT 150").all();return reply({bookings:data.results||[]})}catch{return reply({error:'Bookings unavailable'},503)}
+ }
  const match=/^\/api\/scheduler\/bookings\/([0-9a-f-]{36})\/cancel$/.exec(new URL(req.url).pathname);
  if(!match||req.method!=='POST')return reply({error:'Not found'},404);
  if(!env.DB)return reply({error:'Database unavailable'},503);
