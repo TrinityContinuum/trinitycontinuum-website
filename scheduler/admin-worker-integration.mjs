@@ -3,6 +3,7 @@
 // D1 migration 003 is applied, and the staging auth/CSRF tests pass.
 // The legacy worker is the authoritative authentication gate for every route.
 import legacyAdmin from './legacy-admin-worker.mjs';
+import {bookingAdminApi} from './booking-admin-api.mjs';
 import {openSlotsApi} from './open-slots-api.mjs';
 import {settingsApi} from './settings-api.mjs';
 import {opportunityApi} from './opportunities-api.mjs';
@@ -11,7 +12,7 @@ const reply=(body,status=200,headers={})=>new Response(body,{status,headers:{'ca
 export default {
   async fetch(req,env,ctx){
     const url=new URL(req.url);
-    const enhanced=url.pathname==='/api/scheduler/settings'||url.pathname==='/api/scheduler/open-slots'||url.pathname.startsWith('/api/scheduler/open-slots/')||url.pathname==='/desk'||url.pathname==='/api/opportunities'||url.pathname.startsWith('/api/opportunities/');
+    const enhanced=url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/')||url.pathname==='/api/scheduler/settings'||url.pathname==='/api/scheduler/open-slots'||url.pathname.startsWith('/api/scheduler/open-slots/')||url.pathname==='/desk'||url.pathname==='/api/opportunities'||url.pathname.startsWith('/api/opportunities/');
     if(!enhanced)return legacyAdmin.fetch(req,env,ctx);
     if(!['GET','POST','PATCH','PUT','DELETE'].includes(req.method))return reply('Method not allowed',405,{'allow':'GET, POST, PATCH, PUT, DELETE'});
     // Authenticate with the existing private admin Worker. It checks the
@@ -34,6 +35,7 @@ export default {
         'content-security-policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`});
     }
     if(url.pathname==='/desk')return reply('Method not allowed',405);
+    if(url.pathname==='/api/scheduler/bookings'||url.pathname.startsWith('/api/scheduler/bookings/'))return bookingAdminApi(req,env);
     if(url.pathname==='/api/scheduler/settings')return settingsApi(req,env);
     if(url.pathname==='/api/scheduler/open-slots'||url.pathname.startsWith('/api/scheduler/open-slots/'))return openSlotsApi(req,env);
     return opportunityApi(req,env);
