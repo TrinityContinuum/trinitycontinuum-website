@@ -26,8 +26,10 @@ export default {
       if(req.headers.get('Sec-Fetch-Site')==='cross-site')return reply('Forbidden',403);
     }
     if(url.pathname==='/desk'&&req.method==='GET'){
-      return reply(ADMIN_DESK_HTML,200,{'content-type':'text/html; charset=utf-8',
-        'content-security-policy':"default-src 'none'; script-src 'nonce-trinity-desk-v1'; style-src 'nonce-trinity-desk-v1'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'"});
+      const nonce=crypto.randomUUID().replaceAll('-','');
+      const page=ADMIN_DESK_HTML.replaceAll('trinity-desk-v1',nonce);
+      return reply(page,200,{'content-type':'text/html; charset=utf-8',
+        'content-security-policy':`default-src 'none'; script-src 'nonce-${nonce}'; style-src 'nonce-${nonce}'; connect-src 'self'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'`});
     }
     if(url.pathname==='/desk')return reply('Method not allowed',405);
     return opportunityApi(req,env);
