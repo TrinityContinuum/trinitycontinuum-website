@@ -1,7 +1,7 @@
 // Private administrator API. Caller authenticates, checks Origin/CSRF and supplies trusted actor.
 // No public routes, automatic emails, or calendar writes.
 const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json','cache-control':'no-store'}});
-const uuid=/^[0-9a-f-]{36}$/i;
+const coordination=(db,bookingId,eventType,sourceId,actor,payload)=>db.prepare('INSERT INTO scheduler_coordination_events(id,booking_id,event_type,source_id,actor,payload_json) VALUES(?,?,?,?,?,?)').bind(crypto.randomUUID(),bookingId,eventType,sourceId,actor,JSON.stringify(payload));
 const validDate=s=>typeof s==='string'&&/^\d{4}-\d\d-\d\dT\d\d:\d\d:\d\d(?:\.\d+)?Z$/.test(s)&&!Number.isNaN(Date.parse(s));
 export async function meetingDossierApi(request,env,actor){
  if(typeof actor!=='string'||!actor.trim())return json({error:'Trusted administrator required'},403);
@@ -16,9 +16,13 @@ export async function meetingDossierApi(request,env,actor){
    if(!input||!['open','in_progress','done','cancelled'].includes(input.status))return json({error:'Invalid task status'},400);
    const current=await env.DB.prepare('SELECT id,booking_id,status FROM scheduler_follow_up_tasks WHERE id=?').bind(taskMatch[1]).first();
    if(!current)return json({error:'Task not found'},404);
-   const result=await env.DB.prepare("UPDATE scheduler_follow_up_tasks SET status=?,completed_at=CASE WHEN ?='done' THEN strftime('%Y-%m-%dT%H:%M:%fZ','now') ELSE NULL END,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND status=?").bind(input.status,input.status,current.id,current.status).run();
-   if(result.meta?.changes!==1)return json({error:'Task changed concurrently; reload'},409);
-   await env.DB.prepare("INSERT INTO scheduler_audit(entity_type,entity_id,action,actor,detail_json) VALUES('scheduler_follow_up',?,'status_change',?,?)").bind(current.id,actor,JSON.stringify({from:current.status,to:input.status})).run();
+   if(current.status===input.status)return json({ok:true,id:current.id,status:input.status,unchanged:true});
+   const result=await env.DB.batch([
+    env.DB.prepare("UPDATE scheduler_follow_up_tasks SET status=?,completed_at=CASE WHEN ?='done' THEN strftime('%Y-%m-%dT%H:%M:%fZ','now') ELSE NULL END,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND status=?").bind(input.status,input.status,current.id,current.status),
+    env.DB.prepare("INSERT INTO scheduler_audit(entity_type,entity_id,action,actor,detail_json) VALUES('scheduler_follow_up',?,'status_change',?,?)").bind(current.id,actor,JSON.stringify({from:current.status,to:input.status})),
+    coordination(env.DB,current.booking_id,'follow_up_updated',current.id,actor,{from:current.status,to:input.status})
+   ]);
+   if(result[0]?.meta?.changes!==1)return json({error:'Task changed concurrently; reload'},409);
    return json({ok:true,id:current.id,status:input.status});
   }
   if(!match)return json({error:'Not found'},404);
@@ -36,13 +40,19 @@ export async function meetingDossierApi(request,env,actor){
   if(input.type==='note'){
    if(!['preparation','meeting','follow_up'].includes(input.phase)||typeof input.body!=='string'||!input.body.trim()||input.body.length>12000)return json({error:'Invalid note'},400);
    const noteId=crypto.randomUUID();
-   await env.DB.prepare('INSERT INTO scheduler_meeting_notes(id,booking_id,phase,body,author) VALUES(?,?,?,?,?)').bind(noteId,id,input.phase,input.body.trim(),actor).run();
+   await env.DB.batch([
+    env.DB.prepare('INSERT INTO scheduler_meeting_notes(id,booking_id,phase,body,author) VALUES(?,?,?,?,?)').bind(noteId,id,input.phase,input.body.trim(),actor),
+    coordination(env.DB,id,'meeting_note_added',noteId,actor,{phase:input.phase})
+   ]);
    return json({ok:true,id:noteId},201);
   }
   if(input.type==='task'){
    if(typeof input.title!=='string'||!input.title.trim()||input.title.length>240||typeof input.owner!=='string'||!input.owner.trim()||input.owner.length>120||typeof(input.details??'')!=='string'||(input.details??'').length>4000||(input.due_at!=null&&!validDate(input.due_at)))return json({error:'Invalid follow-up task'},400);
    const taskId=crypto.randomUUID();
-   await env.DB.prepare('INSERT INTO scheduler_follow_up_tasks(id,booking_id,title,details,owner,due_at,created_by) VALUES(?,?,?,?,?,?,?)').bind(taskId,id,input.title.trim(),input.details??'',input.owner.trim(),input.due_at??null,actor).run();
+   await env.DB.batch([
+    env.DB.prepare('INSERT INTO scheduler_follow_up_tasks(id,booking_id,title,details,owner,due_at,created_by) VALUES(?,?,?,?,?,?,?)').bind(taskId,id,input.title.trim(),input.details??'',input.owner.trim(),input.due_at??null,actor),
+    coordination(env.DB,id,'follow_up_created',taskId,actor,{title:input.title.trim(),owner:input.owner.trim(),due_at:input.due_at??null})
+   ]);
    return json({ok:true,id:taskId},201);
   }
   return json({error:'Unknown record type'},400);
