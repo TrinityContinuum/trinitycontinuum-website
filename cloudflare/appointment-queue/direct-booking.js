@@ -183,6 +183,13 @@ export default {async fetch(req,env){
   if(!basic(req,env))return new Response("Unauthorized",{status:401,headers:{"www-authenticate":"Basic realm=\"Trinity Scheduling\"","cache-control":"no-store"}});
   return new Response(ADMIN_HTML,{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"}});
  }
+ if(url.pathname==="/api/admin/master"&&req.method==="GET"){
+  if(!basic(req,env))return json({error:"Unauthorized"},401);
+  const direct=await env.DB.prepare("SELECT id,slot_start AS start_utc,slot_end AS end_utc,name,email,organization,topic,state,calendar_event_id FROM appointment_bookings ORDER BY slot_start DESC LIMIT 250").all();
+  const pending=await env.DB.prepare("SELECT a.id,a.name,a.email,a.organization,a.topic,a.date1,a.time1,a.date2,a.time2,a.timezone,d.choice,d.notification_state FROM appointments a LEFT JOIN appointment_decisions d ON d.request_id=a.id ORDER BY a.created_at DESC LIMIT 250").all();
+  const entries=[...(direct.results||[]).map(x=>({...x,source:"direct",verification:x.state==="confirmed"?"calendar_event_created":"reconcile_required"})),...(pending.results||[]).map(x=>({...x,source:"request_queue",verification:x.choice==="first"||x.choice==="second"?"decision_recorded_invitation_unverified":"approval_pending"}))];
+  return json({entries,notice:"Historic personal-calendar events require separate authorized import and reconciliation before this can be called complete."});
+ }
  if(url.pathname==="/api/admin/bookings"&&req.method==="GET"){
   if(!basic(req,env))return json({error:"Unauthorized"},401);
   const b=await env.DB.prepare("SELECT id,slot_start,slot_end,name,email,state,calendar_event_id FROM appointment_bookings ORDER BY slot_start DESC LIMIT 150").all();return json({bookings:b.results||[]});
