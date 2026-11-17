@@ -135,7 +135,7 @@ async function handleBook(req,env,origin){
  }
 }
 
-const ADMIN_HTML=String.raw\`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trinity — Scheduling Policy</title>
+const ADMIN_HTML=String.raw`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trinity — Scheduling Policy</title>
 <style>body{margin:0;background:#07111e;color:#e9f0f6;font:16px/1.5 system-ui}main{max-width:940px;margin:auto;padding:28px}h1{color:#dfc17d}fieldset{border:1px solid #6a7a8b;border-radius:10px;padding:16px;margin:18px 0}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #43576d;text-align:left;padding:10px}input{font:inherit;padding:7px}input[type=time]{width:115px;background:#10253a;color:white}button{background:#dfc17d;color:#07111e;border:0;padding:12px 18px;border-radius:7px;font-weight:700;cursor:pointer}p{max-width:780px}.muted{color:#bbcbd8}#message{padding:14px;border:1px solid #43576d;border-radius:6px}a{color:#dfc17d}@media(max-width:600px){table{font-size:13px}input[type=time]{width:85px}}</style>
 <main><h1>Trinity · Central Scheduling Controls</h1><p>Jack chooses the hours available for direct booking. Outside these hours, visitors request approval. <strong>Hours are in America/Chicago (Central), including DST.</strong></p>
 <p class="muted">The appointment register remains Trinity's authority. No direct booking is active unless the policy is enabled AND the separate server deployment switch and verified business calendar are available. New direct bookings are 30 minutes. 11:30 AM–1 PM Central is always blocked.</p>
@@ -165,7 +165,7 @@ document.getElementById('policy').addEventListener('submit',async e=>{
  const r=await fetch('/api/admin/policy',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(body)});const j=await r.json();
  msg.textContent=r.ok?'Hours saved in Trinity policy; no invitations sent.':(j.error||'Could not save');});
 load().catch(e=>msg.textContent=e.message);
-</script></html>\`;
+</script></html>`;
 
 export default {async fetch(req,env){
  const url=new URL(req.url),origin=req.headers.get("Origin")||"";
