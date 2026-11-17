@@ -100,8 +100,9 @@ async function handleSlots(url,env,origin){
    if(!slotWithin(day,time,p))continue;
    const start=fromLocal(day,time),end=new Date(start.getTime()+1800000);
    if(!inRange(start,p))continue;
-   const reserved=await env.DB.prepare("SELECT id FROM appointment_bookings WHERE slot_start=? AND state IN ('processing','confirmed','needs_reconciliation')").bind(start.toISOString()).first();
-   if(!reserved&&await freeBusy(env,tok,start,end))slots.push({time,zone:ZONE});
+   const reserved=await env.DB.prepare("SELECT id FROM appointment_bookings WHERE slot_start < ? AND slot_end > ? AND state IN ('processing','confirmed','needs_reconciliation') LIMIT 1").bind(end.toISOString(),start.toISOString()).first();
+   const legacy=await env.DB.prepare("SELECT id FROM appointment_external WHERE start_utc < ? AND end_utc > ? AND status IN ('invited','accepted','completed','tentative') LIMIT 1").bind(end.toISOString(),start.toISOString()).first();
+   if(!reserved&&!legacy&&await freeBusy(env,tok,start,end))slots.push({time,zone:ZONE});
   }catch{/* Skip ambiguous or unavailable slots safely. */}
  }
  return json({enabled:true,date:day,timezone:ZONE,slots},200,origin);
@@ -118,7 +119,10 @@ async function handleBook(req,env,origin){
  start=fromLocal(day,time);end=new Date(start.getTime()+1800000);
  if(!inRange(start,p))return json({error:"Outside booking window"},409,origin);
  }catch{return json({error:"Invalid or ambiguous time"},400,origin)}
- let token;try{token=await googleToken(env);if(!await freeBusy(env,token,start,end))return json({error:"Time no longer available"},409,origin)}
+ let token;try{token=await googleToken(env);
+  const previous=await env.DB.prepare("SELECT id FROM appointment_external WHERE start_utc < ? AND end_utc > ? AND status IN ('invited','accepted','completed','tentative') LIMIT 1").bind(end.toISOString(),start.toISOString()).first();
+  if(previous)return json({error:"Existing Trinity meeting conflicts with selected time"},409,origin);
+  if(!await freeBusy(env,token,start,end))return json({error:"Time no longer available"},409,origin)}
  catch{return json({error:"Could not verify business calendar; no booking made"},503,origin)}
  // D1 unique index on slot_start serializes simultaneous submissions.
  try{
