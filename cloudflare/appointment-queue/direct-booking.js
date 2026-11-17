@@ -194,6 +194,23 @@ export default {async fetch(req,env){
   const entries=[...(direct.results||[]).map(x=>({...x,source:"direct",verification:x.state==="confirmed"?"calendar_event_created":"reconcile_required"})),...(pending.results||[]).map(x=>({...x,source:"request_queue",verification:x.choice==="first"||x.choice==="second"?"decision_recorded_invitation_unverified":"approval_pending"}))];
   return json({entries,notice:"Historic personal-calendar events require separate authorized import and reconciliation before this can be called complete."});
  }
+ if(url.pathname==="/api/admin/import-external"&&req.method==="POST"){
+  if(!basic(req,env))return json({error:"Unauthorized"},401);
+  if(req.headers.get("Origin")!==url.origin)return json({error:"Invalid administrator origin"},403);
+  let payload;try{payload=await req.json()}catch{return json({error:"Invalid import document"},400)}
+  if(!Array.isArray(payload?.appointments)||payload.appointments.length>100)return json({error:"Maximum 100 validated records per import"},400);
+  const statuses=new Set(["invited","accepted","completed","cancelled","tentative"]);
+  let inserted=0,unchanged=0;
+  for(const a of payload.appointments){
+   if(typeof a?.id!=="string"||!/^[A-Z0-9-]{10,100}$/.test(a.id)||typeof a?.source_key!=="string"||a.source_key.length<5||a.source_key.length>250||!statuses.has(a.status)||typeof a.title!=="string"||a.title.length>200||typeof a.start_utc!=="string"||typeof a.end_utc!=="string"||!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/.test(a.start_utc)||!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/.test(a.end_utc)||!Number.isFinite(Date.parse(a.start_utc))||Date.parse(a.end_utc)<=Date.parse(a.start_utc))return json({error:"Import contains invalid data; no further rows imported",inserted},400);
+   const existing=await env.DB.prepare("SELECT id FROM appointment_external WHERE source_key=? OR id=? LIMIT 1").bind(a.source_key,a.id).first();
+   if(existing){unchanged++;continue}
+   try{
+    await env.DB.prepare("INSERT INTO appointment_external(id,title,start_utc,end_utc,timezone,status,platform,join_url,attendees,organizer,source_key,notes) VALUES(?,?,?,?,?,?,?,?,?,?,?,?)").bind(a.id,a.title,a.start_utc,a.end_utc,"America/Chicago",a.status,String(a.platform||"").slice(0,120),String(a.join_url||"").slice(0,1000),String(a.attendees||"").slice(0,1500),String(a.organizer||"").slice(0,150),a.source_key,String(a.notes||"").slice(0,2000)).run();inserted++;
+   }catch{return json({error:"Database import stopped; compare existing rows before retry",inserted,unchanged},409)}
+  }
+  return json({ok:true,inserted,unchanged,note:"Imported into Trinity private register only; no calendar invitations or emails sent."});
+ }
  if(url.pathname==="/api/admin/bookings"&&req.method==="GET"){
   if(!basic(req,env))return json({error:"Unauthorized"},401);
   const b=await env.DB.prepare("SELECT id,slot_start,slot_end,name,email,state,calendar_event_id FROM appointment_bookings ORDER BY slot_start DESC LIMIT 150").all();return json({bookings:b.results||[]});
