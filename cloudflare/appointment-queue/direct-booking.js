@@ -134,6 +134,39 @@ async function handleBook(req,env,origin){
   return json({error:"Calendar confirmation uncertain; Trinity will reconcile. Do not retry.",reference:id},503,origin);
  }
 }
+
+const ADMIN_HTML=String.raw\`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trinity — Scheduling Policy</title>
+<style>body{margin:0;background:#07111e;color:#e9f0f6;font:16px/1.5 system-ui}main{max-width:940px;margin:auto;padding:28px}h1{color:#dfc17d}fieldset{border:1px solid #6a7a8b;border-radius:10px;padding:16px;margin:18px 0}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #43576d;text-align:left;padding:10px}input{font:inherit;padding:7px}input[type=time]{width:115px;background:#10253a;color:white}button{background:#dfc17d;color:#07111e;border:0;padding:12px 18px;border-radius:7px;font-weight:700;cursor:pointer}p{max-width:780px}.muted{color:#bbcbd8}#message{padding:14px;border:1px solid #43576d;border-radius:6px}a{color:#dfc17d}@media(max-width:600px){table{font-size:13px}input[type=time]{width:85px}}</style>
+<main><h1>Trinity · Central Scheduling Controls</h1><p>Jack chooses the hours available for direct booking. Outside these hours, visitors request approval. <strong>Hours are in America/Chicago (Central), including DST.</strong></p>
+<p class="muted">The appointment register remains Trinity's authority. No direct booking is active unless the policy is enabled AND the separate server deployment switch and verified business calendar are available. New direct bookings are 30 minutes. 11:30 AM–1 PM Central is always blocked.</p>
+<form id="policy"><fieldset><legend>Automatic confirmation policy</legend><label><input id="enabled" type="checkbox"> Allow automatic booking during the selected hours</label><table><thead><tr><th>Day</th><th>On</th><th>Start (Central)</th><th>End (Central)</th></tr></thead><tbody id="days"></tbody></table>
+<label>Minimum lead time (hours) <input id="lead" type="number" min="1" max="720" value="24"></label> <label>Booking horizon (days) <input id="horizon" type="number" min="1" max="365" value="60"></label>
+</fieldset><button type="submit">Save Jack's booking hours</button></form><p id="message" role="status">Loading private schedule...</p><h2>Confirmed or reconciliation-needed direct bookings</h2><div id="bookings">Loading records...</div></main>
+<script>
+const names=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+const host=document.getElementById('days'),msg=document.getElementById('message');
+for(let i=0;i<7;i++){const tr=document.createElement('tr');tr.innerHTML='<td>'+names[i]+'</td><td><input type="checkbox" data-day="'+i+'"></td><td><input type="time" data-start="'+i+'" value="09:00" step="1800"></td><td><input type="time" data-end="'+i+'" value="17:00" step="1800"></td>';host.append(tr)}
+const elm=(type,day)=>document.querySelector('[data-'+type+'="'+day+'"]');
+async function load(){
+ const [r,b]=await Promise.all([fetch('/api/admin/policy'),fetch('/api/admin/bookings')]);if(!r.ok||!b.ok)throw Error('Unable to read private schedule');
+ const p=await r.json(),book=await b.json();document.getElementById('enabled').checked=p.enabled;document.getElementById('lead').value=p.minNoticeHours;document.getElementById('horizon').value=p.maxDays;
+ for(const w of p.windows){elm('day',w.weekday).checked=true;elm('start',w.weekday).value=w.start;elm('end',w.weekday).value=w.end}
+ const area=document.getElementById('bookings');area.replaceChildren();
+ for(const x of book.bookings){const row=document.createElement('p');row.textContent=x.slot_start+' Central-converted in your view · '+x.name+' · '+x.email+' · '+x.state+' · '+x.id;area.append(row)}
+ if(!book.bookings.length)area.textContent='No direct-booking records yet.';
+ msg.textContent=p.enabled?'Policy enabled; production still requires DIRECT_BOOKING_ENABLED=true and verified calendar integration.':'No automatic bookings are authorized by the policy.';
+}
+document.getElementById('policy').addEventListener('submit',async e=>{
+ e.preventDefault();const windows=[];
+ for(let i=0;i<7;i++)if(elm('day',i).checked)windows.push({weekday:i,start:elm('start',i).value,end:elm('end',i).value});
+ const body={enabled:document.getElementById('enabled').checked,windows,minNoticeHours:Number(document.getElementById('lead').value),maxDays:Number(document.getElementById('horizon').value)};
+ if(body.enabled&&!windows.length){msg.textContent='Choose at least one allowed day first.';return}
+ if(!confirm('Save Jack’s automatic-booking hours? Direct booking requires separate deployment approval.'))return;
+ const r=await fetch('/api/admin/policy',{method:'PUT',headers:{'content-type':'application/json'},body:JSON.stringify(body)});const j=await r.json();
+ msg.textContent=r.ok?'Hours saved in Trinity policy; no invitations sent.':(j.error||'Could not save');});
+load().catch(e=>msg.textContent=e.message);
+</script></html>\`;
+
 export default {async fetch(req,env){
  const url=new URL(req.url),origin=req.headers.get("Origin")||"";
  if(req.method==="OPTIONS")return ORIGINS.has(origin)?new Response(null,{status:204,headers:{"access-control-allow-origin":origin,"access-control-allow-methods":"GET,POST,PUT,OPTIONS","access-control-allow-headers":"content-type,authorization"}}):new Response(null,{status:403});
@@ -146,9 +179,18 @@ export default {async fetch(req,env){
   if(!ORIGINS.has(origin))return json({error:"Forbidden origin"},403,origin);
   return handleBook(req,env,origin);
  }
+ if(url.pathname==="/admin"&&req.method==="GET"){
+  if(!basic(req,env))return new Response("Unauthorized",{status:401,headers:{"www-authenticate":"Basic realm=\"Trinity Scheduling\"","cache-control":"no-store"}});
+  return new Response(ADMIN_HTML,{headers:{"content-type":"text/html; charset=utf-8","cache-control":"no-store","x-content-type-options":"nosniff"}});
+ }
+ if(url.pathname==="/api/admin/bookings"&&req.method==="GET"){
+  if(!basic(req,env))return json({error:"Unauthorized"},401);
+  const b=await env.DB.prepare("SELECT id,slot_start,slot_end,name,email,state,calendar_event_id FROM appointment_bookings ORDER BY slot_start DESC LIMIT 150").all();return json({bookings:b.results||[]});
+ }
  if(url.pathname==="/api/admin/policy"&&["GET","PUT"].includes(req.method)){
   if(!basic(req,env))return new Response("Unauthorized",{status:401,headers:{"www-authenticate":"Basic realm=\"Trinity Scheduling\"","cache-control":"no-store"}});
   if(req.method==="GET")return json(await policy(env));
+  if(req.headers.get("Origin")!==url.origin)return json({error:"Invalid administrator origin"},403);
   let b;try{b=await req.json()}catch{return json({error:"Invalid policy"},400)}
   if(!validWindows(b.windows)||!Number.isInteger(b.minNoticeHours)||b.minNoticeHours<1||b.minNoticeHours>720||!Number.isInteger(b.maxDays)||b.maxDays<1||b.maxDays>365)return json({error:"Invalid hours or notice"},400);
   await env.DB.prepare("INSERT INTO booking_policy (id,enabled,windows_json,min_notice_hours,max_days) VALUES (1,?,?,?,?) ON CONFLICT(id) DO UPDATE SET enabled=excluded.enabled,windows_json=excluded.windows_json,min_notice_hours=excluded.min_notice_hours,max_days=excluded.max_days,updated_at=datetime('now')").bind(b.enabled===true?1:0,JSON.stringify(b.windows),b.minNoticeHours,b.maxDays).run();
