@@ -202,7 +202,7 @@ export default {async fetch(req,env){
   const statuses=new Set(["invited","accepted","completed","cancelled","tentative"]);
   let inserted=0,unchanged=0;
   for(const a of payload.appointments){
-   if(typeof a?.id!=="string"||!/^[A-Z0-9-]{10,100}$/.test(a.id)||typeof a?.source_key!=="string"||a.source_key.length<5||a.source_key.length>250||!statuses.has(a.status)||typeof a.title!=="string"||a.title.length>200||typeof a.start_utc!=="string"||typeof a.end_utc!=="string"||!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/.test(a.start_utc)||!/^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}Z$/.test(a.end_utc)||!Number.isFinite(Date.parse(a.start_utc))||Date.parse(a.end_utc)<=Date.parse(a.start_utc))return json({error:"Import contains invalid data; no further rows imported",inserted},400);
+   if(typeof a?.id!=="string"||!/^[A-Z0-9-]{10,100}$/.test(a.id)||typeof a?.source_key!=="string"||a.source_key.length<5||a.source_key.length>250||!statuses.has(a.status)||typeof a.title!=="string"||a.title.length>200||typeof a.start_utc!=="string"||typeof a.end_utc!=="string"||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(a.start_utc)||!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$/.test(a.end_utc)||!Number.isFinite(Date.parse(a.start_utc))||Date.parse(a.end_utc)<=Date.parse(a.start_utc))return json({error:"Import contains invalid data; no further rows imported",inserted},400);
    const existing=await env.DB.prepare("SELECT id FROM appointment_external WHERE source_key=? OR id=? LIMIT 1").bind(a.source_key,a.id).first();
    if(existing){unchanged++;continue}
    try{
