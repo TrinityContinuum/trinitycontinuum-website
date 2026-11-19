@@ -32,14 +32,14 @@ export function localParts(instant){
 export function classifySlot(startIso,endIso,policy,now=Date.now()){
  const p=validPolicy(policy);
  const a=Date.parse(startIso),b=Date.parse(endIso);
- if(!Number.isFinite(a)||!Number.isFinite(b)||b-a!==p.slot_minutes*60000)return 'invalid';
+ if(!Number.isFinite(a)||!Number.isFinite(b)||![30,60].includes((b-a)/60000))return 'invalid';
  if(a<now+p.min_notice_minutes*60000||a>now+p.max_days_ahead*86400000)return 'manual_approval';
  const s=localParts(a),e=localParts(b-1);
  const day=s.year+'-'+s.month+'-'+s.day;
  if(day!==e.year+'-'+e.month+'-'+e.day||p.blackouts.includes(day))return 'manual_approval';
  const weekday={Sun:0,Mon:1,Tue:2,Wed:3,Thu:4,Fri:5,Sat:6}[s.weekday];
  const start=Number(s.hour)*60+Number(s.minute);
- const end=start+p.slot_minutes;
+ const end=start+(b-a)/60000;
  if(start<13*60&&end>11*60+30)return 'manual_approval';
  if(!p.automatic_enabled)return 'manual_approval';
  return (p.weekdays[String(weekday)]||[]).some(([from,to])=>start>=minutes(from)&&end<=minutes(to))?'automatic_candidate':'manual_approval';
