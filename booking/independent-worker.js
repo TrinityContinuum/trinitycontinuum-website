@@ -72,6 +72,24 @@ async function owner(req,env,url){
   try{await env.DB.batch(actions);}catch{return json({error:'Cancellation failed'},500);}
   return json({cancelled:true,notification_status:'pending'});
  }
+ if(req.method==='POST'&&url.pathname.endsWith('/reschedule')){
+  let body,slot;try{body=await req.json();slot=parseSlot(body);}catch{return json({error:'Invalid rescheduling request'},400);}
+  if(typeof body.booking_id!=='string'||!body.booking_id)return json({error:'Booking ID required'},400);
+  const current=await env.DB.prepare('SELECT * FROM automatic_bookings WHERE id=?').bind(body.booking_id).first();
+  if(!current)return json({error:'Booking not found'},404);
+  if(current.status!=='confirmed')return json({error:'Only confirmed appointments can be moved'},409);
+  if(!(await available(env,body)).eligible)return json({error:'New time is not available'},409);
+  const oldStarts=current.starts_at,oldEnds=current.ends_at;
+  if(slot.starts_at===oldStarts&&slot.ends_at===oldEnds)return json({rescheduled:true,unchanged:true});
+  const newLocks=segments(slot.a,slot.b),oldLocks=segments(Date.parse(oldStarts),Date.parse(oldEnds));
+  const statements=[...newLocks.filter(t=>!oldLocks.includes(t)).map(t=>env.DB.prepare('INSERT INTO automatic_booking_slot_locks(slot_start,booking_id) VALUES(?,?)').bind(t,current.id)),
+   env.DB.prepare("UPDATE automatic_bookings SET starts_at=?,ends_at=?,slot_key=?,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND status='confirmed' AND starts_at=? AND ends_at=?").bind(slot.starts_at,slot.ends_at,slot.starts_at,current.id,oldStarts,oldEnds),
+   ...oldLocks.filter(t=>!newLocks.includes(t)).map(t=>env.DB.prepare('DELETE FROM automatic_booking_slot_locks WHERE slot_start=? AND booking_id=?').bind(t,current.id)),
+   env.DB.prepare("INSERT INTO booking_actions(id,booking_id,actor,action,details_json) VALUES(?,?,'owner','rescheduled',?)").bind(id(),current.id,JSON.stringify({from:oldStarts,to:slot.starts_at})),
+   env.DB.prepare("INSERT INTO booking_notifications(id,booking_id,kind,recipient) VALUES(?,?,'reschedule',?) ON CONFLICT(booking_id,kind,recipient) DO UPDATE SET status='pending',attempts=0,provider_message_id=NULL").bind(id(),current.id,current.visitor_email)];
+  try{await env.DB.batch(statements);}catch(e){if(/unique|constraint/i.test(String(e)))return json({error:'New time is no longer available'},409);return json({error:'Rescheduling failed'},500);}
+  return json({rescheduled:true,starts_at:slot.starts_at,ends_at:slot.ends_at,notification_status:'pending'});
+ }
  if(req.method==='PUT'&&url.pathname.endsWith('/policy')){
   let p;try{p=await req.json();const mod=await import('./booking-policy.js');p=mod.validPolicy(p);}catch{return json({error:'Invalid policy'},400);}
   await env.DB.prepare("INSERT INTO appointment_settings(key,value) VALUES('policy',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(JSON.stringify(p)).run();
