@@ -26,7 +26,7 @@ export async function reserveSlot(db,input,{id,slotKey,calendarFree,turnstileVer
   if(!await calendarFree(b.starts_at,b.ends_at))return {ok:false,reason:'unavailable'};
   // Reserve every occupied 30-minute segment in the same D1 transaction.\n  // A 60-minute booking locks two segments, blocking overlapping 30-minute bookings.\n  const segments=[];\n  for(let t=Date.parse(b.starts_at);t<Date.parse(b.ends_at);t+=SLOT_MINUTES*60000)segments.push(new Date(t).toISOString());\n  try{\n    const statements=[db.prepare(`INSERT INTO automatic_bookings
       (id,slot_key,visitor_name,visitor_email,visitor_organization,topic,starts_at,ends_at,status)
-      VALUES(?,?,?,?,?,?,?,?, 'confirmed')`)
+      VALUES(?,?,?,?,?,?,?,?, 'pending_calendar')`)
       .bind(id,slotKey,b.name,b.email,b.organization,b.topic,b.starts_at,b.ends_at),\n      ...segments.map(t=>db.prepare('INSERT INTO automatic_booking_slot_locks(slot_start,booking_id) VALUES(?,?)').bind(t,id))];\n    await db.batch(statements);
   }catch(e){
     // The unique slot locks prevent overlapping reservations across durations.
@@ -36,7 +36,7 @@ export async function reserveSlot(db,input,{id,slotKey,calendarFree,turnstileVer
   // This is a D1 reservation only. A booking is NOT ready for customer-facing
   // automatic confirmation until the calendar event and notification outbox are
   // reconciled. Production integration must implement rollback/hold on sync failure.
-  return {ok:true,id,status:'calendar_sync_pending'};
+  return {ok:true,id,status:'pending_calendar',confirmation_allowed:false};
 }
 export async function ownerAction(db,{id,action,details={}},authenticatedPrincipal){
   // Authenticated principal must come from server-verified session middleware,
