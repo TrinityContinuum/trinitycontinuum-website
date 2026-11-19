@@ -6,7 +6,7 @@
 import { INITIAL_POLICY, classifySlot, TIME_ZONE } from './initial-policy.js';
 import { normalizeBooking } from './booking-core.js';
 const json=(data,status=200,origin='')=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff',...(origin?{'access-control-allow-origin':origin,'vary':'Origin'}:{})}});
-const validOrigin=(req,env)=>{const origin=req.headers.get('origin');return origin===env.PUBLIC_ORIGIN || origin==='https://www.trinitycontinuum.com';};
+const validOrigin=(req,env)=>{const origin=req.headers.get('origin');return origin==='https://trinitycontinuum.com' || origin==='https://www.trinitycontinuum.com';};
 const dayMinutes=30*60000;
 const segments=(a,b)=>{const out=[];for(let t=a;t<b;t+=dayMinutes)out.push(new Date(t).toISOString());return out;};
 const id=()=>crypto.randomUUID();
