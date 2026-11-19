@@ -24,10 +24,17 @@ export async function reserveSlot(db,input,{id,slotKey,calendarFree,turnstileVer
   if(!id||!slotKey||typeof calendarFree!=='function')throw Error('Booking prerequisites unavailable');
   // Free/busy must be checked again server-side immediately before the insert.
   if(!await calendarFree(b.starts_at,b.ends_at))return {ok:false,reason:'unavailable'};
-  // Reserve every occupied 30-minute segment in the same D1 transaction.\n  // A 60-minute booking locks two segments, blocking overlapping 30-minute bookings.\n  const segments=[];\n  for(let t=Date.parse(b.starts_at);t<Date.parse(b.ends_at);t+=SLOT_MINUTES*60000)segments.push(new Date(t).toISOString());\n  try{\n    const statements=[db.prepare(`INSERT INTO automatic_bookings
+  // Reserve every occupied 30-minute segment in the same D1 transaction.
+  // A 60-minute booking locks two segments, blocking overlapping 30-minute bookings.
+  const segments=[];
+  for(let t=Date.parse(b.starts_at);t<Date.parse(b.ends_at);t+=SLOT_MINUTES*60000)segments.push(new Date(t).toISOString());
+  try{
+    const statements=[db.prepare(`INSERT INTO automatic_bookings
       (id,slot_key,visitor_name,visitor_email,visitor_organization,topic,starts_at,ends_at,status)
       VALUES(?,?,?,?,?,?,?,?, 'pending_calendar')`)
-      .bind(id,slotKey,b.name,b.email,b.organization,b.topic,b.starts_at,b.ends_at),\n      ...segments.map(t=>db.prepare('INSERT INTO automatic_booking_slot_locks(slot_start,booking_id) VALUES(?,?)').bind(t,id))];\n    await db.batch(statements);
+      .bind(id,slotKey,b.name,b.email,b.organization,b.topic,b.starts_at,b.ends_at),
+      ...segments.map(t=>db.prepare('INSERT INTO automatic_booking_slot_locks(slot_start,booking_id) VALUES(?,?)').bind(t,id))];
+    await db.batch(statements);
   }catch(e){
     // The unique slot locks prevent overlapping reservations across durations.
     if(/unique|constraint/i.test(String(e)))return {ok:false,reason:'already_booked'};
@@ -55,6 +62,7 @@ export async function ownerAction(db,{id,action,details={}},authenticatedPrincip
     WHERE id=? AND status IN (${rule.from.map(()=>'?').join(',')})`)
     .bind(rule.to,id,...rule.from).run();
   if(result.meta?.changes!==1)return {ok:false,reason:'state_changed_or_missing'};
-  // The caller must reconcile calendar changes, release slot locks only after\n  // confirmed cancellation, and enqueue visitor notice in durable outbox.
+  // The caller must reconcile calendar changes, release slot locks only after
+  // confirmed cancellation, and enqueue visitor notice in durable outbox.
   return {ok:true,id,status:rule.to,notification_required:true,calendar_update_required:true};
 }
