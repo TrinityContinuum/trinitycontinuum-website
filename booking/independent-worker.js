@@ -71,7 +71,7 @@ async function owner(req,env,url){
   if(booking.status!=='confirmed')return json({error:'Only confirmed appointments can receive a video link'},409);
   const statements=[env.DB.prepare("INSERT INTO booking_video_links(booking_id,meeting_url,instructions) VALUES(?,?,?) ON CONFLICT(booking_id) DO UPDATE SET meeting_url=excluded.meeting_url,instructions=excluded.instructions,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(bookingId,meetingUrl.href,instructions),
    env.DB.prepare("INSERT INTO booking_notifications(id,booking_id,kind,recipient) VALUES(?,?,'video_link',?) ON CONFLICT(booking_id,kind,recipient) DO UPDATE SET status='pending',attempts=0,provider_message_id=NULL").bind(id(),bookingId,booking.visitor_email),
-   env.DB.prepare("INSERT INTO booking_actions(id,booking_id,actor,action,details_json) VALUES(?,?,'owner','video_link_updated',?)").bind(id(),bookingId,JSON.stringify({host:meetingUrl.hostname}))];
+   env.DB.prepare("INSERT INTO booking_actions(id,booking_id,actor,action,details_json) VALUES(?,?,'owner','rebook_invited',?)").bind(id(),bookingId,JSON.stringify({host:meetingUrl.hostname}))];
   await env.DB.batch(statements);
   return json({saved:true,meeting_url:meetingUrl.href,notification_status:'pending'});
  }
