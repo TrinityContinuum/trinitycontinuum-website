@@ -20,4 +20,6 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node --experimental-default-type=module --check booking/booking-core.js
+      - run: node --experimental-default-type=module --check booking/independent-worker.js
       - run: node --experimental-default-type=module --test booking/booking-policy.test.mjs
