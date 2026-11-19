@@ -1,29 +1,21 @@
-# Automatic booking, owner controls: integration gates
+# Trinity-owned appointment scheduler
 
-This branch is **development only**. The existing live manual appointment form and D1 intake remain untouched. No automatic booking is advertised as operational.
+Trinity's D1 database, not Google Calendar, is authoritative for automatic reservations. Google is not required for booking, and optional calendar synchronization must never block a valid Trinity booking.
 
-## Intended visitor flow
-1. Server reads real free/busy from Jack's authoritative calendar, applies America/Chicago business hours, 11:30–13:00 CT exclusion, buffer, meeting duration and blackout dates.
-2. Visitor selects an available 30-minute slot, completes Turnstile and contact form.
-3. Server rechecks free/busy, atomically reserves a unique active slot in D1, creates the real calendar event and persists notification work.
-4. **Only after calendar event success** display a confirmed booking and send a confirmation containing date, timezone and private meeting link. On calendar failure, keep booking unconfirmed, reconcile or release it, and never tell a visitor it is confirmed.
-5. Idempotent booking IDs, unique active slot index, audit events, retryable notification outbox, rate limits and privacy controls prevent duplicates and lost updates.
+## Implemented in this development branch
 
-## Jack's controls
-Authenticated Jack-only dashboard actions: cancel booking and notify attendee; propose alternate slot (no forced move until accepted); move booking when agreed and calendar confirms; invite attendee to rebook with fresh availability link. All actions update the calendar and durable D1 history and notify attendee. Owner identity must be derived from verified server-side session, **never** a client-supplied actor field. Use optimistic concurrency and idempotent notification keys.
+- Public `meetings.html` retains the existing manual request form and includes a hidden independent booking form, revealed only if the isolated Worker reports automatic booking enabled.
+- `assets/trinity-booking.js` generates Central Time 30/60-minute choices, including DST-aware UTC conversion, and checks availability before submitting.
+- `booking/independent-worker.js` verifies Turnstile, applies owner policy, reserves D1 half-hour interval locks atomically, writes a confirmed booking, action history and pending notification records, and provides authenticated owner booking, cancellation and policy endpoints.
+- `booking-admin.html` provides a private token-authenticated management interface for hours, enable/disable, reservation review and cancellation. No credentials are stored in localStorage.
+- Additive SQL migrations 001–003 and a dispatch-only isolated Cloudflare staging deployment workflow. The existing manual intake Worker is not overwritten.
 
-## Required work before activation
-- Identify actual Cloudflare appointment Worker and D1 binding, deployed environment and secrets. Keep separate from Coordination Desk D1.
-- Verify calendar provider integration and permission to read free/busy and create/update/delete events. No direct integration has yet been verified.
-- Implement public availability endpoint and calendar-first reconciliation; ensure multi-instance concurrency across D1 and calendar, not merely D1 uniqueness.
-- Implement authenticated owner endpoints, notification queue, secure cancel/reschedule links, privacy retention and tests.
-- Integrate frontend as an optional **Automatic / Manual** administrator switch. Manual remains functional and default until live tests pass.
-- Correct contact.html and privacy.html after verifying actual storage/retention policies.
-- Run tests for DST, conflicts, lunch exclusion, cancellation, proposal, double click, replay, notifications, calendar outage, and owner authorization.
-- No deploy, merge, domain changes, mail sends or spending until end-to-end verification.
+## Still required before production acceptance
 
-## What is already implemented here
-- Additive D1 tables for bookings, action log and notification outbox.
-- Unique active-slot database index.
-- Pure input validation, reservation primitive and owner state transitions in booking-core.js.
-- **Not implemented yet:** authoritative availability, calendar sync, visitor confirmations, owner dashboard, notification worker, authenticated API endpoints. These are mandatory before go-live.
+1. Execute and verify D1 migrations and deploy the isolated Worker; add its Turnstile and owner authentication secrets. The workflow is not evidence of deployment.
+2. Build and verify actual outbound visitor and owner email delivery with provider message IDs, retries and monitoring. The outbox currently records **pending** work only. Do not claim an email was sent.
+3. Add owner rescheduling and corresponding attendee communication; current owner interface supports cancellation, not rescheduling.
+4. Independently execute full integration tests including competing reservations, cancellation/rebook, Turnstile, policy changes, DST, notification failures and production health.
+5. Verify the live public page and owner access, then deliberately enable automatic bookings. Initial policy remains disabled to protect visitors.
+
+**Never advertise the service as fully operational before these acceptance checks pass.** The public manual appointment-request form remains the fallback.
