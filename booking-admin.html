@@ -1,0 +1,47 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trinity appointment administration</title><link rel="stylesheet" href="assets/style.css"><style>main{max-width:850px;margin:3rem auto;padding:1rem}label{display:block;margin:1rem 0}input,button,textarea{padding:.7rem;font:inherit}input[type=password]{width:100%;max-width:540px}button{cursor:pointer}article{border:1px solid #667;padding:1rem;margin:1rem 0}pre{white-space:pre-wrap}textarea{width:100%;min-height:15rem}</style></head><body><main><h1>Trinity appointment administration</h1><p>Private owner interface. Credentials are used only for the current page session and are not saved in browser storage.</p><label>Owner access token <input id="token" type="password" autocomplete="off"></label><button id="load">Load appointments and schedule</button><p id="status" role="status" aria-live="polite"></p><section id="dashboard" hidden><h2>Automatic booking</h2><label><input type="checkbox" id="enabled"> Accept available bookings automatically</label><p>Changing this setting requires saving the complete schedule below. Automatic bookings must remain disabled until the service is verified.</p><label>Schedule policy (Central Time)<textarea id="policy" spellcheck="false"></textarea></label><button id="save">Save schedule</button><h2>Reservations</h2><div id="bookings"></div></section><p><a href="meetings.html">Public appointment page</a></p></main><script>
+(()=>{'use strict';
+const API='https://trinity-independent-booking.jackspurewater.workers.dev';
+const el=id=>document.getElementById(id),status=message=>el('status').textContent=message;
+async function request(path,method='GET',body){
+ const response=await fetch(API+'/api/owner/'+path,{method,headers:{authorization:'Bearer '+el('token').value.trim(),...(body?{'content-type':'application/json'}:{})},...(body?{body:JSON.stringify(body)}:{})});
+ const data=await response.json();if(!response.ok)throw Error(data.error||'Request failed');return data;
+}
+async function load(){
+ try{
+  const [p,b]=await Promise.all([request('policy'),request('bookings')]);
+  el('policy').value=JSON.stringify(p.policy,null,2);el('enabled').checked=p.policy.automatic_enabled;
+  const root=el('bookings');root.replaceChildren();
+  for(const booking of b.bookings){
+   const article=document.createElement('article');
+   const heading=document.createElement('h3');heading.textContent=booking.visitor_name+' · '+booking.status;
+   const info=document.createElement('p');info.textContent=[booking.starts_at,booking.ends_at,booking.visitor_email,booking.visitor_organization,booking.topic].filter(Boolean).join(' | ');
+   article.append(heading,info);
+   if(booking.status==='confirmed'){
+    const cancel=document.createElement('button');cancel.textContent='Cancel this appointment';
+    cancel.addEventListener('click',async()=>{if(!confirm('Cancel this appointment?'))return;try{await request('cancel','POST',{booking_id:booking.id});status('Appointment cancelled in Trinity. Email notification is queued, not guaranteed delivered.');await load();}catch(e){status(e.message);}});
+    article.append(cancel);
+    const date=document.createElement('input');date.type='datetime-local';date.setAttribute('aria-label','New Central Time start');
+    const length=document.createElement('select');length.setAttribute('aria-label','Meeting duration');for(const n of [30,60])length.add(new Option(n+' minutes',String(n)));
+    const move=document.createElement('button');move.textContent='Reschedule (Central Time)';
+    move.addEventListener('click',async()=>{
+     if(!date.value){status('Choose a new Central Time start first.');return;}
+     const start=new Date(date.value+':00Z');if(!Number.isFinite(start.getTime())){status('Invalid date.');return;}
+     const desired=date.value.slice(0,16);let iso;
+     const formatter=new Intl.DateTimeFormat('sv-SE',{timeZone:'America/Chicago',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hourCycle:'h23'});
+     for(let t=start.getTime()-12*3600000;t<=start.getTime()+12*3600000;t+=30*60000){if(formatter.format(new Date(t)).replace(' ','T')===desired){iso=new Date(t).toISOString();break;}}
+     if(!iso){status('Unable to resolve Central Time.');return;}
+     try{await request('reschedule','POST',{booking_id:booking.id,starts_at:iso,ends_at:new Date(Date.parse(iso)+Number(length.value)*60000).toISOString()});status('Rescheduled in Trinity. Notification queued.');await load();}catch(e){status(e.message);}
+    });article.append(date,length,move);
+   }
+   root.append(article);
+  }
+  el('dashboard').hidden=false;status('Owner schedule and reservations loaded.');
+ }catch(e){status(e.message);}
+}
+el('load').addEventListener('click',load);
+el('save').addEventListener('click',async()=>{
+ try{const p=JSON.parse(el('policy').value);p.automatic_enabled=el('enabled').checked;await request('policy','PUT',p);status('Schedule saved.');await load();}
+ catch(e){status(e.message);}
+});
+})();
+</script></body></html>

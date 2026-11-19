@@ -1,0 +1,70 @@
+name: Deploy isolated Trinity booking staging
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/automatic-booking-owner-controls-20261119
+permissions:
+  contents: read
+jobs:
+  stage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify code before deployment
+        run: |
+          node --experimental-default-type=module --check booking/booking-core.js
+          node --experimental-default-type=module --check booking/independent-worker.js
+          node --experimental-default-type=module --check assets/trinity-booking.js
+          node --experimental-default-type=module --test booking/booking-policy.test.mjs
+      - name: Resolve existing Trinity Cloudflare D1 database
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${CF_TOKEN:-}" || { echo "::error::Missing Cloudflare token"; exit 1; }
+          curl -fsS -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/c1c16121076a98e0c060349aebfae11a/d1/database" > /tmp/trinity-d1.json
+          python3 - <<'PY'
+          import json,os
+          data=json.load(open('/tmp/trinity-d1.json'))
+          if not data.get('success'): raise SystemExit('Cloudflare D1 lookup failed')
+          found=[d for d in data.get('result',[]) if d.get('name')=='trinity-appointments-db']
+          if len(found)!=1: raise SystemExit('Expected one existing Trinity appointment D1 database; refusing to create or guess')
+          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('TRINITY_D1_ID='+found[0]['uuid']+'\n')
+          PY
+      - name: Install Wrangler and configure isolated Worker
+        run: |
+          npm install --no-save wrangler@4
+          cat > wrangler.trinity-booking.json <<EOF
+          {
+            "name": "trinity-independent-booking",
+            "main": "booking/independent-worker.js",
+            "compatibility_date": "2026-11-19",
+            "account_id": "c1c16121076a98e0c060349aebfae11a",
+            "workers_dev": true,
+            "triggers": {"crons": ["*/10 * * * *"]},
+            "d1_databases": [{
+              "binding": "DB",
+              "database_name": "trinity-appointments-db",
+              "database_id": "${TRINITY_D1_ID}"
+            }]
+          }
+          EOF
+      - name: Apply additive booking schema to existing appointment database
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler d1 execute trinity-appointments-db --remote --config wrangler.trinity-booking.json --file booking/001_automatic_booking.sql
+          npx wrangler d1 execute trinity-appointments-db --remote --config wrangler.trinity-booking.json --file booking/002_interval_locks.sql
+          npx wrangler d1 execute trinity-appointments-db --remote --config wrangler.trinity-booking.json --file booking/003_independent_settings.sql
+      - name: Deploy isolated disabled-by-default Worker
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.trinity-booking.json
+      - name: Deployment boundary
+        run: echo "Staging Worker deployed. Automatic booking remains disabled until secrets, notifications, owner administration, and production acceptance tests are verified."
