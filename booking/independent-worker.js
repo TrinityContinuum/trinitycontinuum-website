@@ -1,3 +1,4 @@
+import {dispatchNotifications} from './notification-dispatcher.js';
 // Trinity-owned appointment engine. Deploy as a NEW isolated Worker after migration.
 // No Google Calendar, Google booking page, or third-party scheduling dependency.
 // Required bindings: DB (D1), TURNSTILE_SECRET, TURNSTILE_SITEKEY, ADMIN_TOKEN.
@@ -54,6 +55,7 @@ async function owner(req,env,url){
  const a=new TextEncoder().encode(token),b=new TextEncoder().encode(env.ADMIN_TOKEN);
  let difference=0;for(let i=0;i<a.length;i++)difference|=a[i]^b[i];if(difference!==0)return json({error:'Unauthorized'},401);
  if(req.method==='GET'&&url.pathname.endsWith('/policy'))return json({policy:await policy(env)});
+ if(req.method==='POST'&&url.pathname.endsWith('/dispatch-notifications'))return json(await dispatchNotifications(env));
  if(req.method==='GET'&&url.pathname.endsWith('/bookings')){
   const data=await env.DB.prepare('SELECT id,visitor_name,visitor_email,visitor_organization,topic,starts_at,ends_at,status FROM automatic_bookings ORDER BY starts_at DESC LIMIT 100').all();
   return json({bookings:data.results});
@@ -99,7 +101,7 @@ async function owner(req,env,url){
  }
  return json({error:'Unknown owner action'},404);
 }
-export default {async fetch(req,env){
+export default {async scheduled(_event,env,ctx){ctx.waitUntil(dispatchNotifications(env));},async fetch(req,env){
  const response=await handle(req,env);
  if(validOrigin(req,env)){const headers=new Headers(response.headers);headers.set('access-control-allow-origin',req.headers.get('origin'));headers.set('vary','Origin');return new Response(response.body,{status:response.status,headers});}
  return response;
