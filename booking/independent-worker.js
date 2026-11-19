@@ -78,7 +78,9 @@ async function owner(req,env,url){
   const current=await env.DB.prepare('SELECT * FROM automatic_bookings WHERE id=?').bind(body.booking_id).first();
   if(!current)return json({error:'Booking not found'},404);
   if(current.status!=='confirmed')return json({error:'Only confirmed appointments can be moved'},409);
-  if(!(await available(env,body)).eligible)return json({error:'New time is not available'},409);
+  if(classifySlot(slot.starts_at,slot.ends_at,await policy(env))!=='automatic_candidate')return json({error:'New time is outside automatic hours'},409);
+  const conflict=await env.DB.prepare('SELECT COUNT(*) AS n FROM automatic_booking_slot_locks WHERE slot_start>=? AND slot_start<? AND booking_id<>?').bind(slot.starts_at,slot.ends_at,current.id).first();
+  if(Number(conflict?.n||0)>0)return json({error:'New time is not available'},409);
   const oldStarts=current.starts_at,oldEnds=current.ends_at;
   if(slot.starts_at===oldStarts&&slot.ends_at===oldEnds)return json({rescheduled:true,unchanged:true});
   const newLocks=segments(slot.a,slot.b),oldLocks=segments(Date.parse(oldStarts),Date.parse(oldEnds));
