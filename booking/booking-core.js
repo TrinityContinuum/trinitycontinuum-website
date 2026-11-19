@@ -39,8 +39,12 @@ export async function reserveSlot(db,input,{id,slotKey,calendarFree,turnstileVer
   // reconciled. Production integration must implement rollback/hold on sync failure.
   return {ok:true,id,status:'calendar_sync_pending'};
 }
-export async function ownerAction(db,{id,action,actor,details={}}){
-  if(actor!=='jack'&&actor!=='authorized_admin')throw Error('Owner authorization required');
+export async function ownerAction(db,{id,action,details={}},authenticatedPrincipal){
+  // Authenticated principal must come from server-verified session middleware,
+  // never from the caller's JSON body. Reject absent/unauthenticated sessions.
+  if(authenticatedPrincipal?.verified!==true ||
+     !['jack','authorized_admin'].includes(authenticatedPrincipal.role))
+    throw Error('Owner authorization required');
   const transitions={
     cancel:{from:['confirmed','reschedule_proposed'],to:'cancelled'},
     propose:{from:['confirmed'],to:'reschedule_proposed'},
