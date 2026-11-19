@@ -32,6 +32,12 @@ async function load(){
      if(!iso){status('Unable to resolve Central Time.');return;}
      try{await request('reschedule','POST',{booking_id:booking.id,starts_at:iso,ends_at:new Date(Date.parse(iso)+Number(length.value)*60000).toISOString()});status('Rescheduled in Trinity. Notification queued.');await load();}catch(e){status(e.message);}
     });article.append(date,length,move);
+    const videoLabel=document.createElement('label');videoLabel.textContent='Video meeting link (Meet, Zoom, Teams, Jitsi, or another HTTPS meeting room)';
+    const video=document.createElement('input');video.type='url';video.placeholder='https://';video.value=booking.meeting_url||'';video.style.width='100%';videoLabel.append(video);
+    const instructions=document.createElement('textarea');instructions.placeholder='Optional joining instructions';instructions.value=booking.instructions||'';instructions.rows=2;
+    const sendVideo=document.createElement('button');sendVideo.textContent='Save and email video invitation';
+    sendVideo.addEventListener('click',async()=>{try{const result=await request('video-link','POST',{booking_id:booking.id,meeting_url:video.value,instructions:instructions.value});status(result.saved?'Video link saved; invitation queued for delivery.':'Could not save video link.');}catch(e){status(e.message);}});
+    article.append(videoLabel,instructions,sendVideo);
    }
    root.append(article);
   }
