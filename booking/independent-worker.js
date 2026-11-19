@@ -57,6 +57,20 @@ async function owner(req,env,url){
   const data=await env.DB.prepare('SELECT id,visitor_name,visitor_email,visitor_organization,topic,starts_at,ends_at,status FROM automatic_bookings ORDER BY starts_at DESC LIMIT 100').all();
   return json({bookings:data.results});
  }
+ if(req.method==='POST'&&url.pathname.endsWith('/cancel')){
+  let body;try{body=await req.json();}catch{return json({error:'Invalid request'},400);}
+  if(typeof body.booking_id!=='string'||!body.booking_id)return json({error:'Booking ID required'},400);
+  const existing=await env.DB.prepare("SELECT id,status FROM automatic_bookings WHERE id=?").bind(body.booking_id).first();
+  if(!existing)return json({error:'Booking not found'},404);
+  if(existing.status==='cancelled')return json({cancelled:true,already_cancelled:true});
+  if(existing.status!=='confirmed')return json({error:'Booking is not cancellable'},409);
+  const actions=[env.DB.prepare("UPDATE automatic_bookings SET status='cancelled',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND status='confirmed'").bind(body.booking_id),
+   env.DB.prepare('DELETE FROM automatic_booking_slot_locks WHERE booking_id=?').bind(body.booking_id),
+   env.DB.prepare("INSERT INTO booking_actions(id,booking_id,actor,action) VALUES(?,?,'owner','cancelled')").bind(id(),body.booking_id),
+   env.DB.prepare("INSERT INTO booking_notifications(id,booking_id,kind,recipient) SELECT ?,id,'cancellation',visitor_email FROM automatic_bookings WHERE id=?").bind(id(),body.booking_id)];
+  try{await env.DB.batch(actions);}catch{return json({error:'Cancellation failed'},500);}
+  return json({cancelled:true,notification_status:'pending'});
+ }
  if(req.method==='PUT'&&url.pathname.endsWith('/policy')){
   let p;try{p=await req.json();const mod=await import('./booking-policy.js');mod.validPolicy(p);}catch{return json({error:'Invalid policy'},400);}
   await env.DB.prepare("INSERT INTO appointment_settings(key,value) VALUES('policy',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(JSON.stringify(p)).run();
