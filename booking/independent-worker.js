@@ -53,6 +53,7 @@ async function owner(req,env,url){
  if(!env.ADMIN_TOKEN||!token||token.length!==env.ADMIN_TOKEN.length)return json({error:'Unauthorized'},401);
  const a=new TextEncoder().encode(token),b=new TextEncoder().encode(env.ADMIN_TOKEN);
  let difference=0;for(let i=0;i<a.length;i++)difference|=a[i]^b[i];if(difference!==0)return json({error:'Unauthorized'},401);
+ if(req.method==='GET'&&url.pathname.endsWith('/policy'))return json({policy:await policy(env)});
  if(req.method==='GET'&&url.pathname.endsWith('/bookings')){
   const data=await env.DB.prepare('SELECT id,visitor_name,visitor_email,visitor_organization,topic,starts_at,ends_at,status FROM automatic_bookings ORDER BY starts_at DESC LIMIT 100').all();
   return json({bookings:data.results});
@@ -72,7 +73,7 @@ async function owner(req,env,url){
   return json({cancelled:true,notification_status:'pending'});
  }
  if(req.method==='PUT'&&url.pathname.endsWith('/policy')){
-  let p;try{p=await req.json();const mod=await import('./booking-policy.js');mod.validPolicy(p);}catch{return json({error:'Invalid policy'},400);}
+  let p;try{p=await req.json();const mod=await import('./booking-policy.js');p=mod.validPolicy(p);}catch{return json({error:'Invalid policy'},400);}
   await env.DB.prepare("INSERT INTO appointment_settings(key,value) VALUES('policy',?) ON CONFLICT(key) DO UPDATE SET value=excluded.value").bind(JSON.stringify(p)).run();
   return json({updated:true,policy:p});
  }
@@ -86,7 +87,7 @@ export default {async fetch(req,env){
 async function handle(req,env){
  try{
   const origin=req.headers.get('origin')||'';
-  if(req.method==='OPTIONS')return validOrigin(req,env)?new Response(null,{status:204,headers:{'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST','access-control-allow-headers':'content-type','access-control-max-age':'600','vary':'Origin'}}):new Response(null,{status:403});
+  if(req.method==='OPTIONS')return validOrigin(req,env)?new Response(null,{status:204,headers:{'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST, PUT','access-control-allow-headers':'content-type, authorization','access-control-max-age':'600','vary':'Origin'}}):new Response(null,{status:403});
   const url=new URL(req.url);
   if(url.pathname==='/api/health'&&req.method==='GET')return json({service:'trinity-independent-booking',status:'staged',automatic_enabled:(await policy(env)).automatic_enabled});
   if(url.pathname.startsWith('/api/owner/'))return owner(req,env,url);
