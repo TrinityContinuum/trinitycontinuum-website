@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS automatic_bookings (
   topic TEXT NOT NULL,
   starts_at TEXT NOT NULL,
   ends_at TEXT NOT NULL,
-  status TEXT NOT NULL CHECK(status IN ('confirmed','cancelled','reschedule_proposed','rescheduled')),
+  status TEXT NOT NULL CHECK(status IN ('pending_calendar','confirmed','cancelled','reschedule_proposed','rescheduled')),
   calendar_event_id TEXT,
   calendar_sync_status TEXT NOT NULL DEFAULT 'pending' CHECK(calendar_sync_status IN ('pending','synced','failed')),
   created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%fZ','now')),
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS automatic_bookings (
 -- Only one active reservation can own a slot. Cancelled/rescheduled slots may be reused.
 CREATE UNIQUE INDEX IF NOT EXISTS automatic_bookings_active_slot
 ON automatic_bookings(slot_key)
-WHERE status IN ('confirmed','reschedule_proposed');
+WHERE status IN ('pending_calendar','confirmed','reschedule_proposed');
 CREATE INDEX IF NOT EXISTS automatic_bookings_email_idx ON automatic_bookings(visitor_email);
 CREATE TABLE IF NOT EXISTS booking_actions (
   id TEXT PRIMARY KEY,
