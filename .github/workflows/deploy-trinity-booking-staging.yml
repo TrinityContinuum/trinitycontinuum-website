@@ -46,6 +46,7 @@ jobs:
             "compatibility_date": "2026-11-19",
             "account_id": "c1c16121076a98e0c060349aebfae11a",
             "workers_dev": true,
+            "triggers": {"crons": ["*/10 * * * *"]},
             "d1_databases": [{
               "binding": "DB",
               "database_name": "trinity-appointments-db",
