@@ -34,6 +34,7 @@ async function available(env,input){
 async function book(req,env){
  if(!validOrigin(req,env))return json({error:'Origin not allowed'},403);
  if(!env.TURNSTILE_SECRET)return json({error:'Booking unavailable'},503);
+ if(!(await policy(env)).automatic_enabled)return json({error:'Automatic booking is not enabled'},503);
  let input;try{input=await req.json();}catch{return json({error:'Invalid request'},400);}
  if(!await verifyTurnstile(req,env,input.turnstile_token))return json({error:'Security verification failed'},403);
  let b,slot;try{b=normalizeBooking(input);slot=parseSlot(input);}catch{return json({error:'Invalid booking details'},400);}
@@ -66,7 +67,7 @@ async function owner(req,env,url){
 export default {async fetch(req,env){
  try{
   const url=new URL(req.url);
-  if(url.pathname==='/api/health'&&req.method==='GET')return json({service:'trinity-independent-booking',status:'ready'});
+  if(url.pathname==='/api/health'&&req.method==='GET')return json({service:'trinity-independent-booking',status:'staged',automatic_enabled:(await policy(env)).automatic_enabled});
   if(url.pathname.startsWith('/api/owner/'))return owner(req,env,url);
   if(url.pathname==='/api/policy'&&req.method==='GET'){const p=await policy(env);return json({time_zone:TIME_ZONE,automatic_enabled:p.automatic_enabled,weekdays:p.weekdays,durations:[30,60]});}
   if(url.pathname==='/api/availability'&&req.method==='POST'){
