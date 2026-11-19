@@ -4,7 +4,7 @@
 export const SLOT_MINUTES=30;
 export function validateSlot(start,end){
   const a=Date.parse(start),b=Date.parse(end);
-  if(!Number.isFinite(a)||!Number.isFinite(b)||b-a!==SLOT_MINUTES*60000)throw Error('Invalid slot');
+  if(!Number.isFinite(a)||!Number.isFinite(b)||![30,60].includes((b-a)/60000))throw Error('Invalid slot');
   if(a<Date.now()+15*60000)throw Error('Slot must be in the future');
   // Time-zone-aware availability and lunch exclusion belong to the authoritative
   // availability provider; never infer America/Chicago offset from UTC.
@@ -24,13 +24,12 @@ export async function reserveSlot(db,input,{id,slotKey,calendarFree,turnstileVer
   if(!id||!slotKey||typeof calendarFree!=='function')throw Error('Booking prerequisites unavailable');
   // Free/busy must be checked again server-side immediately before the insert.
   if(!await calendarFree(b.starts_at,b.ends_at))return {ok:false,reason:'unavailable'};
-  try{
-    await db.prepare(`INSERT INTO automatic_bookings
+  // Reserve every occupied 30-minute segment in the same D1 transaction.\n  // A 60-minute booking locks two segments, blocking overlapping 30-minute bookings.\n  const segments=[];\n  for(let t=Date.parse(b.starts_at);t<Date.parse(b.ends_at);t+=SLOT_MINUTES*60000)segments.push(new Date(t).toISOString());\n  try{\n    const statements=[db.prepare(`INSERT INTO automatic_bookings
       (id,slot_key,visitor_name,visitor_email,visitor_organization,topic,starts_at,ends_at,status)
       VALUES(?,?,?,?,?,?,?,?, 'confirmed')`)
-      .bind(id,slotKey,b.name,b.email,b.organization,b.topic,b.starts_at,b.ends_at).run();
+      .bind(id,slotKey,b.name,b.email,b.organization,b.topic,b.starts_at,b.ends_at),\n      ...segments.map(t=>db.prepare('INSERT INTO automatic_booking_slot_locks(slot_start,booking_id) VALUES(?,?)').bind(t,id))];\n    await db.batch(statements);
   }catch(e){
-    // Unique active slot prevents duplicate bookings during concurrent requests.
+    // The unique slot locks prevent overlapping reservations across durations.
     if(/unique|constraint/i.test(String(e)))return {ok:false,reason:'already_booked'};
     throw e;
   }
@@ -56,6 +55,6 @@ export async function ownerAction(db,{id,action,details={}},authenticatedPrincip
     WHERE id=? AND status IN (${rule.from.map(()=>'?').join(',')})`)
     .bind(rule.to,id,...rule.from).run();
   if(result.meta?.changes!==1)return {ok:false,reason:'state_changed_or_missing'};
-  // The caller must enqueue visitor notice and calendar update in durable outbox.
+  // The caller must reconcile calendar changes, release slot locks only after\n  // confirmed cancellation, and enqueue visitor notice in durable outbox.
   return {ok:true,id,status:rule.to,notification_required:true,calendar_update_required:true};
 }
