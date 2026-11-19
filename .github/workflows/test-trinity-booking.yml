@@ -1,0 +1,23 @@
+name: Test Trinity appointment booking policy
+on:
+  push:
+    branches:
+      - feature/automatic-booking-owner-controls-20261119
+    paths:
+      - booking/**
+      - .github/workflows/test-trinity-booking.yml
+  pull_request:
+    paths:
+      - booking/**
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  booking-policy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --experimental-default-type=module --test booking/booking-policy.test.mjs
