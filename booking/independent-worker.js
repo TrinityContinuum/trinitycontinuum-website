@@ -57,8 +57,23 @@ async function owner(req,env,url){
  if(req.method==='GET'&&url.pathname.endsWith('/policy'))return json({policy:await policy(env)});
  if(req.method==='POST'&&url.pathname.endsWith('/dispatch-notifications'))return json(await dispatchNotifications(env));
  if(req.method==='GET'&&url.pathname.endsWith('/bookings')){
-  const data=await env.DB.prepare('SELECT id,visitor_name,visitor_email,visitor_organization,topic,starts_at,ends_at,status FROM automatic_bookings ORDER BY starts_at DESC LIMIT 100').all();
+  const data=await env.DB.prepare('SELECT b.id,b.visitor_name,b.visitor_email,b.visitor_organization,b.topic,b.starts_at,b.ends_at,b.status,v.meeting_url,v.instructions FROM automatic_bookings b LEFT JOIN booking_video_links v ON v.booking_id=b.id ORDER BY b.starts_at DESC LIMIT 100').all();
   return json({bookings:data.results});
+ }
+ if(req.method==='POST'&&url.pathname.endsWith('/video-link')){
+  let body;try{body=await req.json();}catch{return json({error:'Invalid request'},400);}
+  const bookingId=String(body.booking_id||'');
+  let meetingUrl;try{meetingUrl=new URL(String(body.meeting_url||''));}catch{return json({error:'Enter a valid HTTPS video meeting link'},400);}
+  if(meetingUrl.protocol!=='https:'||meetingUrl.username||meetingUrl.password||meetingUrl.href.length>2048)return json({error:'A secure HTTPS meeting link is required'},400);
+  const instructions=String(body.instructions||'').trim();if(instructions.length>2000)return json({error:'Instructions too long'},400);
+  const booking=await env.DB.prepare('SELECT id,status,visitor_email FROM automatic_bookings WHERE id=?').bind(bookingId).first();
+  if(!booking)return json({error:'Booking not found'},404);
+  if(booking.status!=='confirmed')return json({error:'Only confirmed appointments can receive a video link'},409);
+  const statements=[env.DB.prepare("INSERT INTO booking_video_links(booking_id,meeting_url,instructions) VALUES(?,?,?) ON CONFLICT(booking_id) DO UPDATE SET meeting_url=excluded.meeting_url,instructions=excluded.instructions,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(bookingId,meetingUrl.href,instructions),
+   env.DB.prepare("INSERT INTO booking_notifications(id,booking_id,kind,recipient) VALUES(?,?,'video_link',?) ON CONFLICT(booking_id,kind,recipient) DO UPDATE SET status='pending',attempts=0,provider_message_id=NULL").bind(id(),bookingId,booking.visitor_email),
+   env.DB.prepare("INSERT INTO booking_actions(id,booking_id,actor,action,details_json) VALUES(?,?,'owner','video_link_updated',?)").bind(id(),bookingId,JSON.stringify({host:meetingUrl.hostname}))];
+  await env.DB.batch(statements);
+  return json({saved:true,meeting_url:meetingUrl.href,notification_status:'pending'});
  }
  if(req.method==='POST'&&url.pathname.endsWith('/cancel')){
   let body;try{body=await req.json();}catch{return json({error:'Invalid request'},400);}
