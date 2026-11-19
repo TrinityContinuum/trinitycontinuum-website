@@ -15,7 +15,6 @@ jobs:
       - name: Verify token can access Cloudflare account
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          CF_ACCOUNT_ID: c1c16121076a98e0c060349aebfae11a
         shell: bash
         run: |
           set -euo pipefail
@@ -26,7 +25,7 @@ jobs:
           response=$(curl --silent --show-error --fail-with-body \
             -H "Authorization: Bearer ${CF_TOKEN}" \
             -H "Accept: application/json" \
-            "https://api.cloudflare.com/client/v4/accounts/${CF_ACCOUNT_ID}/tokens/verify")
+            "https://api.cloudflare.com/client/v4/user/tokens/verify")
           echo "$response" | python3 -c 'import json,sys; d=json.load(sys.stdin); assert d.get("success") is True, "Cloudflare token verification failed"; print("Cloudflare token verified; no resources changed.")'
       - name: No production changes
         run: echo "Verification only. No Workers, D1 migrations, DNS, or production deployments."
