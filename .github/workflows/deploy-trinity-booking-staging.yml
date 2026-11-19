@@ -1,6 +1,9 @@
 name: Deploy isolated Trinity booking staging
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - feature/automatic-booking-owner-controls-20261119
 permissions:
   contents: read
 jobs:
