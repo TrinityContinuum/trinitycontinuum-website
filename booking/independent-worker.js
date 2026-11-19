@@ -5,7 +5,7 @@
 // delivery is separate and must be configured before advertising email confirmations.
 import { INITIAL_POLICY, classifySlot, TIME_ZONE } from './initial-policy.js';
 import { normalizeBooking } from './booking-core.js';
-const json=(data,status=200)=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff'}});
+const json=(data,status=200,origin='')=>new Response(JSON.stringify(data),{status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff',...(origin?{'access-control-allow-origin':origin,'vary':'Origin'}:{})}});
 const validOrigin=(req,env)=>{const origin=req.headers.get('origin');return origin===env.PUBLIC_ORIGIN || origin==='https://www.trinitycontinuum.com';};
 const dayMinutes=30*60000;
 const segments=(a,b)=>{const out=[];for(let t=a;t<b;t+=dayMinutes)out.push(new Date(t).toISOString());return out;};
@@ -79,7 +79,14 @@ async function owner(req,env,url){
  return json({error:'Unknown owner action'},404);
 }
 export default {async fetch(req,env){
+ const response=await handle(req,env);
+ if(validOrigin(req,env)){const headers=new Headers(response.headers);headers.set('access-control-allow-origin',req.headers.get('origin'));headers.set('vary','Origin');return new Response(response.body,{status:response.status,headers});}
+ return response;
+}};
+async function handle(req,env){
  try{
+  const origin=req.headers.get('origin')||'';
+  if(req.method==='OPTIONS')return validOrigin(req,env)?new Response(null,{status:204,headers:{'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST','access-control-allow-headers':'content-type','access-control-max-age':'600','vary':'Origin'}}):new Response(null,{status:403});
   const url=new URL(req.url);
   if(url.pathname==='/api/health'&&req.method==='GET')return json({service:'trinity-independent-booking',status:'staged',automatic_enabled:(await policy(env)).automatic_enabled});
   if(url.pathname.startsWith('/api/owner/'))return owner(req,env,url);
@@ -92,4 +99,4 @@ export default {async fetch(req,env){
   if(url.pathname==='/api/book'&&req.method==='POST')return book(req,env);
   return json({error:'Not found'},404);
  }catch(e){return json({error:'Request could not be completed'},500);}
-}};
+}
