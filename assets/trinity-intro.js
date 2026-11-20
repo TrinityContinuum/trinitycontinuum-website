@@ -4,6 +4,8 @@
 
   const startIntro = () => {
     if (document.body.dataset.page !== 'index') return;
+    // Visitors continuing from the film presentation should reach the website directly.
+    if (new URLSearchParams(window.location.search).get('view') === 'site') return;
     if (document.getElementById('trinity-film-intro')) return;
 
     // Respect reduced-motion preferences: the website remains immediately usable.
@@ -120,6 +122,8 @@
 
       root.remove();
       style.remove();
+      // Continue the visitor journey to the existing four-film presentation.
+      window.location.assign('film-presentations.html');
     };
 
     skip.addEventListener('click', close);
