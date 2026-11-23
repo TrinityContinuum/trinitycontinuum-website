@@ -256,3 +256,28 @@ test("Turnstile absent secret is denied before provider or database calls",async
   assert.equal(h.calls.length,0);
  }finally{h.reset()}
 });
+
+test("private administrator requires Cloudflare Access staff identity AND a strong password",async()=>{
+ const h=harness();
+ h.env.ADMIN_PASSWORD="private-test-password-32-characters-long";
+ h.env.ADMIN_APPROVER_EMAILS="jack@trinitycontinuum.com";
+ const auth="Basic "+Buffer.from("jack:"+h.env.ADMIN_PASSWORD).toString("base64");
+ const request=(path="/admin")=>new Request(origin+path,{headers:{authorization:auth}});
+ // Even a correct password is useless without the verified Access identity.
+ for(const [ctx,expected] of [
+  [undefined,401],
+  [{access:{email:"unapproved@example.invalid"}},401],
+  [{access:{email:"jack@trinitycontinuum.com"}},200]
+ ]){
+  const response=await booking.fetch(request(),h.env,ctx);
+  assert.equal(response.status,expected);
+ }
+ // A staff identity alone is also insufficient without the existing secret.
+ const noPassword=await booking.fetch(new Request(origin+"/admin"),h.env,{access:{email:"jack@trinitycontinuum.com"}});
+ assert.equal(noPassword.status,401);
+ // All private read endpoints must reject requests with no Access identity.
+ for(const path of ["/api/admin/master","/api/admin/bookings","/api/admin/policy"]){
+  const response=await booking.fetch(request(path),h.env);
+  assert.equal(response.status,401,path);
+ }
+});
