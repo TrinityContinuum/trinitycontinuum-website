@@ -128,7 +128,24 @@
 
     skip.addEventListener('click', close);
     root.addEventListener('keydown', (event) => {
-      if (event.key === 'Escape') close();
+      if (event.key === 'Escape') {
+        close();
+        return;
+      }
+      // Keep keyboard focus within the accessible modal while the introduction plays.
+      if (event.key !== 'Tab') return;
+      const controls = [...root.querySelectorAll('button:not([hidden]):not([disabled])')];
+      if (!controls.length) return;
+      const first = controls[0];
+      const last = controls[controls.length - 1];
+      const focused = document.activeElement;
+      if (event.shiftKey && (focused === first || !root.contains(focused))) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && (focused === last || !root.contains(focused))) {
+        event.preventDefault();
+        first.focus();
+      }
     });
     skip.focus();
     video.addEventListener('ended', close);
