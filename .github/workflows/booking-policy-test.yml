@@ -1,7 +1,7 @@
 name: Draft Jack booking hours, federal holiday and collision tests
 on:
   push:
-    branches: [feature/trinity-central-booking-policy]
+    branches: [feature/trinity-central-booking-policy, audit/dual-calendar-20261122]
     paths:
       - 'tests/booking-policy.test.mjs'
       - 'tests/booking-api.test.mjs'
