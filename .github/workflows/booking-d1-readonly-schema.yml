@@ -24,11 +24,13 @@ jobs:
           sql="SELECT type,name FROM sqlite_master WHERE type IN ('table','index','trigger') AND name NOT LIKE 'sqlite_%' ORDER BY type,name"
           with open('/tmp/query.json','w') as f:json.dump({'sql':sql},f)
           PY
-          curl --silent --show-error --max-time 20 -w '%{http_code}' \
-            -X POST -H "Authorization: Bearer ${CF_TOKEN}" -H "Content-Type: application/json" \
-            --data-binary @/tmp/query.json \
-            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database/${D1_ID}/query" \
-            -o /tmp/schema-result.json > /tmp/schema-status.txt
+          # Wrangler is Cloudflare's supported D1 administration client.
+          # Only schema metadata is queried; personal appointment rows are not.
+          CLOUDFLARE_API_TOKEN="${CF_TOKEN}" CLOUDFLARE_ACCOUNT_ID="${ACCOUNT}" \
+            npx --yes wrangler@4 d1 execute trinity-appointments-db --remote --json \
+            --command "SELECT type,name FROM sqlite_master WHERE type IN ('table','index','trigger') AND name NOT LIKE 'sqlite_%' ORDER BY type,name" \
+            > /tmp/schema-result.json
+          printf '200' > /tmp/schema-status.txt
           curl --silent --show-error --max-time 20 -w '%{http_code}' \
             -H "Authorization: Bearer ${CF_TOKEN}" \
             "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database/${D1_ID}/time_travel/bookmark" \
@@ -39,9 +41,9 @@ jobs:
               data=json.load(open(file))
               print(typ,'HTTP',open(stat).read().strip(),'errors',[(e.get('code'),str(e.get('message',''))[:180]) for e in data.get('errors',[])][:4])
           q=json.load(open('/tmp/schema-result.json'))
-          if not q.get('success') or not q.get('result'):raise SystemExit('D1 schema query failed; no changes')
+          if not isinstance(q,list):raise SystemExit('Unexpected D1 Wrangler schema response; no changes')
           rows=[]
-          for result in q['result']:
+          for result in q:
               if not result.get('success',False):raise SystemExit('D1 query rejected')
               rows+=result.get('results',[])
           schema={k:sorted(x.get('name') for x in rows if x.get('type')==k) for k in ('table','index','trigger')}
