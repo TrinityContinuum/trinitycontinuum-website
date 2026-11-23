@@ -53,4 +53,3 @@ jobs:
           print('PASS: Cloudflare API token can read worker and D1 metadata. This does not verify migrations, secrets, OAuth, calendar free/busy, Turnstile or invitations.')
           PY
 
-# Credential recheck requested after GitHub Actions secret replacement (2026-11-22 CT).
