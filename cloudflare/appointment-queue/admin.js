@@ -43,7 +43,7 @@ try{
    return {email:a.email,subject,body};
   };
   select.addEventListener('change',create);create();
-  const copy=document.createElement('button');copy.textContent='Copy reply text';copy.onclick=async()=>{const d=create();try{await navigator.clipboard.writeText(d.body);copy.textContent='Copied — paste into Namecheap Reply';}catch{copy.textContent='Copy failed; select text above';}};
+  const copy=document.createElement('button');copy.textContent='Copy reply text';copy.onclick=async()=>{const d=create();try{await navigator.clipboard.writeText(d.body);copy.textContent='Copied — paste into corporate Gmail Reply';}catch{copy.textContent='Copy failed; select text above';}};
   card.append(copy);
   // No external mail service credential is configured. Pre-fill the visitor's message
   // in the local email client instead of pretending that email was sent.
