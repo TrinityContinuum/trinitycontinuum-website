@@ -4,6 +4,7 @@ on:
     branches: [feature/trinity-central-booking-policy]
     paths:
       - 'tests/booking-policy.test.mjs'
+      - 'tests/booking-api.test.mjs'
       - 'cloudflare/appointment-queue/direct-booking.js'
       - 'cloudflare/appointment-queue/004_direct_booking.sql'
       - '.github/workflows/booking-policy-test.yml'
@@ -19,4 +20,4 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: node --test tests/booking-policy.test.mjs
+      - run: node --test tests/booking-policy.test.mjs tests/booking-api.test.mjs
