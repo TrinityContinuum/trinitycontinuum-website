@@ -196,7 +196,7 @@ async function handleBook(req,env,origin){
  let body;try{body=await req.json()}catch{return json({error:"Invalid booking"},400,origin)}
  const id=String(body.id||""),day=String(body.date||""),time=String(body.time||"");
  const name=String(body.name||"").trim(),email=String(body.email||"").trim(),organization=String(body.organization||"").trim(),topic=String(body.topic||"").trim();
- if(!/^[0-9a-f-]{36}$/i.test(id)||name.length<2||name.length>120||organization.length>150||topic.length<3||topic.length>2500||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:"Invalid details"},400,origin);
+ if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)||name.length<2||name.length>120||organization.length>150||topic.length<3||topic.length>2500||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:"Invalid details"},400,origin);
  if(!(await verifyTurnstile(req,env,String(body.turnstileToken||""))))return json({error:"Security verification failed"},403,origin);
  let start,end,p;
  try{p=await policy(env);if(!p.enabled||!slotWithin(day,time,p.windows))return json({error:"This time needs Jack's approval"},409,origin);
