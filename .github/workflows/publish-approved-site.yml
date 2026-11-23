@@ -8,6 +8,7 @@ on:
       - '**/*.html'
       - 'assets/**'
       - 'CNAME'
+      - 'sitemap.xml'
       - '.github/workflows/publish-approved-site.yml'
 
 permissions:
@@ -51,3 +52,48 @@ jobs:
       - name: Deploy approved website to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # Read the actual public host after deployment instead of trusting an old search-index cache.
+  verify-live:
+    needs: publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Confirm public film and sitemap release
+        shell: bash
+        run: |
+          set -euo pipefail
+          passed=0
+          for attempt in $(seq 1 12); do
+            if curl --fail --silent --show-error --location --max-time 15 \
+                 --header 'Cache-Control: no-cache' \
+                 "https://trinitycontinuum.com/media.html?release=${GITHUB_SHA}" \
+                 --output /tmp/trinity-media.html \
+              && curl --fail --silent --show-error --location --max-time 15 \
+                 --header 'Cache-Control: no-cache' \
+                 "https://trinitycontinuum.com/film-presentations.html?release=${GITHUB_SHA}" \
+                 --output /tmp/trinity-films.html \
+              && curl --fail --silent --show-error --location --max-time 15 \
+                 --header 'Cache-Control: no-cache' \
+                 "https://trinitycontinuum.com/sitemap.xml?release=${GITHUB_SHA}" \
+                 --output /tmp/trinity-sitemap.xml \
+              && grep -Fq '<title>Narrated Engineering Films & Media | Trinity Continuum</title>' /tmp/trinity-media.html \
+              && ! grep -Fq 'Narration is not embedded' /tmp/trinity-media.html \
+              && ! grep -Fq 'Open individual chapter video sources (24)' /tmp/trinity-media.html \
+              && grep -Fq '<title>Narrated Engineering Films: Water, Power & Thermal | Trinity Continuum</title>' /tmp/trinity-films.html \
+              && test "$(grep -o 'https://app.heygen.com/embeds/' /tmp/trinity-films.html | wc -l)" -eq 4 \
+              && grep -Fq '<lastmod>2026-11-22</lastmod>' /tmp/trinity-sitemap.xml; then
+              passed=1
+              break
+            fi
+            echo "Public content not yet matching approved release (attempt ${attempt}/12)"
+            sleep 10
+          done
+          if [ "$passed" -ne 1 ]; then
+            echo "::error::Production host did not serve approved film/sitemap release; inspect Pages domain, CDN caching and deployment target."
+            exit 1
+          fi
+          echo "PASS: Public host serves current clean Media page, four narrated-review embeds, and updated sitemap."
+          echo "NOTE: Presence of embedded voice-configured videos does not prove their audible output; listening check remains separate."
