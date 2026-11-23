@@ -14,7 +14,8 @@
 <link rel="canonical" href="https://trinitycontinuum.com/film-presentations.html">
 <link rel="stylesheet" href="assets/style.css">
 <link rel="stylesheet" href="assets/film-presentation-zoom.css">
-<script defer src="assets/config.js"></script><script defer src="assets/site.js"></script><script defer src="assets/film-presentation-zoom.js"></script>
+<link rel="stylesheet" href="assets/trailer-walkthrough.css">
+<script defer src="assets/config.js"></script><script defer src="assets/site.js"></script><script defer src="assets/film-presentation-zoom.js"></script><script defer src="assets/trailer-walkthrough.js"></script>
 <style>
 .meeting-intro{padding:50px 0 30px;background:radial-gradient(ellipse at 85% 0%,#1c3b50,#07111e 64%)}.meeting-intro h1{font:800 clamp(33px,4vw,52px)/1.1 Manrope,sans-serif;margin:12px 0 10px}.meeting-intro .lead{margin:0 0 10px;max-width:1000px}.brief-framing{max-width:1100px;color:#d9e6f2;border-left:3px solid #d9b977;padding:12px 18px;background:#12263a;margin:16px 0}.brief-actions,.brief-bottom{display:flex;gap:12px;flex-wrap:wrap;margin:20px 0}.brief-actions .btn{cursor:pointer;background:transparent;color:inherit}.brief-actions .btn.primary{background:var(--gold);color:#09131f}.meeting-section{padding:25px 0 40px}.brief-heading{display:flex;justify-content:space-between;gap:22px;align-items:end;margin-bottom:16px}.brief-heading h2{font:800 clamp(25px,3vw,34px)/1.2 Manrope,sans-serif;margin:6px 0}.brief-heading p{max-width:330px;color:var(--muted);margin:0}.brief-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.brief-card{border:1px solid #405670;border-radius:12px;padding:21px 24px;background:linear-gradient(145deg,#15283d,#101d2f);display:flex;flex-direction:column}.brief-kicker{font-size:11px;letter-spacing:.13em;text-transform:uppercase;font-weight:800;color:var(--gold)}.brief-card h2{font:800 clamp(18px,2vw,23px)/1.3 Manrope,sans-serif;margin:9px 0}.brief-card ul{padding-left:20px;margin:5px 0 12px}.brief-card li{line-height:1.5;margin:5px 0;color:#dbe6ee}.brief-film-link{font-size:13px;color:#efd49b;border-top:1px solid #38495d;padding-top:10px;margin-top:auto;font-weight:700}.brief-details{border:1px solid #405670;border-radius:12px;background:#101e2f}.brief-details summary{font-weight:800;padding:17px 22px;cursor:pointer}.brief-detail-body{padding:0 22px 20px;color:#cbd9e4}.brief-bottom{margin-top:22px}@media(max-width:750px){.brief-grid{grid-template-columns:1fr}.brief-heading{display:block}.meeting-intro{padding-top:40px}}@media print{.site-header,.footer,.brief-actions,.brief-film-link,.brief-bottom,.brief-details{display:none!important}.meeting-intro,.meeting-section{padding:10px 0}.brief-grid{grid-template-columns:repeat(2,1fr)}.brief-card{break-inside:avoid;color:#111;background:white;border:1px solid #aaa}.brief-card li,.brief-framing,.brief-heading p{color:#111}.meeting-intro h1,.brief-card h2{color:#111}body{background:white;color:black}}
 </style>
@@ -54,7 +55,7 @@
 <p class="brief-framing"><strong>For meeting participants:</strong> These films are visual interpretations of the Trinity Continuum vision. The narration explains the concepts; the imagery helps us envision the proposed technology. Illustrations are not necessarily synchronized to every spoken detail and are not evidence of a completed installation.</p>
 <aside class="brief-framing" aria-label="Current Texas eight-trailer configuration"><strong>Current Texas development configuration: eight trailers total.</strong> Six trailers comprise the integrated water, power and thermal utility core; the additional units are one BFS trailer and one data-center trailer. Film 02 retains its original <em>Six Trailers. One Continuum.</em> title because it depicts the utility core, not all eight trailers. The Mumbai two-trailer project is separate. Complete-system performance and costs are not independently certified. <a href="projects.html">Explore the eight-trailer configuration</a>.</aside>
 
-<div class="brief-actions"><a class="btn primary" href="#four-visions">Present the four visions</a><a class="btn" href="#presentation-images">Enlarge illustrations</a><a class="btn" href="#full-films">About the full films</a><button class="btn" type="button" onclick="window.print()">Print / Save meeting overview</button></div>
+<div class="brief-actions"><a class="btn primary" href="#four-visions">Present the four visions</a><a class="btn" href="#presentation-images">Enlarge illustrations</a><a class="btn" href="#eight-trailer-walkthrough">Explore the eight trailers</a><a class="btn" href="#full-films">About the full films</a><button class="btn" type="button" onclick="window.print()">Print / Save meeting overview</button></div>
 </div></section>
 <section id="four-visions" class="meeting-section"><div class="wrap">
 <div class="brief-heading"><div><div class="eyebrow">Video Vision Talking Points · 3–5 minute overview</div><h2>What we invite you to envision and experience</h2></div><p>Jack can present these four subjects directly, without playing a ten-minute video.</p></div>
@@ -75,7 +76,61 @@ document.querySelectorAll('.visual-ref-open').forEach(function(button){button.ad
 document.getElementById('visual-ref-modal-close').addEventListener('click',function(){dialog.close()});
 dialog.addEventListener('click',function(ev){if(ev.target===dialog)dialog.close()});
 });
-</script><section class="presentation-eight-trailer" aria-labelledby="eight-trailer-visual-heading"><div class="eyebrow">CURRENT TEXAS DEVELOPMENT CONFIGURATION · EIGHT TRAILERS</div><h2 id="eight-trailer-visual-heading">See the complete eight-trailer system</h2><p>Six trailers form the integrated water, power and thermal utility core. Trailer 07 is the BFS addition; Trailer 08 is the data-center addition. This is a trailer-count concept diagram, not a verified equipment layout or fabrication drawing.</p><figure style="margin:16px 0 0"><a href="assets/texas-eight-trailer-overview.svg" target="_blank" rel="noopener noreferrer" aria-label="Open the eight-trailer diagram full size in a new tab"><img src="assets/texas-eight-trailer-overview.svg" alt="Eight numbered Texas configuration trailers in two rows: six utility-core units, one BFS trailer and one data-center trailer" loading="eager" width="1164" height="560" style="width:100%;height:auto;display:block;border:1px solid #58758a;border-radius:12px;background:#091927"></a><figcaption class="notice">Select the illustration to open it full size for Jack's screen share. Film 02 below retains the original six-trailer utility-core story; the Mumbai project is separate.</figcaption></figure></section>
+</script><section class="presentation-eight-trailer" id="eight-trailer-walkthrough" aria-labelledby="eight-trailer-visual-heading">
+<div class="wrap">
+<div class="eyebrow">CURRENT TEXAS DEVELOPMENT CONFIGURATION · EIGHT TRAILERS</div>
+<h2 id="eight-trailer-visual-heading">Walk through all eight trailers, one at a time</h2>
+<p class="trailer-intro">Select any numbered trailer to open its full-size illustration, function, and Jack’s meeting talking points. Use <strong>Previous</strong> and <strong>Next</strong>, or the keyboard left/right arrows, to guide visitors through the system without leaving this presentation.</p>
+<p class="trailer-intro"><strong>Six-trailer utility core:</strong> water preparation, integrated heating and energy conversion, purification and storage. <strong>Two proposed additions:</strong> one BFS clean-process packaging trailer and one modular data-center trailer. The images are conceptual explanations, not manufactured-equipment photographs, fabrication drawings or certification evidence.</p>
+<figure class="trailer-overview-figure">
+<div class="trailer-overview-map" role="group" aria-label="Select any of the eight trailers in the Texas configuration diagram">
+<img src="assets/texas-eight-trailer-overview.svg" alt="Conceptual eight-trailer grouping: six integrated utility-core units, a separate BFS packaging trailer and a separate data-center trailer" loading="eager" width="1164" height="560">
+<button type="button" class="trailer-overview-hotspot" data-trailer="01" style="left:3.265%;top:25.714%;width:21.993%;height:25.357%" aria-label="View 01: Feedwater pretreatment trailer details"><span aria-hidden="true">View 01</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="02" style="left:27.32%;top:25.714%;width:21.993%;height:25.357%" aria-label="View 02: Primary heating and turbo trailer details"><span aria-hidden="true">View 02</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="03" style="left:51.375%;top:25.714%;width:21.993%;height:25.357%" aria-label="View 03: Pump, expander and generation trailer details"><span aria-hidden="true">View 03</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="04" style="left:75.43%;top:25.714%;width:21.993%;height:25.357%" aria-label="View 04: Secondary thermal integration trailer details"><span aria-hidden="true">View 04</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="05" style="left:3.265%;top:55.714%;width:21.993%;height:25.357%" aria-label="View 05: Distillation and finishing trailer details"><span aria-hidden="true">View 05</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="06" style="left:27.32%;top:55.714%;width:21.993%;height:25.357%" aria-label="View 06: Product-water storage trailer details"><span aria-hidden="true">View 06</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="07" style="left:51.375%;top:55.714%;width:21.993%;height:25.357%" aria-label="View 07: BFS packaging trailer details"><span aria-hidden="true">View 07</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="08" style="left:75.43%;top:55.714%;width:21.993%;height:25.357%" aria-label="View 08: Data-center computing trailer details"><span aria-hidden="true">View 08</span></button>
+</div>
+<figcaption>Select a numbered trailer in the image to open its individual walkthrough, or use the detailed cards below. <a href="assets/texas-eight-trailer-overview.svg" target="_blank" rel="noopener noreferrer">View the complete original diagram full size</a>.</figcaption>
+</figure>
+<h3 id="trailer-chooser-heading">Choose a trailer to explore</h3>
+<ol class="trailer-walkthrough-grid" id="trailer-walkthrough-grid" aria-labelledby="trailer-chooser-heading"></ol>
+<noscript><p class="trailer-walkthrough-note">The individual walkthrough requires JavaScript. You can still open the complete eight-trailer concept illustration above.</p></noscript>
+<p class="trailer-walkthrough-note">Presentation reference only. Individual unit assignments follow the controlled six-trailer Gold process sequence; final geometry, OEM equipment, performance, physical allocation revisions and the two added modules remain under professional engineering review. The Mumbai two-trailer concept is separate. Film 02 retains its original six-trailer utility-core title.</p>
+</div>
+</section>
+<dialog class="trailer-walkthrough-dialog" id="trailer-walkthrough-dialog" aria-labelledby="trailer-detail-title" aria-describedby="trailer-detail-summary">
+<div class="trailer-walkthrough-modal-shell">
+<div class="trailer-walkthrough-modal-top">
+<span id="trailer-detail-counter">Trailer 1 of 8</span>
+<button type="button" id="trailer-detail-close" aria-label="Close walkthrough and return to the eight-trailer overview">✕ Close walkthrough</button>
+</div>
+<div class="trailer-walkthrough-modal-content">
+<div class="trailer-walkthrough-detail-layout">
+<div>
+<img class="trailer-walkthrough-detail-image" id="trailer-detail-image" src="assets/trailer-walkthrough-01.svg" alt="Conceptual trailer illustration" width="940" height="510">
+<p class="trailer-walkthrough-legend">Illustrative function graphic, not a literal equipment-placement or manufacturing drawing.</p>
+<p><a href="assets/texas-eight-trailer-overview.svg" target="_blank" rel="noopener noreferrer">Open the entire eight-trailer overview</a></p>
+</div>
+<div>
+<div class="trailer-walkthrough-content-eyebrow" id="trailer-detail-category">Integrated utility core</div>
+<h3 id="trailer-detail-title">Trailer 01 · Feedwater pretreatment</h3>
+<p id="trailer-detail-summary">Source-water preparation within the integrated utility core.</p>
+<h4>Walkthrough talking points</h4>
+<ul id="trailer-detail-points"></ul>
+<p id="trailer-detail-status" class="trailer-walkthrough-status"></p>
+</div>
+</div>
+</div>
+<div class="trailer-walkthrough-modal-actions">
+<button type="button" id="trailer-detail-previous" aria-label="View previous trailer">← Previous trailer</button>
+<button type="button" id="trailer-detail-next" aria-label="View next trailer">Next trailer →</button>
+</div>
+</div>
+</dialog>
 <section class="meeting-section" id="full-films"><div class="wrap">
 <details class="brief-details"><summary>Purpose of the full films and how to view them</summary>
 <div class="brief-detail-body"><p>The full films add narrated visual context to the four topics above. They are optional materials for attendees to explore after a short meeting or for Jack to open when a participant requests a deeper visual explanation.</p>
