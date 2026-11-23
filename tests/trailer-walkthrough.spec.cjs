@@ -34,6 +34,21 @@ test('preserves all four original video players, the source eight-trailer overvi
   await expect(page.locator('#trailer-walkthrough-dialog')).not.toBeVisible();
 });
 
+test('eight direct overview-image hotspots open the correct individual unit and return focus', async ({page}) => {
+  const hotspots = page.locator('.trailer-overview-hotspot');
+  await expect(hotspots).toHaveCount(8);
+  const target = page.getByRole('button',{name:'Open trailer 04 from overview: Secondary thermal integration'});
+  await target.click();
+  const dialog = page.locator('#trailer-walkthrough-dialog');
+  await expect(dialog).toBeVisible();
+  await expect(dialog.locator('#trailer-detail-title')).toContainText('Trailer 04 · Secondary thermal integration');
+  await dialog.getByRole('button',{name:'View next trailer'}).click();
+  await expect(dialog.locator('#trailer-detail-title')).toContainText('Trailer 05 · Vacuum distillation');
+  await dialog.getByRole('button',{name:/Close trailer walkthrough/}).click();
+  await expect(dialog).not.toBeVisible();
+  await expect(target).toBeFocused();
+});
+
 test('opening trailer 01 shows real function, then Next and Previous preserve the dialog', async ({page}) => {
   const open = page.getByRole('button',{name:'Open trailer 01: Feedwater pretreatment'});
   await open.click();
