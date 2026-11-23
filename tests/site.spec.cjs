@@ -20,7 +20,8 @@ for (const [name, viewport] of [['desktop', { width: 1440, height: 900 }], ['mob
         const introSkip = page.getByRole('button', { name: /Skip Intro/i });
         if (await introSkip.isVisible().catch(() => false)) {
           await introSkip.click();
-          await expect(page.getByRole('dialog', { name: /Trinity Continuum introduction film/i })).toBeHidden();
+          await expect(page).toHaveURL(/film-presentations\.html$/, { timeout: 10000 });
+          await page.goto(base + '/full-site.html');
         }
         const button = page.locator('button.menu');
         const nav = page.locator('nav.links');
@@ -59,4 +60,29 @@ test('homepage and publications local links and assets resolve', async ({ reques
       expect(response.status(), path + ' -> ' + target).toBe(200);
     }
   }
+});
+
+test('Jack opening film displays on home and continues to the full four-film presentation', async ({ page, request }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  const videoResponse = await request.get(base + '/assets/trinity-intro-captioned.mp4');
+  expect(videoResponse.status(), 'original captioned intro film must remain published').toBe(200);
+  expect((await videoResponse.body()).length).toBeGreaterThan(100000);
+  await page.goto(base + '/index.html');
+  const modal = page.getByRole('dialog', { name: /Trinity Continuum introduction film/i });
+  await expect(modal).toBeVisible({ timeout: 10000 });
+  await expect(page.locator('#trinity-intro-video')).toHaveAttribute('src', 'assets/trinity-intro-captioned.mp4');
+  await page.locator('#trinity-intro-video').evaluate(video => video.dispatchEvent(new Event('ended')));
+  await expect(page).toHaveURL(/film-presentations\\.html$/, { timeout: 10000 });
+  await expect(page.locator('iframe[src*="app.heygen.com/embeds/"]')).toHaveCount(4);
+  await expect(page.getByRole('link', { name: /Home/i }).first()).toHaveAttribute('href','full-site.html');
+});
+
+test('Skip Intro follows presentation; full-site destination bypasses cinematic overlay', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+  await page.goto(base + '/');
+  await page.getByRole('button',{name:/Skip Intro/i}).click();
+  await expect(page).toHaveURL(/film-presentations\\.html$/, { timeout:10000 });
+  await page.goto(base + '/full-site.html');
+  await expect(page.locator('#trinity-film-intro')).toHaveCount(0);
+  await expect(page.locator('h1')).toHaveCount(1);
 });
