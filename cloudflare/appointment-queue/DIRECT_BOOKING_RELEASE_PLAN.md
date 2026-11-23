@@ -14,6 +14,13 @@
 - **Cloudflare deployment credential RESTORED and independent Worker DEPLOYED HARD-OFF:** GitHub secret was rotated securely; read-only authentication check [45114264588](https://github.com/TrinityContinuum/trinitycontinuum-website/actions/runs/45114264588) passed Workers/D1 HTTP 200. Newly created Worker `trinity-independent-booking` deployed without schema changes or new secrets. [Final live acceptance 45116623035](https://github.com/TrinityContinuum/trinitycontinuum-website/actions/runs/45116623035) passed 5/5: policy inactive, zero slots, booking rejected, private admin/booking ledger unauthenticated access denied. Cloudflare API confirmed `DB` D1 binding and `DIRECT_BOOKING_ENABLED=false`. Public site, existing Workers, DNS and existing appointment records unchanged. This is **NOT** customer booking acceptance; deployment only.
 - Google OAuth credentials and Turnstile secret must be verified separately in the actual Worker; GitHub secret replacement alone does not authorize customer appointment creation. Booking remains disabled until a real internal appointment canary succeeds end-to-end.
 
+## Deployment-workflow cleanup and current baseline
+- The one-time bootstrap workflow `.github/workflows/deploy-independent-booking-disabled.yml` **was retired after its successful Cloudflare upload**. It is now a read-only inspection; rerunning it will neither attempt to create the already-existing Worker nor reset future Worker secrets/configuration. Original installer changes remain in Git history.
+- The repeatable *live no-write* acceptance check is `.github/workflows/verify-independent-booking-live.yml`. Its last accepted run was [45116623035](https://github.com/TrinityContinuum/trinitycontinuum-website/actions/runs/45116623035): 5/5 public/admin safety checks passed while direct booking remained OFF.
+- `.github/workflows/booking-cloudflare-readonly.yml` checks token access and the presence of existing Workers/D1 without modifying customer records.
+- **No automatic deployment of the draft branch is permitted.** A future reviewed production update must use an explicit, protected release process that checks the deployed Worker state, preserves existing secrets/bindings, and has a rollback path. Running the historical bootstrap or merging draft PR #43 is **not** an approval to activate bookings.
+- Remaining acceptance: backed-up additive D1 schema review/migrations; Cloudflare Access/MFA protections; approved scoped Google OAuth to the corporate and personal busy calendars; Turnstile secret; one internal real appointment through D1, Google Meet and invitations, including duplicate/cancellation checks; then explicit management activation of both policy and Worker flag.
+
 ## Required behavior
 
 **Single source of truth:** Trinity's Cloudflare D1 private appointment data, not Jack's private/personal Google Calendar. The existing `appointments` table holds approval-required meeting requests; `appointment_bookings` holds confirmed direct bookings and uncertain-outcome records. An administrative master schedule must reconcile both with pre-existing Google invitations before cutover.
@@ -25,9 +32,9 @@
 - **Authority:** Jack selects daily allowed windows, notice period and booking horizon from the authenticated `/admin` policy screen. Default = zero windows and disabled.
 - **Approvals:** Existing D1 request and manual approval queue remain intact; do not rebook or delete prior meetings.
 
-## Staged files
+## Deployed code and staged activation files
 - `004_direct_booking.sql`: disabled-by-default policy and unique per-slot D1 booking ledger.
-- `direct-booking.js`: separate experimental Cloudflare Worker for `/api/public/policy`, `/api/public/slots`, `/api/public/book`, `/admin`, `/api/admin/policy`, `/api/admin/bookings`. Separate worker; DO NOT replace existing `intake.js` or existing `admin.js`.
+- `direct-booking.js`: deployed to an isolated Cloudflare Worker with DIRECT_BOOKING_ENABLED=false; source supports `/api/public/policy`, `/api/public/slots`, `/api/public/book`, `/admin`, `/api/admin/policy`, `/api/admin/bookings`. Separate worker; DO NOT replace existing `intake.js` or existing `admin.js`.
 - `instant-booking.html`: public feature page, with direct-booking API unset and approval-request fallback.
 
 ## Deployment and security gates — mandatory
