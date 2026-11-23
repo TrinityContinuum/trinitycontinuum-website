@@ -1,0 +1,26 @@
+name: Verify public narrated film audio
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'tests/public-film-audio.cjs'
+      - '.github/workflows/verify-public-film-audio.yml'
+permissions:
+  contents: read
+jobs:
+  inspect-public-embeds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser tooling
+        run: |
+          npm install --no-save @playwright/test
+          npx playwright install --with-deps chromium
+          command -v ffprobe || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - name: Inspect audio tracks in four actual public film embeds
+        run: node tests/public-film-audio.cjs
