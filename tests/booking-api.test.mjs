@@ -151,6 +151,23 @@ test("uncertain Google event creation is held for human reconciliation and not r
   assert.equal(b.slots.some(x=>x.time==="14:00"),false,"15-minute buffer blocks adjacent times");
  }finally{h.reset();}
 });
+
+test("disabled independent Worker boots before D1 migrations and cannot issue appointments",async()=>{
+ const env={DIRECT_BOOKING_ENABLED:"false"};
+ const policy=await get("/api/public/policy",env);
+ assert.equal(policy.status,200);
+ assert.equal((await policy.json()).instantBookingEnabled,false);
+ const slots=await get("/api/public/slots?date="+date,env);
+ assert.equal(slots.status,200);
+ assert.deepEqual((await slots.json()).slots,[]);
+ const booking=await post(date,"13:30",env);
+ assert.equal(booking.status,503);
+ const verdict=await booking.json();
+ assert.match(verdict.error,/disabled/i);
+ // Admin endpoints remain non-functional in a credential-free cold deploy.
+ const admin=await get("/api/admin/bookings",env);
+ assert.equal(admin.status,503);
+});
 test.after(()=>{Date.now=realNow});
 
 test("all authorized Jack busy calendars are checked, including existing commitments",async()=>{
