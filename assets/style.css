@@ -34,3 +34,6 @@ body{font-family:Arial,Helvetica,sans-serif}.brand,.section h2,.page-hero h1,.he
 /* Accessibility: visible keyboard focus and reduced-motion support. */
 :where(a, button, input, select, textarea, summary):focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}
+
+/* Four utilities — same visual system as existing Trinity cards */
+.grid4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:18px}@media(max-width:1000px){.grid4{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:600px){.grid4{grid-template-columns:1fr}}
