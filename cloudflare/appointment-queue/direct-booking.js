@@ -132,7 +132,7 @@ async function handleSlots(url,env,origin){
  const slots=[];for(let min=0;min<=1410;min+=30){
   const time=String(Math.floor(min/60)).padStart(2,"0")+":"+String(min%60).padStart(2,"0");
   try{
-   if(!slotWithin(day,time,p))continue;
+   if(!slotWithin(day,time,p.windows))continue;
    const start=fromLocal(day,time),end=new Date(start.getTime()+1800000);
    if(!inRange(start,p))continue;
    const reserved=await env.DB.prepare("SELECT id FROM appointment_bookings WHERE slot_start < ? AND slot_end > ? AND state IN ('processing','confirmed','needs_reconciliation') LIMIT 1").bind(bufferEnd(end).toISOString(),bufferStart(start).toISOString()).first();
@@ -150,7 +150,7 @@ async function handleBook(req,env,origin){
  if(!/^[0-9a-f-]{36}$/i.test(id)||name.length<2||name.length>120||organization.length>150||topic.length<3||topic.length>2500||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:"Invalid details"},400,origin);
  if(!(await verifyTurnstile(req,env,String(body.turnstileToken||""))))return json({error:"Security verification failed"},403,origin);
  let start,end,p;
- try{p=await policy(env);if(!p.enabled||!slotWithin(day,time,p))return json({error:"This time needs Jack's approval"},409,origin);
+ try{p=await policy(env);if(!p.enabled||!slotWithin(day,time,p.windows))return json({error:"This time needs Jack's approval"},409,origin);
  start=fromLocal(day,time);end=new Date(start.getTime()+1800000);
  if(!inRange(start,p))return json({error:"Outside booking window"},409,origin);
  }catch{return json({error:"Invalid or ambiguous time"},400,origin)}
