@@ -39,7 +39,8 @@ jobs:
           import json
           for typ,file,stat in [('schema','/tmp/schema-result.json','/tmp/schema-status.txt'),('bookmark','/tmp/bookmark-result.json','/tmp/bookmark-status.txt')]:
               data=json.load(open(file))
-              print(typ,'HTTP',open(stat).read().strip(),'errors',[(e.get('code'),str(e.get('message',''))[:180]) for e in data.get('errors',[])][:4])
+              errors=[] if isinstance(data,list) else [(e.get('code'),str(e.get('message',''))[:180]) for e in data.get('errors',[])][:4]
+              print(typ,'HTTP',open(stat).read().strip(),'errors',errors)
           q=json.load(open('/tmp/schema-result.json'))
           if not isinstance(q,list):raise SystemExit('Unexpected D1 Wrangler schema response; no changes')
           rows=[]
