@@ -122,7 +122,23 @@ test("server books the 4 PM Central start, creates an invite and rejects a simul
   assert.equal(h.calls.filter(x=>x.url.includes("/events?")).length,1,"No duplicate invitation");
  }finally{h.reset();}
 });
-test("off-hours, holiday, weekend and bad-origin submissions are rejected without invitations",async()=>{
+test("malformed booking identifiers are rejected before Turnstile, D1 or Google operations",async()=>{
+ const h=harness();h.use();
+ try{
+  for(const id of [
+   "------------------------------------",
+   "111111111111-4111-8111-111111111111",
+   "11111111-1111-1111-8111-111111111111",
+   "11111111-1111-4111-1111-111111111111"
+  ]){
+   const r=await post(date,"14:00",h.env,{id});
+   assert.equal(r.status,400,"Malformed UUID must not reach downstream providers");
+  }
+  assert.equal(h.bookings.length,0);
+  assert.equal(h.calls.length,0,"No Turnstile, Calendar or Google operations on malformed IDs");
+ }finally{h.reset()}
+});
+\ntest("off-hours, holiday, weekend and bad-origin submissions are rejected without invitations",async()=>{
  const h=harness();h.use();
  try{
   for(const [day,time,status] of [[date,"13:00",409],["2026-11-26","14:00",409],["2026-11-28","14:00",409]]){
