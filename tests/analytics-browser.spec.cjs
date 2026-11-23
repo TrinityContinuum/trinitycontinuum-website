@@ -38,11 +38,17 @@ test('consent banner is usable on narrow screens', async ({page})=>{
  await expect(page.getByRole('button',{name:'Decline',exact:true})).toBeVisible();
 });
 
-test('homepage content and privacy controls are directly accessible without a film gate', async ({page}) => {
+test('homepage introduction keeps access to presentations, full site and privacy choices', async ({page}) => {
+ await page.emulateMedia({reducedMotion:'no-preference'});
  await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
  await expect(page.locator('main h1')).toContainText('Three Essential Utilities');
- await expect(page.locator('#trinity-film-intro')).toHaveCount(0);
- await expect(page.locator('a[href="film-presentations.html"]').first()).toBeVisible();
+ await expect(page.locator('#trinity-film-intro')).toBeVisible();
+ await expect(page.getByRole('button',{name:/Skip Intro/i})).toBeVisible();
+ await page.getByRole('button',{name:/Skip Intro/i}).click();
+ await expect(page).toHaveURL(/film-presentations\.html$/);
+ await page.locator('a[href="full-site.html"]').first().click();
+ await expect(page).toHaveURL(/full-site\.html$/);
+ await expect(page.locator('main h1')).toContainText('Three Essential Utilities');
  await expect(page.locator('#trinity-consent-banner')).toBeVisible();
  await page.locator('#trinity-consent-banner').getByRole('button',{name:'Decline'}).click();
  await expect(page.locator('#trinity-consent-banner')).toHaveCount(0);
