@@ -165,7 +165,10 @@ test('film frames have nonblank distinct accessible titles', async ({page}) => {
 });
 test('keyboard skip link focuses primary content on supporting and main routes', async ({page}) => {
   for(const path of ['index.html','full-site.html','engineering-overview.html','gold-request.html','project-interest.html']){
-    await page.goto(BASE+'/'+path,{waitUntil:'domcontentloaded'});
+    // The normal homepage intentionally starts in a modal introduction that takes
+    // initial focus. The ?view=site route explicitly bypasses that film overlay.
+    const target=path === 'index.html' ? 'index.html?view=site' : path;
+    await page.goto(BASE+'/'+target,{waitUntil:'domcontentloaded'});
     await page.keyboard.press('Tab');
     await expect(page.locator('a.skip')).toBeFocused();
     await page.keyboard.press('Enter');
