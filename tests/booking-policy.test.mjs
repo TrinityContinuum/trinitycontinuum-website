@@ -58,3 +58,16 @@ test("D1 serializes adjacent bookings with a 15-minute spacing buffer",()=>{
   assert.equal(count,2);
  }finally{db.close();}
 });
+
+test("D1 blocks a cancelled booking reactivation or overlapping reschedule",()=>{
+ const db=new DatabaseSync(":memory:");
+ try{
+  db.exec(readFileSync(new URL("../cloudflare/appointment-queue/004_direct_booking.sql",import.meta.url),"utf8"));
+  const insert=db.prepare("INSERT INTO appointment_bookings (id,slot_start,slot_end,name,email,topic,state) VALUES (?,?,?,?,?,?,?)");
+  insert.run("one","2026-11-30T19:30:00.000Z","2026-11-30T20:00:00.000Z","Test","synthetic@example.invalid","Test","confirmed");
+  insert.run("two","2026-11-30T20:00:00.000Z","2026-11-30T20:30:00.000Z","Test","synthetic@example.invalid","Test","cancelled");
+  assert.throws(()=>db.prepare("UPDATE appointment_bookings SET state='processing' WHERE id='two'").run(),/15-minute buffer/);
+  assert.throws(()=>db.prepare("UPDATE appointment_bookings SET slot_start='2026-11-30T19:45:00.000Z',slot_end='2026-11-30T20:15:00.000Z' WHERE id='one'").run(),/UNIQUE|overlap|buffer/);
+  assert.equal(db.prepare("SELECT state FROM appointment_bookings WHERE id='two'").get().state,"cancelled");
+ }finally{db.close()}
+});
