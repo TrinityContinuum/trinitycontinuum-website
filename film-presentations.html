@@ -83,10 +83,18 @@ dialog.addEventListener('click',function(ev){if(ev.target===dialog)dialog.close(
 <p class="trailer-intro">Select any numbered trailer to open its full-size illustration, function, and Jack’s meeting talking points. Use <strong>Previous</strong> and <strong>Next</strong>, or the keyboard left/right arrows, to guide visitors through the system without leaving this presentation.</p>
 <p class="trailer-intro"><strong>Six-trailer utility core:</strong> water preparation, integrated heating and energy conversion, purification and storage. <strong>Two proposed additions:</strong> one BFS clean-process packaging trailer and one modular data-center trailer. The images are conceptual explanations, not manufactured-equipment photographs, fabrication drawings or certification evidence.</p>
 <figure class="trailer-overview-figure">
-<a href="assets/texas-eight-trailer-overview.svg" target="_blank" rel="noopener noreferrer" aria-label="Open the complete eight-trailer concept diagram full size in a new tab">
+<div class="trailer-overview-map" role="group" aria-label="Select any of the eight trailers in the Texas configuration diagram">
 <img src="assets/texas-eight-trailer-overview.svg" alt="Conceptual eight-trailer grouping: six integrated utility-core units, a separate BFS packaging trailer and a separate data-center trailer" loading="eager" width="1164" height="560">
-</a>
-<figcaption>All eight together. Select the image to view the original full-size overview in a new tab.</figcaption>
+<button type="button" class="trailer-overview-hotspot" data-trailer="01" style="left:3.265%;top:25.714%;width:21.993%;height:25.357%" aria-label="Open trailer 01 from overview: Feedwater pretreatment"><span aria-hidden="true">View 01</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="02" style="left:27.32%;top:25.714%;width:21.993%;height:25.357%" aria-label="Open trailer 02 from overview: Primary heating and turbo"><span aria-hidden="true">View 02</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="03" style="left:51.375%;top:25.714%;width:21.993%;height:25.357%" aria-label="Open trailer 03 from overview: Pump, expander and generation"><span aria-hidden="true">View 03</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="04" style="left:75.43%;top:25.714%;width:21.993%;height:25.357%" aria-label="Open trailer 04 from overview: Secondary thermal integration"><span aria-hidden="true">View 04</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="05" style="left:3.265%;top:55.714%;width:21.993%;height:25.357%" aria-label="Open trailer 05 from overview: Distillation and finishing"><span aria-hidden="true">View 05</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="06" style="left:27.32%;top:55.714%;width:21.993%;height:25.357%" aria-label="Open trailer 06 from overview: Product-water storage"><span aria-hidden="true">View 06</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="07" style="left:51.375%;top:55.714%;width:21.993%;height:25.357%" aria-label="Open trailer 07 from overview: BFS packaging"><span aria-hidden="true">View 07</span></button>
+<button type="button" class="trailer-overview-hotspot" data-trailer="08" style="left:75.43%;top:55.714%;width:21.993%;height:25.357%" aria-label="Open trailer 08 from overview: Data-center computing"><span aria-hidden="true">View 08</span></button>
+</div>
+<figcaption>Select a numbered trailer in the image to open its individual walkthrough, or use the detailed cards below. <a href="assets/texas-eight-trailer-overview.svg" target="_blank" rel="noopener noreferrer">View the complete original diagram full size</a>.</figcaption>
 </figure>
 <h3 id="trailer-chooser-heading">Choose a trailer to explore</h3>
 <ol class="trailer-walkthrough-grid" id="trailer-walkthrough-grid" aria-labelledby="trailer-chooser-heading"></ol>
