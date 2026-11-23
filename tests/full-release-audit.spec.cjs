@@ -224,3 +224,26 @@ test('opening film modal retains keyboard focus until visitor exits', async ({pa
   await page.keyboard.press('Escape');
   await expect(page).toHaveURL(/\/film-presentations\.html$/);
 });
+
+
+test('reduced-motion visitor bypasses autoplay intro and reaches the main website', async ({browser}) => {
+  const context=await browser.newContext({reducedMotion:'reduce',viewport:{width:390,height:844}});
+  try {
+    const page=await context.newPage();
+    await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
+    await expect(page.locator('#trinity-film-intro')).toHaveCount(0);
+    await expect(page.locator('main#main')).toBeVisible();
+    await page.keyboard.press('Tab');
+    await expect(page.locator('a.skip')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/#main$/);
+  } finally {
+    await context.close();
+  }
+});
+
+test('visitors returning from Four Films can skip the original intro without re-opening it', async ({page}) => {
+  await page.goto(BASE+'/index.html?view=site',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#trinity-film-intro')).toHaveCount(0);
+  await expect(page.locator('main#main')).toBeVisible();
+});
