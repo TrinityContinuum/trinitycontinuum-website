@@ -9,7 +9,7 @@ const windows=[1,2,3,4,5].map(weekday=>({weekday,start:"13:30",end:"16:30"}));
 const realNow=Date.now;
 Date.now=()=>Date.UTC(2026,10,22,18,0,0);
 
-function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure=false}={}){
+function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure=false,otherCalendarBusy=false,otherCalendarUnavailable=false,meetMissing=false}={}){
   const bookings=[], calls=[];
   const db={prepare(sql){
     let params=[];
@@ -51,14 +51,21 @@ function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure
     const response=(obj,status=200)=>new Response(JSON.stringify(obj),{status,headers:{"content-type":"application/json"}});
     if(u.includes("oauth2.googleapis.com/token"))
       return businessCalendarReady?response({access_token:"synthetic-token"}):response({error:"unauthorized_client"},401);
-    if(u.includes("www.googleapis.com/calendar/v3/freeBusy"))
-      return response({calendars:{"trinity-business@example.invalid":{busy:googleBusy?[{start:"2026-11-30T21:00:00Z",end:"2026-11-30T21:30:00Z"}]:[]}}});
+    if(u.includes("www.googleapis.com/calendar/v3/freeBusy")){
+      const ids=JSON.parse(opts.body).items.map(i=>i.id);
+      const calendars={};
+      for(const id of ids){
+        if(otherCalendarUnavailable&&id==="existing-jack-events@example.invalid")continue;
+        calendars[id]={busy:(id==="trinity-business@example.invalid"&&googleBusy)||(id==="existing-jack-events@example.invalid"&&otherCalendarBusy)?[{start:"2026-11-30T21:00:00Z",end:"2026-11-30T21:30:00Z"}]:[]};
+      }
+      return response({calendars});
+    }
     if(u.includes("challenges.cloudflare.com/turnstile/v0/siteverify"))
       return response({success:true,hostname:"trinitycontinuum.com"});
     if(u.includes("www.googleapis.com/calendar/v3/calendars/")){
       if(googleEventFailure)return response({error:"unavailable"},503);
       const posted=JSON.parse(opts.body);
-      return response({id:posted.id,hangoutLink:"https://meet.google.com/synthetic-test",htmlLink:"https://calendar.google.com/synthetic-test"});
+      return response({id:posted.id,hangoutLink:meetMissing?"":"https://meet.google.com/synthetic-test",htmlLink:"https://calendar.google.com/synthetic-test"});
     }
     throw Error("Unexpected network call:"+u);
   };
@@ -140,3 +147,42 @@ test("uncertain Google event creation is held for human reconciliation and not r
  }finally{h.reset();}
 });
 test.after(()=>{Date.now=realNow});
+
+test("all authorized Jack busy calendars are checked, including existing commitments",async()=>{
+ const h=harness({otherCalendarBusy:true});h.env.GOOGLE_BUSY_CALENDAR_IDS_JSON=JSON.stringify(["existing-jack-events@example.invalid"]);h.use();
+ try{
+  const r=await get("/api/public/slots?date="+date,h.env);
+  assert.equal(r.status,200);
+  const response=await r.json();
+  // The secondary calendar has an event at 15:00 UTC-equivalent, and the
+  // 15-minute buffer excludes adjacent meeting starts around that event.
+  assert.equal(response.slots.length,0,"Any busy calendar must block direct booking");
+  const calls=h.calls.filter(x=>x.url.includes("/freeBusy"));
+  assert(calls.length>0);
+  assert(calls.every(x=>JSON.parse(x.body).items.some(z=>z.id==="existing-jack-events@example.invalid")));
+ }finally{h.reset();}
+});
+test("a missing authorized busy calendar fails closed instead of advertising free slots",async()=>{
+ const h=harness({otherCalendarUnavailable:true});h.env.GOOGLE_BUSY_CALENDAR_IDS_JSON=JSON.stringify(["existing-jack-events@example.invalid"]);h.use();
+ try{
+  const r=await get("/api/public/slots?date="+date,h.env);
+  assert.equal(r.status,200);
+  const data=await r.json();assert.deepEqual(data.slots,[]);
+  const b=await post(date,"14:00",h.env);
+  assert.equal(b.status,503);
+  assert.equal(h.bookings.length,0);
+ }finally{h.reset();}
+});
+test("a Google event without confirmed Google Meet link is held, not falsely booked",async()=>{
+ const h=harness({meetMissing:true});h.use();
+ try{
+  const r=await post(date,"16:00",h.env);
+  assert.equal(r.status,503);
+  assert.equal(h.bookings.length,1);
+  assert.equal(h.bookings[0].state,"needs_reconciliation");
+  const check=await get("/api/public/slots?date="+date,h.env);
+  assert.equal(check.status,200);
+  const slots=(await check.json()).slots.map(x=>x.time);
+  assert.equal(slots.includes("16:00"),false);
+ }finally{h.reset();}
+});
