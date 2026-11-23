@@ -1,36 +1,16 @@
 <!doctype html>
-<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow">
-<title>Trinity Appointment Intake — Diagnostic</title>
-<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-<style>body{background:#07111e;color:#fff;font:16px/1.5 system-ui;margin:0}main{max-width:680px;margin:50px auto;padding:24px}section{background:#182b40;border:1px solid #536c86;border-radius:12px;padding:24px}h1{color:#e4c37f;font-size:27px}button{background:#e4c37f;color:#101822;border:0;border-radius:7px;padding:14px 22px;font:700 16px system-ui;cursor:pointer;margin-top:18px}button:disabled{opacity:.6}pre{background:#0a1a2a;color:#fff;white-space:pre-wrap;overflow-wrap:anywhere;padding:16px;border-radius:8px}a{color:#e4c37f}small{color:#cbd4e0}</style></head>
-<body><main><section>
-<h1>Trinity Continuum — Intake Diagnostic</h1>
-<p>Tests the Cloudflare appointment database connection with <strong>dummy information only</strong>. No email will be sent, no visitor appointment will be booked, and the existing Web3Forms system is not changed.</p>
-<p><strong>Internal diagnostic only — not a customer appointment form.</strong> This page can write a synthetic test record to the real appointment queue; use it only for owner-authorized acceptance testing.</p><p>Complete the security check below, then select <strong>Run Database Test</strong>.</p>
-<div class="cf-turnstile" data-sitekey="0x4AAAAAAGBTprzSAt5m98MQ"></div>
-<button id="test" type="button">Run Database Test</button>
-<pre id="result" role="status" aria-live="polite">No test has been run.</pre>
-<small>On success, the diagnostic stores a clearly labeled dummy appointment in Trinity's D1 database. You can delete the test record later using its reference number. Do not use real visitor information here.</small>
-</section></main>
-<script>
-(function(){
-"use strict";
-var btn=document.getElementById("test"),out=document.getElementById("result");
-function isoFuture(n){var d=new Date();d.setDate(d.getDate()+n);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")}
-btn.addEventListener("click",async function(){
-var token=document.querySelector('[name="cf-turnstile-response"]')?.value;
-if(!token){out.textContent="Complete the Cloudflare security check first.";return}
-if(!crypto?.randomUUID){out.textContent="Secure browser required for test ID.";return}
-btn.disabled=true;out.textContent="Testing Cloudflare intake and database...";
-var payload={id:crypto.randomUUID(),name:"TRINITY INTAKE DIAGNOSTIC — NOT A VISITOR",email:"diagnostic@example.invalid",organization:"Trinity Continuum — Internal Test",date1:isoFuture(3),time1:"09:00",date2:isoFuture(4),time2:"14:00",timezone:"America/Chicago (Central)",topic:"DIAGNOSTIC ONLY — do not book, do not send email",turnstileToken:token};
-try{
-var controller=new AbortController(),timer=setTimeout(()=>controller.abort(),16000);
-var response;
-try{response=await fetch("https://trinity-appointments.jackspurewater.workers.dev/api/intake",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload),signal:controller.signal})}finally{clearTimeout(timer)}
-var result=await response.json().catch(()=>({error:"Non-JSON server response"}));
-out.textContent="HTTP "+response.status+"\n"+JSON.stringify(result,null,2)+(result.ok?"\n\nDatabase intake accepted the diagnostic request. This does not verify the private dashboard or email automation.":"\n\nNo successful database write was confirmed.");
-}catch(e){out.textContent="Request failed or timed out: "+(e?.message||"Network error")+". Do not repeat until status is checked."}
-finally{btn.disabled=false;if(window.turnstile)window.turnstile.reset()}
-});
-})();
-</script></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta name="referrer" content="no-referrer">
+<title>Appointment diagnostic retired | Trinity Continuum</title>
+<style>body{background:#07111e;color:#fff;font:16px/1.55 system-ui;margin:0}main{max-width:700px;margin:8vh auto;padding:24px}section{background:#17293e;border:1px solid #60758a;border-radius:12px;padding:26px}h1{color:#e4c37f}a{color:#e4c37f}p{overflow-wrap:anywhere}</style>
+</head>
+<body><main><section role="status">
+<h1>Appointment diagnostic retired</h1>
+<p>The public database diagnostic has been withdrawn. Diagnostic writes and queue inspection must be performed through a separately authenticated Trinity administrative service.</p>
+<p>This page does not accept, transmit or store appointment data. Existing appointment records and the original helper source remain preserved in Git history; no live queue records were changed.</p>
+<p><a href="../meetings.html">Public meeting requests</a> · <a href="../contact.html">Contact Trinity</a></p>
+</section></main></body></html>
