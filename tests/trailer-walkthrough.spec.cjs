@@ -115,6 +115,28 @@ test('mobile cards and expanded detail stay within the visible viewport', async 
   await expect(opener).toBeFocused();
 });
 
+test('public email deep links open each matching individual trailer automatically', async ({page}) => {
+  for (let n = 1; n <= 8; n++) {
+    const number = String(n).padStart(2, '0');
+    const url = BASE + '/film-presentations.html?trailer=' + number + '#eight-trailer-walkthrough';
+    await page.goto(url, {waitUntil: 'domcontentloaded'});
+    const dialog = page.locator('#trailer-walkthrough-dialog');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('#trailer-detail-counter')).toHaveText('Trailer ' + n + ' of 8');
+    await expect(dialog.locator('#trailer-detail-title')).toContainText(titles[n - 1]);
+    await expect(dialog.locator('#trailer-detail-image')).toHaveAttribute('src','assets/trailer-walkthrough-'+number+'.svg');
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+  }
+});
+
+test('invalid email link parameter never opens a different trailer', async ({page}) => {
+  for (const input of ['99','00','0A','01%3Ftest','1','07%2Fother']) {
+    await page.goto(BASE + '/film-presentations.html?trailer=' + input + '#eight-trailer-walkthrough', {waitUntil:'domcontentloaded'});
+    await expect(page.locator('#trailer-walkthrough-dialog')).not.toBeVisible();
+  }
+});
+
 test('no fabricated certifications or links to controlled CAD are added by the public explorer', async ({page}) => {
   await page.locator('#trailer-walkthrough-grid .trailer-walkthrough-card').nth(4).click();
   await expect(page.locator('#trailer-detail-status')).toContainText('modeled');
