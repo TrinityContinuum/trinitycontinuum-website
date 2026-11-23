@@ -123,7 +123,7 @@ test('every sitemap route renders on mobile without horizontal page overflow', a
       const response = await page.goto(base + route, { waitUntil: 'domcontentloaded', timeout: 15000 });
       if (!response || response.status() !== 200) { failures.push(route + ': not HTTP 200'); continue; }
       const structure = await page.evaluate(() => ({
-        h1: document.querySelectorAll('h1').length,
+        h1: document.querySelectorAll('main h1').length,
         main: document.querySelectorAll('main').length,
         overflow: document.documentElement.scrollWidth > innerWidth + 2
       }));
