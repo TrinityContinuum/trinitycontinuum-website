@@ -87,11 +87,29 @@ async function googleToken(env){
  const b=await r.json();if(!r.ok||!b.access_token)throw Error("Calendar authorization failed");
  return b.access_token;
 }
+function requiredBusyCalendars(env){
+ const primary=String(env.GOOGLE_CALENDAR_ID||"").trim();
+ if(!primary)throw Error("Business calendar not configured");
+ let extras=[];
+ if(env.GOOGLE_BUSY_CALENDAR_IDS_JSON){
+  try{extras=JSON.parse(env.GOOGLE_BUSY_CALENDAR_IDS_JSON)}catch{throw Error("Busy-calendar configuration invalid")}
+  if(!Array.isArray(extras)||extras.length>12||extras.some(x=>typeof x!=="string"||!x.trim()||x.length>256))
+   throw Error("Busy-calendar configuration invalid");
+ }
+ return [...new Set([primary,...extras.map(x=>x.trim())])];
+}
 async function freeBusy(env,token,start,end){
- const r=await fetch("https://www.googleapis.com/calendar/v3/freeBusy",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({timeMin:start.toISOString(),timeMax:end.toISOString(),items:[{id:env.GOOGLE_CALENDAR_ID}]})});
- const b=await r.json(),c=b.calendars?.[env.GOOGLE_CALENDAR_ID];
- if(!r.ok||!c||c.errors?.length||!Array.isArray(c.busy))throw Error("Calendar availability unavailable");
- return c.busy.length===0;
+ const ids=requiredBusyCalendars(env);
+ const r=await fetch("https://www.googleapis.com/calendar/v3/freeBusy",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({timeMin:start.toISOString(),timeMax:end.toISOString(),items:ids.map(id=>({id}))})});
+ const b=await r.json();
+ if(!r.ok||!b.calendars)throw Error("Calendar availability unavailable");
+ for(const id of ids){
+  const c=b.calendars[id];
+  // A permission error on ANY relevant calendar is a hard block, not "free."
+  if(!c||c.errors?.length||!Array.isArray(c.busy))throw Error("Busy-calendar availability unavailable");
+  if(c.busy.length)return false;
+ }
+ return true;
 }
 function basic(req,env){
  if(!env.ADMIN_PASSWORD||env.ADMIN_PASSWORD.length<24)return false;
@@ -122,7 +140,9 @@ async function createInvitation(env,token,id,request,start,end){
  const r=await fetch(api,{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify(data)});
  const b=await r.json().catch(()=>({}));
  if(!r.ok||b.id!==eventId)throw Error("Calendar event not confirmed; manual reconciliation required");
- return {eventId,meetLink:b.hangoutLink||"",htmlLink:b.htmlLink||""};
+ const meetLink=b.hangoutLink||b.conferenceData?.entryPoints?.find(p=>p.entryPointType==="video")?.uri||"";
+ if(!/^https:\/\/meet\.google\.com\/[a-z0-9-]+(?:[/?#].*)?$/i.test(meetLink))throw Error("Meet link not ready; reconcile event before confirming");
+ return {eventId,meetLink,htmlLink:b.htmlLink||""};
 }
 async function handleSlots(url,env,origin){
  const p=await policy(env);
