@@ -115,3 +115,28 @@ test('mobile supplementary-page navigation operates with keyboard and Escape', a
   await expect(menu).toHaveAttribute('aria-expanded','false');
   await expect(menu).toBeFocused();
 });
+
+
+// Stable presentation assertions prevent reintroducing superseded product claims.
+test('public Texas entry points distinguish the eight-trailer deployment from its six-trailer core', async ({page}) => {
+  for (const path of ['index.html','full-site.html']) {
+    await page.goto(BASE+'/'+path,{waitUntil:'domcontentloaded'});
+    await expect(page.locator('main')).toContainText('eight-trailer');
+    await expect(page.locator('#platform')).toContainText('six-trailer utility core');
+    await expect(page.locator('#platform')).toContainText('BFS');
+    await expect(page.locator('#platform')).toContainText('data-center');
+    await expect(page.locator('#platform img')).toHaveAttribute('alt',/six modular trailers/i);
+  }
+});
+test('film presentation retains four distinct approved embedded destinations', async ({page}) => {
+  await page.goto(BASE+'/film-presentations.html',{waitUntil:'domcontentloaded'});
+  const urls=await page.locator('iframe[src*="app.heygen.com/embeds/"]').evaluateAll(els=>els.map(el=>el.getAttribute('src')));
+  expect(urls).toHaveLength(4);
+  expect(new Set(urls).size).toBe(4);
+  await expect(page.locator('#film-02')).toContainText('Historical film title retained');
+});
+test('superseded four-trailer technical media is clearly identified as historical', async ({page}) => {
+  await page.goto(BASE+'/media.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('#four-trailer')).toContainText('Historical reference');
+  await expect(page.locator('#four-trailer')).toContainText('not the current Texas configuration');
+});
