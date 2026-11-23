@@ -117,3 +117,24 @@ test("project interest and Gold request are explicitly mail-client handoffs",asy
  await expect(page.locator("#gold-request-form")).toHaveCount(1);
  await expect(page.locator("body")).toContainText(/management approval/i);
 });
+
+test("live public deployment follows Jack intro into actual presentation",async({page})=>{
+ await page.emulateMedia({reducedMotion:"no-preference"});
+ await page.route("**/*",route=>{
+  const u=new URL(route.request().url());
+  if(u.hostname==="trinitycontinuum.com"||u.hostname==="www.trinitycontinuum.com"||u.protocol==="data:")return route.continue();
+  return route.abort();
+ });
+ const r=await page.goto("https://trinitycontinuum.com/index.html?site_audit=20261122",{waitUntil:"domcontentloaded",timeout:30000});
+ expect(r.status()).toBe(200);
+ await expect(page.locator("#trinity-film-intro")).toBeVisible({timeout:12000});
+ await expect(page.locator("#trinity-intro-video")).toHaveAttribute("src","assets/trinity-intro-captioned.mp4");
+ await page.screenshot({path:path.join(capture,"live-intro.png"),fullPage:false,animations:"disabled"});
+ await page.getByRole("button",{name:/Skip Intro/i}).click();
+ await expect(page).toHaveURL(/trinitycontinuum\.com\/film-presentations\.html$/,{timeout:15000});
+ await expect(page.locator('iframe[src*="app.heygen.com/embeds/"]')).toHaveCount(4);
+ await page.screenshot({path:path.join(capture,"live-four-films.png"),fullPage:false,animations:"disabled"});
+ await page.locator('a[href="full-site.html"]').first().click();
+ await expect(page).toHaveURL(/trinitycontinuum\.com\/full-site\.html$/,{timeout:15000});
+ await expect(page.locator("#trinity-film-intro")).toHaveCount(0);
+});
