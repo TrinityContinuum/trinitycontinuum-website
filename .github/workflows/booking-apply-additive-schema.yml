@@ -1,4 +1,6 @@
-name: Apply protected additive Trinity booking D1 schema (hard-off)
+# One-time migrations 004 and 005 finished successfully in run 45119095328.
+# Retain original migration SQL and Git history, but make this workflow NO-WRITE.
+name: Verify migrated Trinity booking schema safely (read-only)
 on:
   push:
     branches: [feature/trinity-central-booking-policy]
@@ -6,105 +8,16 @@ on:
   workflow_dispatch:
 permissions:
   contents: read
-  actions: read
-concurrency:
-  group: trinity-booking-additive-schema
-  cancel-in-progress: false
 jobs:
-  apply-schema:
+  inspect:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Test booking policy before live D1 changes
-        run: |
-          set -euo pipefail
-          node --test tests/booking-policy.test.mjs tests/booking-api.test.mjs
-      - name: Retrieve independently verified pre-migration encrypted recovery artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: trinity-d1-prebooking-encrypted-45118922972
-          run-id: 45118922972
-          github-token: ${{ github.token }}
-          path: /tmp/trinity-protected-backup
-      - name: Authenticate recovery artifact before any D1 mutation
-        env:
-          TRINITY_BACKUP_PASSPHRASE: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          node cloudflare/appointment-queue/protected-backup.mjs verify \
-            /tmp/trinity-protected-backup/trinity-prebooking.sql.enc
-          echo "Recovery artifact authenticated; abort if this check ever fails."
-      - name: Verify same live D1, hard-off Worker, absent new schema and baseline counts
-        env:
-          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          export CLOUDFLARE_API_TOKEN="${CF_TOKEN}"
-          export CLOUDFLARE_ACCOUNT_ID="c1c16121076a98e0c060349aebfae11a"
-          ACCOUNT="${CLOUDFLARE_ACCOUNT_ID}"
-          D1_ID="5bb3ab47-f258-4ce3-8545-605cb2a158d0"
-          curl --fail --silent --show-error --max-time 20 \
-            -H "Authorization: Bearer ${CF_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts/trinity-independent-booking/settings" \
-            -o /tmp/migrate-worker-settings.json
-          curl --fail --silent --show-error --max-time 20 \
-            -H "Authorization: Bearer ${CF_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database/${D1_ID}/time_travel/bookmark" \
-            -o /tmp/migrate-bookmark.json
-          npx --yes wrangler@4 d1 execute trinity-appointments-db --remote --json \
-            --command "SELECT type,name FROM sqlite_master WHERE type IN ('table','index','trigger') AND name NOT LIKE 'sqlite_%' ORDER BY type,name" \
-            > /tmp/migrate-before-schema.json
-          npx --yes wrangler@4 d1 execute trinity-appointments-db --remote --json \
-            --command "SELECT 'appointments' AS table_name,COUNT(*) AS records FROM appointments UNION ALL SELECT 'appointment_decisions' AS table_name,COUNT(*) AS records FROM appointment_decisions" \
-            > /tmp/migrate-before-counts.json
-          python3 - <<'PY'
-          import json
-          worker=json.load(open('/tmp/migrate-worker-settings.json'))
-          obj=worker.get('result') or {}
-          conf=obj.get('settings') if isinstance(obj.get('settings'),dict) else obj
-          bindings=conf.get('bindings',[])
-          if not worker.get('success') or not any(b.get('name')=='DB' and b.get('type')=='d1' and b.get('id')=='5bb3ab47-f258-4ce3-8545-605cb2a158d0' for b in bindings):
-              raise SystemExit('Worker missing exact approved D1 binding; NO MIGRATION')
-          if not any(b.get('name')=='DIRECT_BOOKING_ENABLED' and str(b.get('text',b.get('value',''))).lower()=='false' for b in bindings):
-              raise SystemExit('Worker not hard-disabled; NO MIGRATION')
-          bookmark=json.load(open('/tmp/migrate-bookmark.json'))
-          if not bookmark.get('success') or not (bookmark.get('result') or {}).get('bookmark'):
-              raise SystemExit('No current Time Travel recovery bookmark; NO MIGRATION')
-          schema=json.load(open('/tmp/migrate-before-schema.json'))
-          rows=[v for item in schema for v in item.get('results',[])]
-          names={row['name'] for row in rows if row.get('type')=='table'}
-          if not {'appointments','appointment_decisions'}.issubset(names):
-              raise SystemExit('Legacy D1 tables unavailable; NO MIGRATION')
-          additional={'booking_policy','appointment_bookings','appointment_external'}
-          if additional & names:
-              raise SystemExit('New booking tables already present; refusing duplicate/partial migration')
-          counts=json.load(open('/tmp/migrate-before-counts.json'))
-          d={x['table_name']:x['records'] for item in counts for x in item.get('results',[])}
-          if set(d)!={'appointments','appointment_decisions'} or any(not isinstance(x,int) for x in d.values()):
-              raise SystemExit('Legacy D1 counts not available; NO MIGRATION')
-          print('PASS exact D1 binding and Worker hard-off; two legacy tables intact; three booking tables absent.')
-          print('PASS current pre-migration Time Travel bookmark captured privately; no PII displayed.')
-          print('Original legacy record counts:',d)
-          PY
-      - name: Apply ONLY non-destructive booking migrations 004 and 005
-        env:
-          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          export CLOUDFLARE_API_TOKEN="${CF_TOKEN}"
-          export CLOUDFLARE_ACCOUNT_ID="c1c16121076a98e0c060349aebfae11a"
-          npx --yes wrangler@4 d1 execute trinity-appointments-db --remote \
-            --file cloudflare/appointment-queue/004_direct_booking.sql > /tmp/booking-migration-004.log 2>&1 \
-            || { echo "::error::Additive migration 004 failed, leave Worker hard-off; inspect D1 before retry"; exit 1; }
-          npx --yes wrangler@4 d1 execute trinity-appointments-db --remote \
-            --file cloudflare/appointment-queue/005_external_appointments.sql > /tmp/booking-migration-005.log 2>&1 \
-            || { echo "::error::Additive migration 005 failed, leave Worker hard-off; inspect D1 before retry"; exit 1; }
-          echo "Both additive migrations executed; verifying D1 structure and legacy record counts."
-      - name: Independently verify live schema, constraints and unchanged legacy data
+      - name: Inspect migrated tables and disabled Worker, no SQL writes
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
@@ -113,59 +26,33 @@ jobs:
           export CLOUDFLARE_ACCOUNT_ID="c1c16121076a98e0c060349aebfae11a"
           npx --yes wrangler@4 d1 execute trinity-appointments-db --remote --json \
             --command "SELECT type,name FROM sqlite_master WHERE type IN ('table','index','trigger') AND name NOT LIKE 'sqlite_%' ORDER BY type,name" \
-            > /tmp/migrate-after-schema.json
+            > /tmp/trinity-after-migration-schema.json
           npx --yes wrangler@4 d1 execute trinity-appointments-db --remote --json \
-            --command "SELECT 'appointments' AS table_name,COUNT(*) AS records FROM appointments UNION ALL SELECT 'appointment_decisions' AS table_name,COUNT(*) AS records FROM appointment_decisions" \
-            > /tmp/migrate-after-counts.json
-          npx --yes wrangler@4 d1 execute trinity-appointments-db --remote --json \
-            --command "SELECT enabled,windows_json,min_notice_hours,max_days FROM booking_policy WHERE id=1" \
-            > /tmp/migrate-policy.json
-          python3 - <<'PY'
-          import json
-          def rows(p):return [x for v in json.load(open(p)) for x in v.get('results',[])]
-          objs=rows('/tmp/migrate-after-schema.json')
-          name=lambda kind:{x['name'] for x in objs if x.get('type')==kind}
-          for kind,required in [('table',{'appointments','appointment_decisions','booking_policy','appointment_bookings','appointment_external'}),
-                    ('trigger',{'trg_trinity_booking_buffer','trg_trinity_booking_buffer_on_update'}),
-                    ('index',{'idx_active_trinity_slot','idx_booking_time','idx_external_start'})]:
-              missing=required-name(kind)
-              if missing:raise SystemExit('Post-migration validation missing '+kind+': '+','.join(sorted(missing)))
-          def counts(p):return {x['table_name']:x['records'] for x in rows(p)}
-          before=counts('/tmp/migrate-before-counts.json')
-          after=counts('/tmp/migrate-after-counts.json')
-          if any(after[k]<before[k] for k in before):
-              raise SystemExit('Legacy count decreased unexpectedly. Stop; do NOT blindly restore or retry')
-          policy=rows('/tmp/migrate-policy.json')
-          if len(policy)!=1 or policy[0]['enabled']!=0 or policy[0]['min_notice_hours']!=24:
-              raise SystemExit('Unsafe booking policy; stop without enabling Worker')
-          windows=json.loads(policy[0]['windows_json'])
-          if [w['weekday'] for w in windows]!=[1,2,3,4,5] or any(w['start']!='13:30' or w['end']!='16:30' for w in windows):
-              raise SystemExit('Booking windows did not match management-approved Central starts')
-          print('PASS all 3 new booking tables, 2 collision triggers and 3 indexes exist.')
-          print('PASS legacy table record counts preserved (concurrent legitimate increases allowed).')
-          print('PASS booking policy remains DISABLED; weekday windows 13:30–16:30 CT for last start 16:00.')
-          print('Legacy counts after:',after)
-          print('No synthetic booking, calendar event, customer email, or personal record was inserted by migration.')
-          PY
-      - name: Verify public Worker still rejects direct booking
-        run: |
-          set -euo pipefail
+            --command "SELECT enabled,windows_json FROM booking_policy WHERE id=1" \
+            > /tmp/trinity-after-migration-policy.json
           curl --fail --silent --show-error --max-time 20 \
-            https://trinity-independent-booking.jackspurewater.workers.dev/api/public/policy \
-            -o /tmp/migrate-live-policy.json
+            -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${CLOUDFLARE_ACCOUNT_ID}/workers/scripts/trinity-independent-booking/settings" \
+            -o /tmp/trinity-worker-settings.json
           python3 - <<'PY'
           import json
-          p=json.load(open('/tmp/migrate-live-policy.json'))
-          if p.get('instantBookingEnabled') is not False:
-              raise SystemExit('Worker unexpectedly enabled; investigate before any customer access')
-          print('PASS independently deployed Worker remains hard-disabled after schema migration.')
+          def rows(path):return [r for d in json.load(open(path)) for r in d.get('results',[])]
+          s=rows('/tmp/trinity-after-migration-schema.json')
+          names=lambda k:{r.get('name') for r in s if r.get('type')==k}
+          table={'appointments','appointment_decisions','booking_policy','appointment_bookings','appointment_external'}
+          triggers={'trg_trinity_booking_buffer','trg_trinity_booking_buffer_on_update'}
+          indexes={'idx_active_trinity_slot','idx_booking_time','idx_external_start'}
+          if not table.issubset(names('table')) or not triggers.issubset(names('trigger')) or not indexes.issubset(names('index')):
+              raise SystemExit('Required migrated D1 structure missing')
+          p=rows('/tmp/trinity-after-migration-policy.json')
+          if len(p)!=1 or p[0]['enabled']!=0:raise SystemExit('Booking policy must remain disabled')
+          w=json.load(open('/tmp/trinity-worker-settings.json'))
+          obj=w.get('result') or {}
+          settings=obj.get('settings') if isinstance(obj.get('settings'),dict) else obj
+          flags=settings.get('bindings',[]) if isinstance(settings,dict) else []
+          if not w.get('success') or not any(x.get('name')=='DIRECT_BOOKING_ENABLED' and x.get('text')=='false' for x in flags):
+              raise SystemExit('Direct-booking Worker must remain disabled')
+          print('PASS: all booking migrations present, collision triggers/indexes verified, D1 policy OFF, Worker OFF.')
+          print('NO data writes, migrations, invites or email sends. Original SQL remains in Git history.')
           PY
-      - name: Remove private transient files
-        if: always()
-        run: |
-          rm -rf /tmp/trinity-protected-backup
-          rm -f /tmp/migrate-bookmark.json /tmp/migrate-before-counts.json \
-            /tmp/migrate-after-counts.json /tmp/migrate-before-schema.json \
-            /tmp/migrate-after-schema.json /tmp/migrate-policy.json \
-            /tmp/migrate-worker-settings.json /tmp/booking-migration-004.log \
-            /tmp/booking-migration-005.log /tmp/migrate-live-policy.json
+          rm -f /tmp/trinity-after-migration-schema.json /tmp/trinity-after-migration-policy.json /tmp/trinity-worker-settings.json
