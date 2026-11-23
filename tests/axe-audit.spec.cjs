@@ -1,16 +1,13 @@
 const {test, expect}=require('@playwright/test');
 const axePath=require.resolve('axe-core/axe.min.js');
 const BASE='http://127.0.0.1:8765';
-const routes=[
-  'index.html?view=site',
-  'contact.html',
-  'meetings.html',
-  'privacy.html',
-  'film-presentations.html',
-  'gold-request.html',
-  'project-interest.html',
-  'golden-library.html'
-];
+const fs=require('fs');
+const sitemap=fs.readFileSync('sitemap.xml','utf8');
+const siteRoutes=[...sitemap.matchAll(/<loc>https:\/\/trinitycontinuum\.com\/([^<]*)<\/loc>/g)]
+  .map(m=>m[1] || 'index.html?view=site');
+const supportingRoutes=['full-site.html','engineering-overview.html','gold-request.html','project-interest.html'];
+const routes=[...new Set([...siteRoutes,...supportingRoutes])];
+// Cover every sitemap route and supporting customer route at two viewport sizes.
 // Automated WCAG 2.x diagnostics are a necessary subset, not a human WCAG audit.
 // Report violations in CI; require remediation for serious or critical findings.
 // The opening film uses a separate ARIA modal and is tested in the regular suite.
