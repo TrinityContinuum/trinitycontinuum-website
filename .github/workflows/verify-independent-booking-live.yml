@@ -62,6 +62,7 @@ jobs:
                   with urllib.request.urlopen(req,timeout=15) as r:return r.status,r.read().decode('utf-8')
               except urllib.error.HTTPError as e:return e.code,e.read().decode('utf-8')
           st,body=call('/api/public/policy')
+          print('Live public policy result:',st,body[:320])
           assert st==200 and json.loads(body).get('instantBookingEnabled') is False, 'Disabled public policy must be false'
           st,body=call('/api/public/slots?date=2026-11-30',origin=True)
           assert st==200 and json.loads(body).get('slots')==[], 'Disabled public slots must be empty'
