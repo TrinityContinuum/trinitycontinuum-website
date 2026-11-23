@@ -114,10 +114,12 @@
       const button = document.createElement('button');
       button.className = 'trailer-walkthrough-card';
       button.type = 'button';
-      button.setAttribute('aria-label', 'Open trailer ' + trailer.number + ': ' + trailer.title);
+      // Keep the button's accessible name aligned with its visible text.
+      // A separate aria-label hides the visible function title from axe's
+      // label-content-name checks and can confuse speech-command users.
       const art = document.createElement('img');
       art.src = 'assets/trailer-walkthrough-' + trailer.number + '.svg';
-      art.alt = 'Illustrative graphic for trailer ' + trailer.number + ', ' + trailer.title + '; not an equipment placement drawing';
+      art.alt = ''; // Decorative: the same trailer number/function is visible as card text.
       art.loading = 'lazy';
       art.width = 940;
       art.height = 510;
