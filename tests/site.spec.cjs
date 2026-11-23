@@ -86,3 +86,53 @@ test('Skip Intro follows presentation; full-site destination bypasses cinematic 
   await expect(page.locator('#trinity-film-intro')).toHaveCount(0);
   await expect(page.locator('h1')).toHaveCount(1);
 });
+
+
+// Broader public-facing acceptance. This deliberately reads public routes only:
+// no form submissions, no prospect email, no calendar writes or private materials.
+const fs = require('node:fs');
+const auditRoutes = [...fs.readFileSync('sitemap.xml', 'utf8').matchAll(/<loc>([^<]+)<\/loc>/g)]
+  .map(match => new URL(match[1]).pathname);
+
+test('every sitemap route is live on the public domain', async ({ request }) => {
+  test.setTimeout(300000);
+  const failures = [];
+  for (const route of auditRoutes) {
+    try {
+      const response = await request.get('https://trinitycontinuum.com' + route + '?audit=' + (process.env.GITHUB_SHA || 'manual').slice(0, 9), { timeout: 15000 });
+      if (response.status() !== 200) failures.push(route + ': HTTP ' + response.status());
+      else if (!(await response.text()).toLowerCase().includes('<html')) failures.push(route + ': not an HTML document');
+    } catch (error) {
+      failures.push(route + ': ' + String(error.message || error).slice(0, 160));
+    }
+  }
+  expect(failures, 'Public URL errors: ' + failures.join(' | ')).toEqual([]);
+});
+
+test('every sitemap route renders on mobile without horizontal page overflow', async ({ page }) => {
+  test.setTimeout(300000);
+  await page.setViewportSize({ width: 390, height: 844 });
+  // Bypass optional cinematic introduction so underlying homepage is exercised.
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const failures = [];
+  let current = '';
+  page.on('pageerror', error => failures.push(current + ': JS ' + error.message.slice(0, 160)));
+  for (const route of auditRoutes) {
+    current = route;
+    try {
+      const response = await page.goto(base + route, { waitUntil: 'domcontentloaded', timeout: 15000 });
+      if (!response || response.status() !== 200) { failures.push(route + ': not HTTP 200'); continue; }
+      const structure = await page.evaluate(() => ({
+        h1: document.querySelectorAll('h1').length,
+        main: document.querySelectorAll('main').length,
+        overflow: document.documentElement.scrollWidth > innerWidth + 2
+      }));
+      if (structure.h1 !== 1) failures.push(route + ': main heading count ' + structure.h1);
+      if (structure.main !== 1) failures.push(route + ': main landmark count ' + structure.main);
+      if (structure.overflow) failures.push(route + ': horizontal page overflow');
+    } catch (error) {
+      failures.push(route + ': ' + String(error.message || error).slice(0, 160));
+    }
+  }
+  expect(failures, 'Public mobile issues: ' + failures.join(' | ')).toEqual([]);
+});
