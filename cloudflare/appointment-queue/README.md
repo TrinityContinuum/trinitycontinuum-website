@@ -1,5 +1,12 @@
 # Trinity appointment queue — controlled release status
 
+## November 22, 2026 — independent direct booking deployment (safe, disabled)
+
+A **separate** Cloudflare Worker, `trinity-independent-booking`, is now present at `https://trinity-independent-booking.jackspurewater.workers.dev`. Cloudflare confirms its existing Trinity appointment D1 binding and explicit `DIRECT_BOOKING_ENABLED=false`. Live read-only acceptance [45116623035](https://github.com/TrinityContinuum/trinitycontinuum-website/actions/runs/45116623035) passed 5/5: inactive policy, zero offered slots, direct booking returns 503, and anonymous access to both private administration routes returns 401. No appointments, emails, invitations, existing Workers, DNS, or public pages were changed during this isolated deployment.
+
+**Important distinction:** The existing manual-approval intake/admin Workers and the new *independent, disabled* direct-booking Worker are different services. The one-time Worker installer has been retired to a read-only check. Its source, SQL, and deployment history are preserved. Activation still requires approved D1 migrations, Google OAuth for Jack's corporate calendar plus the busy-only personal calendar, Turnstile, stronger administrator access controls and a real internal calendar/Meet/notification canary. See `DIRECT_BOOKING_RELEASE_PLAN.md`. Do not present direct booking as available to the public.
+
+
 **Live and tested on November 14, 2026:** Public form -> Cloudflare D1 intake + Web3Forms -> Namecheap notification; private password-protected admin Worker for manual decisions and prepared email/calendar drafts. Both intake and admin Workers were deployed and tested. Keep them operational.
 
 **NOT LIVE:** Auto-approval email/Google Meet delivery added to GitHub only; external authorizations, migrations, security checks, and deployment are still required.
