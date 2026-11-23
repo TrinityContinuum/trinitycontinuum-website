@@ -233,6 +233,18 @@ export const _bookingPolicyTest={isFederalHoliday,slotWithin,validWindows,fromLo
 
 export default {async fetch(req,env){
  const url=new URL(req.url),origin=req.headers.get("Origin")||"";
+ // Independent deployment bootstraps with no booking schema or credentials.
+ // This server-level switch is deliberately checked BEFORE every D1 query,
+ // preventing any public booking, slot advertisement, or Google/Turnstile call
+ // while the live service is being securely provisioned.
+ if(env.DIRECT_BOOKING_ENABLED!=="true"){
+  if(req.method==="GET"&&url.pathname==="/api/public/policy")
+   return json({instantBookingEnabled:false,timezone:ZONE,minutes:30},200,origin);
+  if(req.method==="GET"&&url.pathname==="/api/public/slots")
+   return json({enabled:false,slots:[],timezone:ZONE},200,origin);
+  if(req.method==="POST"&&url.pathname==="/api/public/book")
+   return json({error:"Direct booking is disabled; please request an appointment for approval."},503,origin);
+ }
  if(req.method==="OPTIONS")return ORIGINS.has(origin)?new Response(null,{status:204,headers:{"access-control-allow-origin":origin,"access-control-allow-methods":"GET,POST,PUT,OPTIONS","access-control-allow-headers":"content-type,authorization"}}):new Response(null,{status:403});
  if(!env.DB)return json({error:"Private scheduling register unavailable"},503,origin);
  if(url.pathname==="/api/public/policy"&&req.method==="GET"){
