@@ -82,16 +82,35 @@ function inRange(date,p){
 }
 async function googleToken(env){
  if(!env.GOOGLE_CLIENT_ID||!env.GOOGLE_CLIENT_SECRET||!env.GOOGLE_REFRESH_TOKEN||!env.GOOGLE_CALENDAR_ID)throw Error("Business calendar not configured");
+// Never advertise Jack's open time until BOTH the corporate calendar and every
+// owner-identified conflict calendar are visible to the same authorized token.
+// Additional calendar IDs are private Worker environment variables, not public URLs.
+if(!String(env.GOOGLE_CONFLICT_CALENDAR_IDS||"").trim())throw Error("All conflict calendars must be configured");
  const form=new URLSearchParams({client_id:env.GOOGLE_CLIENT_ID,client_secret:env.GOOGLE_CLIENT_SECRET,refresh_token:env.GOOGLE_REFRESH_TOKEN,grant_type:"refresh_token"});
  const r=await fetch("https://oauth2.googleapis.com/token",{method:"POST",body:form});
  const b=await r.json();if(!r.ok||!b.access_token)throw Error("Calendar authorization failed");
  return b.access_token;
 }
+function requiredCalendarIds(env){
+ const primary=String(env.GOOGLE_CALENDAR_ID||"").trim();
+ const additional=String(env.GOOGLE_CONFLICT_CALENDAR_IDS||"").split(",").map(x=>x.trim()).filter(Boolean);
+ if(!primary||!additional.length)throw Error("Missing required calendar coverage");
+ const ids=[...new Set([primary,...additional])];
+ if(ids.length<2)throw Error("At least one independently maintained conflict calendar is required");
+ return ids;
+}
 async function freeBusy(env,token,start,end){
- const r=await fetch("https://www.googleapis.com/calendar/v3/freeBusy",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({timeMin:start.toISOString(),timeMax:end.toISOString(),items:[{id:env.GOOGLE_CALENDAR_ID}]})});
- const b=await r.json(),c=b.calendars?.[env.GOOGLE_CALENDAR_ID];
- if(!r.ok||!c||c.errors?.length||!Array.isArray(c.busy))throw Error("Calendar availability unavailable");
- return c.busy.length===0;
+ const ids=requiredCalendarIds(env);
+ const r=await fetch("https://www.googleapis.com/calendar/v3/freeBusy",{method:"POST",headers:{"authorization":"Bearer "+token,"content-type":"application/json"},body:JSON.stringify({timeMin:start.toISOString(),timeMax:end.toISOString(),items:ids.map(id=>({id}))})});
+ const b=await r.json().catch(()=>({}));
+ if(!r.ok)throw Error("Calendar availability unavailable");
+ for(const id of ids){
+  const cal=b.calendars?.[id];
+  // Missing/unshared/permission-denied calendars are NOT treated as empty.
+  if(!cal||cal.errors?.length||!Array.isArray(cal.busy))throw Error("One of Jack's conflict calendars is inaccessible");
+  if(cal.busy.length)return false;
+ }
+ return true;
 }
 function basic(req,env){
  if(!env.ADMIN_PASSWORD||env.ADMIN_PASSWORD.length<24)return false;
