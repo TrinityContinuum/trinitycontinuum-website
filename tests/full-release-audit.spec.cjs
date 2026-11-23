@@ -64,3 +64,54 @@ test('all sitemap pages use valid internal hyperlinks and same-page or cross-pag
     }
   }
 });
+
+
+// Release gate: visitor-facing supporting routes are linked from the sitemap pages,
+// but do not themselves appear in sitemap.xml. They must not evade PR-head checks.
+const supportingRoutes = [
+  'full-site.html',
+  'engineering-overview.html',
+  'project-interest.html',
+  'gold-request.html'
+];
+test.describe('supporting visitor routes', () => {
+  for (const [device, viewport] of Object.entries({
+    desktop: {width:1440,height:900},
+    mobile: {width:390,height:844}
+  })) {
+    test.describe(device, () => {
+      test.use({viewport});
+      for (const path of supportingRoutes) {
+        test(path + ' loads and exposes accessible primary content', async ({page}) => {
+          const errors=[];
+          page.on('pageerror',e=>errors.push(e.message));
+          const res=await page.goto(BASE+'/'+path,{waitUntil:'domcontentloaded'});
+          expect(res && res.status(),path).toBe(200);
+          await expect(page.locator('main')).toHaveCount(1);
+          await expect(page.locator('h1')).toHaveCount(1);
+          await expect(page.locator('a.skip[href="#main"]')).toHaveCount(1);
+          const structure=await page.evaluate(()=>({
+            hasLang: !!document.documentElement.getAttribute('lang'),
+            overflow: document.documentElement.scrollWidth>innerWidth+2,
+            imageWithoutAlt: [...document.images].filter(img=>!img.hasAttribute('alt')).length,
+            unnamedLinks: [...document.querySelectorAll('a')].filter(a=>!((a.innerText||'').trim() || a.getAttribute('aria-label') || a.getAttribute('title') || a.querySelector('img[alt]'))).length,
+            duplicateIds: (()=>{const ids=[...document.querySelectorAll('[id]')].map(el=>el.id);return ids.length!==new Set(ids).size;})()
+          }));
+          expect(structure,{device,path}).toEqual({hasLang:true,overflow:false,imageWithoutAlt:0,unnamedLinks:0,duplicateIds:false});
+          expect(errors,path).toEqual([]);
+        });
+      }
+    });
+  }
+});
+test('mobile supplementary-page navigation operates with keyboard and Escape', async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await page.goto(BASE+'/project-interest.html',{waitUntil:'domcontentloaded'});
+  const menu=page.locator('button.menu');
+  await menu.focus();
+  await page.keyboard.press('Enter');
+  await expect(menu).toHaveAttribute('aria-expanded','true');
+  await page.keyboard.press('Escape');
+  await expect(menu).toHaveAttribute('aria-expanded','false');
+  await expect(menu).toBeFocused();
+});
