@@ -52,11 +52,15 @@ function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure
     if(u.includes("oauth2.googleapis.com/token"))
       return businessCalendarReady?response({access_token:"synthetic-token"}):response({error:"unauthorized_client"},401);
     if(u.includes("www.googleapis.com/calendar/v3/freeBusy")){
-      const ids=JSON.parse(opts.body).items.map(i=>i.id);
+      const request=JSON.parse(opts.body);
+      const ids=request.items.map(i=>i.id);
       const calendars={};
+      const event={start:"2026-11-30T21:00:00Z",end:"2026-11-30T21:30:00Z"};
+      const eventOverlaps=event.start<request.timeMax&&event.end>request.timeMin;
       for(const id of ids){
         if(otherCalendarUnavailable&&id==="existing-jack-events@example.invalid")continue;
-        calendars[id]={busy:(id==="trinity-business@example.invalid"&&googleBusy)||(id==="existing-jack-events@example.invalid"&&otherCalendarBusy)?[{start:"2026-11-30T21:00:00Z",end:"2026-11-30T21:30:00Z"}]:[]};
+        const active=(id==="trinity-business@example.invalid"&&googleBusy)||(id==="existing-jack-events@example.invalid"&&otherCalendarBusy);
+        calendars[id]={busy:active&&eventOverlaps?[event]:[]};
       }
       return response({calendars});
     }
