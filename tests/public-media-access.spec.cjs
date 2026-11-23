@@ -69,3 +69,9 @@ test('public catalog remains searchable but no archived entry pretends to be a p
   await expect(page.locator('#media-results article a')).toHaveCount(0);
   await expect(page.locator('a[href="public-visuals.html"]').first()).toBeVisible();
 });
+
+test('controlled-source requests have a direct web contact alternative to mailto',async({page})=>{
+  await page.goto(BASE+'/gold-request.html',{waitUntil:'domcontentloaded'});
+  await expect(page.getByRole('link',{name:'Open our public web contact page'})).toHaveAttribute('href','contact.html');
+  await expect(page.getByRole('button',{name:'Prepare request email'})).toBeVisible();
+});
