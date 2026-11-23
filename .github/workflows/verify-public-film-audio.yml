@@ -22,5 +22,12 @@ jobs:
           npm install --no-save @playwright/test
           npx playwright install --with-deps chromium
           command -v ffprobe || (sudo apt-get update && sudo apt-get install -y ffmpeg)
+      - name: Verify original Jack opening-film video and audio streams
+        run: |
+          test -s assets/trinity-intro-captioned.mp4
+          ffprobe -v error -show_entries stream=codec_type,codec_name -of csv=p=0 assets/trinity-intro-captioned.mp4 | tee /tmp/trinity-opening-streams.txt
+          grep -q 'video' /tmp/trinity-opening-streams.txt
+          grep -q 'audio' /tmp/trinity-opening-streams.txt
+          echo "PASS: opening MP4 contains both encoded video and audio streams. Intelligibility requires listening."
       - name: Inspect audio tracks in four actual public film embeds
         run: node tests/public-film-audio.cjs
