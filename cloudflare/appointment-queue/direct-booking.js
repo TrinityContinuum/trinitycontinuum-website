@@ -194,6 +194,7 @@ async function handleSlots(url,env,origin){
 async function handleBook(req,env,origin){
  if(env.DIRECT_BOOKING_ENABLED!=="true")return json({error:"Automatic booking not active; request approval"},503,origin);
  let body;try{body=await req.json()}catch{return json({error:"Invalid booking"},400,origin)}
+ if(!body||typeof body!=="object"||Array.isArray(body))return json({error:"Invalid booking"},400,origin);
  const id=String(body.id||""),day=String(body.date||""),time=String(body.time||"");
  const name=String(body.name||"").trim(),email=String(body.email||"").trim(),organization=String(body.organization||"").trim(),topic=String(body.topic||"").trim();
  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)||name.length<2||name.length>120||organization.length>150||topic.length<3||topic.length>2500||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:"Invalid details"},400,origin);
@@ -318,7 +319,7 @@ export default {async fetch(req,env,ctx){
   if(req.method==="GET")return json(await policy(env));
   if(req.headers.get("Origin")!==url.origin)return json({error:"Invalid administrator origin"},403);
   let b;try{b=await req.json()}catch{return json({error:"Invalid policy"},400)}
-  if(!validWindows(b.windows)||!Number.isInteger(b.minNoticeHours)||b.minNoticeHours<1||b.minNoticeHours>720||!Number.isInteger(b.maxDays)||b.maxDays<1||b.maxDays>365)return json({error:"Invalid hours or notice"},400);
+  if(!b||typeof b!=="object"||Array.isArray(b)||!validWindows(b.windows)||!Number.isInteger(b.minNoticeHours)||b.minNoticeHours<1||b.minNoticeHours>720||!Number.isInteger(b.maxDays)||b.maxDays<1||b.maxDays>365)return json({error:"Invalid hours or notice"},400);
   await env.DB.prepare("INSERT INTO booking_policy (id,enabled,windows_json,min_notice_hours,max_days) VALUES (1,?,?,?,?) ON CONFLICT(id) DO UPDATE SET enabled=excluded.enabled,windows_json=excluded.windows_json,min_notice_hours=excluded.min_notice_hours,max_days=excluded.max_days,updated_at=datetime('now')").bind(b.enabled===true?1:0,JSON.stringify(b.windows),b.minNoticeHours,b.maxDays).run();
   return json({ok:true,automaticBookingRequiresDeploymentFlag:true});
  }
