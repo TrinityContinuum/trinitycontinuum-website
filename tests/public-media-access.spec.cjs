@@ -42,7 +42,7 @@ test('seven illustrations are clickable and load without visitor credentials',as
 test('five Film presentation reference links open real local images while all four original embeds remain',async({page,request})=>{
   await page.goto(BASE+'/film-presentations.html',{waitUntil:'domcontentloaded'});
   const links=page.locator('a.visual-ref-source');
-  await expect(links).toHaveCount(5);
+  await expect(links).toHaveCount(6); // five public SVG links plus existing internal Media Library link
   for(let i=0;i<5;i++){
     const href=await links.nth(i).getAttribute('href');
     expect(href).toMatch(/^assets\/[a-z0-9-]+\.svg$/);
@@ -50,6 +50,7 @@ test('five Film presentation reference links open real local images while all fo
     expect(response.status()).toBe(200);
     expect((await response.body()).length).toBeGreaterThan(100);
   }
+  expect(await links.nth(5).getAttribute('href')).toBe('media.html#pictures');
   const ids=[
     '4a280414b961425d12074fc7e20830cc',
     '8feca7a3ab6dab53e7c475de4444b169',
