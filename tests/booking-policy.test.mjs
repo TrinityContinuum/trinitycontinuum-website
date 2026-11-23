@@ -66,8 +66,9 @@ test("D1 blocks a cancelled booking reactivation or overlapping reschedule",()=>
   const insert=db.prepare("INSERT INTO appointment_bookings (id,slot_start,slot_end,name,email,topic,state) VALUES (?,?,?,?,?,?,?)");
   insert.run("one","2026-11-30T19:30:00.000Z","2026-11-30T20:00:00.000Z","Test","synthetic@example.invalid","Test","confirmed");
   insert.run("two","2026-11-30T20:00:00.000Z","2026-11-30T20:30:00.000Z","Test","synthetic@example.invalid","Test","cancelled");
+  insert.run("three","2026-11-30T20:30:00.000Z","2026-11-30T21:00:00.000Z","Test","synthetic@example.invalid","Test","confirmed");
   assert.throws(()=>db.prepare("UPDATE appointment_bookings SET state='processing' WHERE id='two'").run(),/15-minute buffer/);
-  assert.throws(()=>db.prepare("UPDATE appointment_bookings SET slot_start='2026-11-30T19:45:00.000Z',slot_end='2026-11-30T20:15:00.000Z' WHERE id='one'").run(),/UNIQUE|overlap|buffer/);
+  assert.throws(()=>db.prepare("UPDATE appointment_bookings SET slot_start='2026-11-30T20:00:00.000Z',slot_end='2026-11-30T20:30:00.000Z' WHERE id='one'").run(),/15-minute buffer/);
   assert.equal(db.prepare("SELECT state FROM appointment_bookings WHERE id='two'").get().state,"cancelled");
  }finally{db.close()}
 });
