@@ -9,7 +9,7 @@ const windows=[1,2,3,4,5].map(weekday=>({weekday,start:"13:30",end:"16:30"}));
 const realNow=Date.now;
 Date.now=()=>Date.UTC(2026,10,22,18,0,0);
 
-function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure=false,otherCalendarBusy=false,otherCalendarUnavailable=false,meetMissing=false}={}){
+function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure=false,otherCalendarBusy=false,otherCalendarUnavailable=false,meetMissing=false,turnstileMode="valid"}={}){
   const bookings=[], calls=[];
   const db={prepare(sql){
     let params=[];
@@ -65,8 +65,14 @@ function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure
       }
       return response({calendars});
     }
-    if(u.includes("challenges.cloudflare.com/turnstile/v0/siteverify"))
+    if(u.includes("challenges.cloudflare.com/turnstile/v0/siteverify")){
+      if(turnstileMode==="network_error")throw Error("Synthetic Siteverify outage");
+      if(turnstileMode==="http_error")return response({error:"unavailable"},503);
+      if(turnstileMode==="invalid_json")return new Response("not-json",{status:200});
+      if(turnstileMode==="denied")return response({success:false,hostname:"trinitycontinuum.com"});
+      if(turnstileMode==="foreign_host")return response({success:true,hostname:"attacker.invalid"});
       return response({success:true,hostname:"trinitycontinuum.com"});
+    }
     if(u.includes("www.googleapis.com/calendar/v3/calendars/")){
       if(googleEventFailure)return response({error:"unavailable"},503);
       const posted=JSON.parse(opts.body);
@@ -226,4 +232,27 @@ test("instant booking fails closed if the separate personal busy source is absen
    assert.equal(h.calls.some(x=>x.url.includes("/events?")),false);
   }finally{h.reset()}
  }
+});
+
+test("Turnstile rejection, wrong hostname and verification outages never create bookings or invitations",async()=>{
+ for(const mode of ["denied","foreign_host","http_error","invalid_json","network_error"]){
+  const h=harness({turnstileMode:mode});h.use();
+  try{
+   const r=await post(date,"14:00",h.env);
+   assert.equal(r.status,403,mode+" should fail securely");
+   assert.match((await r.json()).error,/security verification failed/i);
+   assert.equal(h.bookings.length,0,mode+" must not reserve D1");
+   assert.equal(h.calls.filter(x=>x.url.includes("/events?")).length,0,mode+" must not create Google invitations");
+   assert.equal(h.calls.filter(x=>x.url.includes("freeBusy")).length,0,mode+" must not query calendar");
+  }finally{h.reset()}
+ }
+});
+test("Turnstile absent secret is denied before provider or database calls",async()=>{
+ const h=harness();delete h.env.TURNSTILE_SECRET;h.use();
+ try{
+  const r=await post(date,"14:00",h.env);
+  assert.equal(r.status,403);
+  assert.equal(h.bookings.length,0);
+  assert.equal(h.calls.length,0);
+ }finally{h.reset()}
 });
