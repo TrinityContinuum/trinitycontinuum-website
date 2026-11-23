@@ -2,7 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {readFileSync} from "node:fs";
 const src=readFileSync(new URL("../cloudflare/appointment-queue/direct-booking.js",import.meta.url),"utf8");
-const {default:booking}=await import("data:text/javascript;base64,"+Buffer.from(src).toString("base64"));
+const {default:booking,_bookingPolicyTest:p}=await import("data:text/javascript;base64,"+Buffer.from(src).toString("base64"));
 const origin="https://trinitycontinuum.com";
 const date="2026-11-30";
 const windows=[1,2,3,4,5].map(weekday=>({weekday,start:"13:30",end:"16:30"}));
@@ -76,7 +76,7 @@ test("public slots only reflect live Google free/busy and do not reveal holiday 
  try{
   let r=await get("/api/public/slots?date="+date,h.env);
   assert.equal(r.status,200);let b=await r.json();
-  assert.equal(b.enabled,true);assert.deepEqual(b.slots.map(x=>x.time),["13:30","14:00","14:30","15:00","15:30","16:00"]);
+  assert.equal(b.enabled,true);console.log("diagnostic",JSON.stringify({startAllowed:p.slotWithin(date,"13:30",windows),endAllowed:p.slotWithin(date,"16:00",windows),holiday:p.isFederalHoliday(date),slots:b.slots,calls:h.calls.length}));assert.deepEqual(b.slots.map(x=>x.time),["13:30","14:00","14:30","15:00","15:30","16:00"]);
   assert.equal(h.calls.filter(x=>x.url.includes("/freeBusy")).length,6);
   r=await get("/api/public/slots?date=2026-11-26",h.env);
   assert.equal(r.status,200);b=await r.json();assert.equal(b.slots.length,0,"Thanksgiving closed");
@@ -87,7 +87,7 @@ test("public slots only reflect live Google free/busy and do not reveal holiday 
 test("server books the 4 PM Central start, creates an invite and rejects a simultaneous duplicate",async()=>{
  const h=harness();h.use();
  try{
-  let r=await post(date,"16:00",h.env);assert.equal(r.status,201);
+  let r=await post(date,"16:00",h.env);assert.equal(r.status,201,"Response: "+await r.clone().text());
   let result=await r.json();assert.equal(result.status,"confirmed");assert.equal(result.time,"16:00");
   assert.equal(h.bookings.length,1);assert.equal(h.bookings[0].start,"2026-11-30T22:00:00.000Z");
   assert.equal(h.bookings[0].end,"2026-11-30T22:30:00.000Z");
