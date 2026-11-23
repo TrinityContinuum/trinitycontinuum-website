@@ -1,122 +1,41 @@
-name: Deploy isolated Trinity direct-booking Worker DISABLED
+# Historical one-time deployment workflow. The Worker was created on
+# 2026-11-22 and verified live. This file is now a SAFE read-only guard,
+# not a redeployment mechanism. Git history preserves the original installer.
+name: Independent booking bootstrap retired (read-only)
 on:
   push:
     branches: [feature/trinity-central-booking-policy]
-    paths:
-      - .github/workflows/deploy-independent-booking-disabled.yml
+    paths: [.github/workflows/deploy-independent-booking-disabled.yml]
   workflow_dispatch:
 permissions:
   contents: read
-concurrency:
-  group: trinity-independent-booking-create
-  cancel-in-progress: false
 jobs:
-  isolated-disabled-deploy:
+  check-deployed-worker:
     runs-on: ubuntu-latest
-    timeout-minutes: 12
+    timeout-minutes: 4
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - name: Verify source and staged booking safety tests
-        run: |
-          set -euo pipefail
-          node --experimental-default-type=module --check cloudflare/appointment-queue/direct-booking.js
-          node --test tests/booking-policy.test.mjs tests/booking-api.test.mjs
-      - name: Confirm correct Cloudflare D1 and avoid overwriting any existing Worker
+      - name: Inspect existing Worker safely; no redeploy or D1 writes
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          test -n "${CF_TOKEN:-}" || { echo "::error::Missing Cloudflare token"; exit 1; }
+          test -n "${CF_TOKEN:-}" || { echo "::error::Cloudflare credential not configured"; exit 1; }
           ACCOUNT="c1c16121076a98e0c060349aebfae11a"
-          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer ${CF_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database" > /tmp/booking-d1-list.json
-          curl --fail --silent --show-error --max-time 30 -H "Authorization: Bearer ${CF_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts" > /tmp/booking-worker-list.json
+          curl --fail --silent --show-error --max-time 20 \
+            -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts/trinity-independent-booking/settings" \
+            -o /tmp/existing-worker-settings.json
           python3 - <<'PY'
-          import json,os
-          d=json.load(open('/tmp/booking-d1-list.json'))
-          w=json.load(open('/tmp/booking-worker-list.json'))
-          if not d.get('success') or not w.get('success'):
-              raise SystemExit('Cloudflare inventory failed, no changes')
-          existing=[x for x in d.get('result',[]) if x.get('name')=='trinity-appointments-db']
-          if len(existing)!=1 or not existing[0].get('uuid'):
-              raise SystemExit('Expected exactly one existing Trinity appointments D1, no changes')
-          workers={x.get('id') for x in w.get('result',[]) if isinstance(x,dict)}
-          if 'trinity-independent-booking' in workers:
-              raise SystemExit('Independent booking Worker already exists: refusing to overwrite it')
-          with open(os.environ['GITHUB_ENV'],'a') as out:
-              out.write('TRINITY_EXISTING_D1_ID='+existing[0]['uuid']+'\n')
-          print('Verified existing Trinity D1 and confirmed new Worker name is unused.')
-          PY
-      - name: Build Worker configuration with HARD-OFF booking flag
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import json,os
-          c={
-            'name':'trinity-independent-booking',
-            'main':'cloudflare/appointment-queue/direct-booking.js',
-            'account_id':'c1c16121076a98e0c060349aebfae11a',
-            'compatibility_date':'2026-11-22',
-            'workers_dev':True,
-            'vars':{'DIRECT_BOOKING_ENABLED':'false'},
-            'd1_databases':[{
-              'binding':'DB',
-              'database_name':'trinity-appointments-db',
-              'database_id':os.environ['TRINITY_EXISTING_D1_ID']
-            }]
-          }
-          with open('wrangler.trinity.disabled.json','w') as f: json.dump(c,f)
-          print('Generated isolated Worker configuration: D1 binding, public booking disabled, no Google or admin secrets.')
-          PY
-      - name: Deploy only the isolated Worker (NO D1 migrations or customer writes)
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          set -euo pipefail
-          npx --yes wrangler@4 deploy --config wrangler.trinity.disabled.json 2>&1 | tee /tmp/trinity-disabled-worker-deploy.log
-          python3 - <<'PY'
-          import os,re
-          data=open('/tmp/trinity-disabled-worker-deploy.log').read()
-          matches=re.findall(r'https://trinity-independent-booking\.[a-zA-Z0-9.-]+\.workers\.dev',data)
-          if not matches: raise SystemExit('Deployment returned no verified workers.dev URL; check Cloudflare scripts')
-          with open(os.environ['GITHUB_ENV'],'a') as f:f.write('TRINITY_NEW_BOOKING_URL='+matches[-1]+'\n')
-          print('New Worker URL:',matches[-1])
-          PY
-      - name: Verify live Worker is safe while disabled
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          import os,urllib.request,urllib.error,json,time
-          base=os.environ['TRINITY_NEW_BOOKING_URL'].rstrip('/')
-          def call(path,method='GET',data=None,origin=False):
-              req=urllib.request.Request(base+path,method=method,data=data,headers={
-                **({'Origin':'https://trinitycontinuum.com'} if origin else {}),
-                **({'Content-Type':'application/json'} if data else {})})
-              try:
-                  with urllib.request.urlopen(req,timeout=15) as r:return r.status,r.read().decode()
-              except urllib.error.HTTPError as e:return e.code,e.read().decode()
-          last=None
-          for n in range(6):
-              try:
-                  code,body=call('/api/public/policy')
-                  if code==200:break
-                  last=f'policy HTTP {code}'
-              except Exception as e:last=str(e)
-              time.sleep(3)
-          else:raise SystemExit('Live Worker did not become ready: '+str(last))
-          if json.loads(body).get('instantBookingEnabled') is not False:raise SystemExit('Hard-off gate failed')
-          code,body=call('/api/public/slots?date=2026-11-30',origin=True)
-          if code!=200 or json.loads(body).get('slots')!=[]:raise SystemExit('Disabled Worker advertised slots')
-          code,body=call('/api/public/book','POST',b'{}',origin=True)
-          if code!=503:raise SystemExit('Disabled Worker did not reject attempted booking')
-          code,_=call('/admin')
-          if code!=401:raise SystemExit('Private admin was accessible without a secret')
-          code,_=call('/api/admin/bookings')
-          if code!=401:raise SystemExit('Private admin records were accessible')
-          print('PASS: live isolated Worker deployed, hard-off policy and slots, booking rejected, private admin 401.')
-          print('No D1 migration, customer appointment, calendar invitation, notification, or public website change.')
+          import json
+          obj=json.load(open('/tmp/existing-worker-settings.json'))
+          if not obj.get('success'):raise SystemExit('Existing Worker inspection failed')
+          res=obj.get('result') or {}
+          cfg=res.get('settings') if isinstance(res.get('settings'),dict) else res
+          bindings=cfg.get('bindings',[]) if isinstance(cfg,dict) else []
+          hard_off=any(b.get('name')=='DIRECT_BOOKING_ENABLED' and str(b.get('text',b.get('value',''))).lower()=='false' for b in bindings)
+          d1=any(b.get('name')=='DB' and b.get('type')=='d1' for b in bindings)
+          if not hard_off or not d1:raise SystemExit('Existing Worker does not match approved disabled deployment')
+          print('PASS: existing independent booking Worker found; D1 bound; direct booking OFF.')
+          print('One-time bootstrap archived. No code deployment, D1 migration or appointment changes.')
+          print('For current live HTTP acceptance, use verify-independent-booking-live.yml.')
           PY
