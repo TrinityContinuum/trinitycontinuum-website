@@ -283,3 +283,22 @@ test("private administrator requires Cloudflare Access staff identity AND a stro
   assert.equal(response.status,401,path);
  }
 });
+
+test("private administrator writes reject password-only, unauthorized staff and hostile origins",async()=>{
+ const h=harness();
+ h.env.ADMIN_PASSWORD="private-test-password-32-characters-long";
+ h.env.ADMIN_APPROVER_EMAILS="jack@trinitycontinuum.com";
+ const authorization="Basic "+Buffer.from("jack:"+h.env.ADMIN_PASSWORD).toString("base64");
+ const approved={access:{getIdentity:async()=>({email:"jack@trinitycontinuum.com"})}};
+ const disallowed={access:{getIdentity:async()=>({email:"outsider@example.invalid"})}};
+ for(const path of ["/api/admin/policy","/api/admin/import-external"]){
+  const method=path.endsWith("/policy")?"PUT":"POST";
+  const body=path.endsWith("/policy")?JSON.stringify({enabled:false,windows:[],minNoticeHours:24,maxDays:60}):JSON.stringify({appointments:[]});
+  const request=(headers={})=>new Request(origin+path,{method,headers:{"content-type":"application/json",authorization,...headers},body});
+  assert.equal((await booking.fetch(request({Origin:origin}),h.env)).status,401,path+" missing Access");
+  assert.equal((await booking.fetch(request({Origin:origin}),h.env,disallowed)).status,401,path+" unapproved staff");
+  assert.equal((await booking.fetch(request({Origin:"https://attacker.invalid"}),h.env,approved)).status,403,path+" bad Origin");
+  assert.equal((await booking.fetch(request(),h.env,approved)).status,403,path+" missing Origin");
+ }
+ assert.equal(h.bookings.length,0);
+});
