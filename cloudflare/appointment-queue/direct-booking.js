@@ -122,11 +122,19 @@ function basic(req,env){
  return decoded==="jack:"+env.ADMIN_PASSWORD;
 }
 async function verifyTurnstile(req,env,token){
- if(!env.TURNSTILE_SECRET||!token)return false;
+ // No token, secret, trusted hostname or successful Cloudflare response = NO booking.
+ // Never downgrade to client-side verification or treat an outage as approval.
+ if(!env.TURNSTILE_SECRET||typeof token!=="string"||!token.trim()||token.length>2048)return false;
  const fd=new FormData();fd.set("secret",env.TURNSTILE_SECRET);fd.set("response",token);
  const ip=req.headers.get("CF-Connecting-IP");if(ip)fd.set("remoteip",ip);
- const r=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{method:"POST",body:fd});
- const v=await r.json();return !!v.success&&["trinitycontinuum.com","www.trinitycontinuum.com"].includes(v.hostname);
+ try{
+  const r=await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify",{
+   method:"POST",body:fd,signal:AbortSignal.timeout(8000)
+  });
+  if(!r.ok)return false;
+  const v=await r.json();
+  return v?.success===true&&["trinitycontinuum.com","www.trinitycontinuum.com"].includes(v.hostname);
+ }catch{return false}
 }
 async function createInvitation(env,token,id,request,start,end){
  const api="https://www.googleapis.com/calendar/v3/calendars/"+encodeURIComponent(env.GOOGLE_CALENDAR_ID)+"/events?sendUpdates=all&conferenceDataVersion=1";
