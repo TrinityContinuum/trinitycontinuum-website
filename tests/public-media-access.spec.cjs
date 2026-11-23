@@ -61,11 +61,11 @@ test('five Film presentation reference links open real local images while all fo
   expect(srcs.sort()).toEqual(ids.map(x=>'https://app.heygen.com/embeds/'+x).sort());
 });
 
-test('public media catalog routes viewers to public gallery, not private archive',async({page})=>{
+test('public catalog remains searchable but no archived entry pretends to be a public image link',async({page})=>{
   await page.goto(BASE+'/media.html',{waitUntil:'domcontentloaded'});
-  await expect(page.locator('#media-results article').first()).toBeVisible();
-  const links=page.locator('#media-results article a.btn');
-  expect(await links.count()).toBeGreaterThan(0);
-  const hrefs=await links.evaluateAll(els=>els.map(a=>a.getAttribute('href')));
-  expect(hrefs.every(x=>x==='public-visuals.html')).toBeTruthy();
+  const first=page.locator('#media-results article').first();
+  await expect(first).toBeVisible();
+  await expect(first.getByText(/not a published public image/i)).toBeVisible();
+  await expect(page.locator('#media-results article a')).toHaveCount(0);
+  await expect(page.locator('a[href="public-visuals.html"]').first()).toBeVisible();
 });
