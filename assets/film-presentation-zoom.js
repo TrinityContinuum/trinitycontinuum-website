@@ -188,7 +188,7 @@
         if (event.shiftKey && current <= 0) {
           event.preventDefault();
           focusable[focusable.length - 1].focus();
-        } else if (!event.shiftKey && current === focusable.length - 1) {
+        } else if (!event.shiftKey && (current === -1 || current === focusable.length - 1)) {
           event.preventDefault();
           focusable[0].focus();
         }
