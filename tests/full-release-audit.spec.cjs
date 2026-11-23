@@ -182,3 +182,25 @@ test('keyboard skip link focuses primary content on supporting and main routes',
     await expect(page.locator('main#main')).toBeVisible();
   }
 });
+
+
+// Coordination gate with booking PR #43: public manual-request journey must be
+// truthful and navigable before independent automatic-booking activation.
+// No form is submitted and no external provider is contacted by this test.
+test('home to contact to meetings keeps manual request truthful and reachable', async ({page}) => {
+  await page.goto(BASE+'/index.html?view=site',{waitUntil:'domcontentloaded'});
+  await page.getByRole('link',{name:'Request a meeting'}).click();
+  await expect(page).toHaveURL(/\/contact\.html$/);
+  await expect(page.locator('main')).toContainText('not an automatic booking');
+  await page.getByRole('link',{name:'Request an appointment'}).click();
+  await expect(page).toHaveURL(/\/meetings\.html$/);
+  await expect(page.locator('main')).toContainText('confirm an available time');
+  await expect(page.locator('main')).toContainText('meeting');
+});
+test('privacy notice distinguishes submitted meeting requests from local email forms', async ({page}) => {
+  await page.goto(BASE+'/privacy.html',{waitUntil:'domcontentloaded'});
+  await expect(page.locator('main')).toContainText('Cloudflare');
+  await expect(page.locator('main')).toContainText('Web3Forms');
+  await expect(page.locator('main')).toContainText('Turnstile');
+  await expect(page.locator('main')).toContainText('not a confirmed booking');
+});
