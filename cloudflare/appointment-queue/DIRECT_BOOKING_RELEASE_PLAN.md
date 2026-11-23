@@ -1,4 +1,4 @@
-# Trinity central booking — management-review implementation (NOT DEPLOYED)
+# Trinity central booking — independent Worker DEPLOYED HARD-OFF; customer direct booking NOT LIVE
 
 ## Management authorization — November 22, 2026
 - **Booking hours:** Monday through Friday, `America/Chicago`, appointment START TIMES at 13:30, 14:00, 14:30, 15:00, 15:30 and 16:00, subject to actual availability. The 16:00 meeting ends 16:30. No weekend starts.
@@ -11,7 +11,7 @@
 ## Verified integration progress, November 22, 2026
 - **Live Google sharing verified:** From Jack's corporate Google Calendar connector, a free/busy query of the personal calendar `jackspurewater@gmail.com` now succeeds, and reported an existing 2026-11-23 13:30–14:00 Central conflict. Jack shared free/busy only with `jack@trinitycontinuum.com`; titles and attendee details are not exposed. This is *not* proof the Cloudflare Worker's distinct Google OAuth refresh token has the same rights.
 - **Secondary calendar is mandatory in the Worker:** Set `GOOGLE_BUSY_CALENDAR_IDS_JSON=["jackspurewater@gmail.com"]` as a **private Worker environment setting**, together with `GOOGLE_CALENDAR_ID=jack@trinitycontinuum.com`. Missing or empty secondary calendars now fail closed. The implementation checks both for every slot preview and booking attempt.
-- **Cloudflare deployment access BLOCKED:** Read-only GitHub Actions check [45110888351](https://github.com/TrinityContinuum/trinitycontinuum-website/actions/runs/45110888351) received Cloudflare Workers HTTP 400 (9106 authentication failed) and D1 HTTP 401 (10000 authentication error) from the existing `CLOUDFLARE_API_TOKEN` secret. Do **not** claim Cloudflare DB or Worker activation. The owner must rotate/re-authorize a scoped Cloudflare API token and securely update that GitHub Actions secret, without putting the token in code, tickets or chat. Then rerun the read-only gate before any migration/deploy.
+- **Cloudflare deployment credential RESTORED and independent Worker DEPLOYED HARD-OFF:** GitHub secret was rotated securely; read-only authentication check [45114264588](https://github.com/TrinityContinuum/trinitycontinuum-website/actions/runs/45114264588) passed Workers/D1 HTTP 200. Newly created Worker `trinity-independent-booking` deployed without schema changes or new secrets. [Final live acceptance 45116623035](https://github.com/TrinityContinuum/trinitycontinuum-website/actions/runs/45116623035) passed 5/5: policy inactive, zero slots, booking rejected, private admin/booking ledger unauthenticated access denied. Cloudflare API confirmed `DB` D1 binding and `DIRECT_BOOKING_ENABLED=false`. Public site, existing Workers, DNS and existing appointment records unchanged. This is **NOT** customer booking acceptance; deployment only.
 - Google OAuth credentials and Turnstile secret must be verified separately in the actual Worker; GitHub secret replacement alone does not authorize customer appointment creation. Booking remains disabled until a real internal appointment canary succeeds end-to-end.
 
 ## Required behavior
@@ -46,4 +46,4 @@
 - The staged event endpoint sends guest updates via Google; a separate Trinity corporate confirmation sender is not wired here. Do not falsely claim corporate email delivery.
 - If the Google event is created but D1 confirmation fails, the slot remains `needs_reconciliation` rather than being released. This is intentional to avoid duplicate bookings.
 - A standalone Worker on a public hostname requires robust rate limiting and approved authentication. HTTP Basic is interim only.
-- **No external deployment, credentials, D1 migration, user notifications, calendar inserts, or production site changes have been executed from this branch.**
+- **An isolated Cloudflare Worker is now deployed with `DIRECT_BOOKING_ENABLED=false` and no configured booking/admin/Google credentials.** No D1 migrations, appointment writes, invitations, notification sends, DNS or customer-facing website changes were made. Customer booking remains off pending backed-up database migrations, admin hardening and a controlled end-to-end booking/Meet acceptance test.
