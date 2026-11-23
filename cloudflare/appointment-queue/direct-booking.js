@@ -90,10 +90,13 @@ async function googleToken(env){
 function requiredBusyCalendars(env){
  const primary=String(env.GOOGLE_CALENDAR_ID||"").trim();
  if(!primary)throw Error("Business calendar not configured");
+ // A corporate-calendar-only query could double-book Jack. Require the
+ // authorized independent personal busy source before advertising any slot.
+ if(!String(env.GOOGLE_BUSY_CALENDAR_IDS_JSON||"").trim())throw Error("Jack's secondary busy calendars are not configured");
  let extras=[];
  if(env.GOOGLE_BUSY_CALENDAR_IDS_JSON){
   try{extras=JSON.parse(env.GOOGLE_BUSY_CALENDAR_IDS_JSON)}catch{throw Error("Busy-calendar configuration invalid")}
-  if(!Array.isArray(extras)||extras.length>12||extras.some(x=>typeof x!=="string"||!x.trim()||x.length>256))
+  if(!Array.isArray(extras)||extras.length===0||extras.length>12||extras.some(x=>typeof x!=="string"||!x.trim()||x.length>256))
    throw Error("Busy-calendar configuration invalid");
  }
  return [...new Set([primary,...extras.map(x=>x.trim())])];
