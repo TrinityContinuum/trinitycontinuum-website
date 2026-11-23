@@ -72,7 +72,7 @@ test('Jack opening film displays on home and continues to the full four-film pre
   await expect(modal).toBeVisible({ timeout: 10000 });
   await expect(page.locator('#trinity-intro-video')).toHaveAttribute('src', 'assets/trinity-intro-captioned.mp4');
   await page.locator('#trinity-intro-video').evaluate(video => video.dispatchEvent(new Event('ended')));
-  await expect(page).toHaveURL(/film-presentations\\.html$/, { timeout: 10000 });
+  await expect(page).toHaveURL(/film-presentations\.html$/, { timeout: 10000 });
   await expect(page.locator('iframe[src*="app.heygen.com/embeds/"]')).toHaveCount(4);
   await expect(page.getByRole('link', { name: /Home/i }).first()).toHaveAttribute('href','full-site.html');
 });
@@ -81,7 +81,7 @@ test('Skip Intro follows presentation; full-site destination bypasses cinematic 
   await page.emulateMedia({ reducedMotion: 'no-preference' });
   await page.goto(base + '/');
   await page.getByRole('button',{name:/Skip Intro/i}).click();
-  await expect(page).toHaveURL(/film-presentations\\.html$/, { timeout:10000 });
+  await expect(page).toHaveURL(/film-presentations\.html$/, { timeout:10000 });
   await page.goto(base + '/full-site.html');
   await expect(page.locator('#trinity-film-intro')).toHaveCount(0);
   await expect(page.locator('h1')).toHaveCount(1);
