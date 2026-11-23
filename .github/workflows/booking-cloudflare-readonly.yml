@@ -1,0 +1,42 @@
+name: Inspect Trinity booking Cloudflare readiness (read-only)
+on:
+  push:
+    branches: [feature/trinity-central-booking-policy]
+    paths:
+      - '.github/workflows/booking-cloudflare-readonly.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Read deployment metadata only (no D1 queries or Worker writes)
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          if [ -z "${CF_TOKEN:-}" ]; then echo "::error::CLOUDFLARE_API_TOKEN not configured for GitHub Actions"; exit 1; fi
+          ACCOUNT="c1c16121076a98e0c060349aebfae11a"
+          curl --fail --silent --show-error --max-time 20 -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts" > /tmp/trinity-workers.json
+          curl --fail --silent --show-error --max-time 20 -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database" > /tmp/trinity-d1.json
+          python3 - <<'PY'
+          import json
+          worker=json.load(open('/tmp/trinity-workers.json'))
+          d1=json.load(open('/tmp/trinity-d1.json'))
+          for n,payload in [('Workers',worker),('D1',d1)]:
+              if not payload.get('success'): raise SystemExit(f"{n} provider returned an error; no production changes")
+          scripts=worker.get('result') or []
+          dbs=d1.get('result') or []
+          script_names={str(x.get('id') or '') for x in scripts if isinstance(x,dict)}
+          db_names={str(x.get('name') or '') for x in dbs if isinstance(x,dict)}
+          for name in ('trinity-appointments-db',):
+              print('D1', name, 'FOUND' if name in db_names else 'MISSING')
+          for name in ('trinity-independent-booking','trinity-appointments','trinity-appointment-intake','trinity-appointment-admin'):
+              print('Worker', name, 'FOUND' if name in script_names else 'NOT FOUND')
+          if 'trinity-appointments-db' not in db_names: raise SystemExit('Appointment D1 missing; do not deploy')
+          print('PASS: Cloudflare API token can read worker and D1 metadata. This does not verify migrations, secrets, OAuth, calendar free/busy, Turnstile or invitations.')
+          PY
