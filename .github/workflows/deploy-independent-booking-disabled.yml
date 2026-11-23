@@ -69,7 +69,7 @@ jobs:
               'database_id':os.environ['TRINITY_EXISTING_D1_ID']
             }]
           }
-          with open('/tmp/trinity-disabled-worker.json','w') as f: json.dump(c,f)
+          with open('wrangler.trinity.disabled.json','w') as f: json.dump(c,f)
           print('Generated isolated Worker configuration: D1 binding, public booking disabled, no Google or admin secrets.')
           PY
       - name: Deploy only the isolated Worker (NO D1 migrations or customer writes)
@@ -77,7 +77,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
         run: |
           set -euo pipefail
-          npx --yes wrangler@4 deploy --config /tmp/trinity-disabled-worker.json 2>&1 | tee /tmp/trinity-disabled-worker-deploy.log
+          npx --yes wrangler@4 deploy --config wrangler.trinity.disabled.json 2>&1 | tee /tmp/trinity-disabled-worker-deploy.log
           python3 - <<'PY'
           import os,re
           data=open('/tmp/trinity-disabled-worker-deploy.log').read()
