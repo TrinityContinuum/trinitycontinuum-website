@@ -63,7 +63,9 @@ const trinityModules={
   '3':['Vacuum distillation','Water purification through the integrated vacuum-distillation process.'],
   '4':['Water polishing and storage','Final water treatment, polishing, quality monitoring, and product-water handling.'],
   '5':['Control and auxiliary systems','Supporting controls, auxiliary equipment, system integration, and operating infrastructure. Final equipment allocation pending approved documentation.'],
-  '6':['Control and auxiliary systems','Supporting controls, auxiliary equipment, system integration, and operating infrastructure. Final equipment allocation pending approved documentation.']
+  '6':['Control and auxiliary systems','Supporting controls, auxiliary equipment, system integration, and operating infrastructure. Final equipment allocation pending approved documentation.'],
+  '7':['BFS addition','Management-designated BFS trailer. Detailed functions and connections require approved engineering documentation.'],
+  '8':['Data-center addition','Management-designated data-center trailer. Power, cooling, network services and physical layout require qualified design and site-specific acceptance.']
 };
 document.addEventListener('DOMContentLoaded',()=>{
  const detail=document.getElementById('module-detail');
