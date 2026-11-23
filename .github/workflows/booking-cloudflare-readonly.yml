@@ -19,10 +19,22 @@ jobs:
           set -euo pipefail
           if [ -z "${CF_TOKEN:-}" ]; then echo "::error::CLOUDFLARE_API_TOKEN not configured for GitHub Actions"; exit 1; fi
           ACCOUNT="c1c16121076a98e0c060349aebfae11a"
-          curl --fail --silent --show-error --max-time 20 -H "Authorization: Bearer ${CF_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts" > /tmp/trinity-workers.json
-          curl --fail --silent --show-error --max-time 20 -H "Authorization: Bearer ${CF_TOKEN}" \
-            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database" > /tmp/trinity-d1.json
+          # Keep response bodies off the job log; emit only HTTP status and
+          # Cloudflare error codes/messages from the JSON payload, never tokens.
+          curl --silent --show-error --max-time 20 -w '%{http_code}' -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts" -o /tmp/trinity-workers.json > /tmp/workers-http.txt
+          curl --silent --show-error --max-time 20 -w '%{http_code}' -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database" -o /tmp/trinity-d1.json > /tmp/d1-http.txt
+          python3 - <<'PY'
+          import json
+          for kind,raw,code in [('Workers','/tmp/trinity-workers.json','/tmp/workers-http.txt'),('D1','/tmp/trinity-d1.json','/tmp/d1-http.txt')]:
+              try:
+                  payload=json.load(open(raw))
+                  errors=[{'code':e.get('code'),'message':str(e.get('message',''))[:200]} for e in payload.get('errors',[])]
+              except Exception:
+                  errors=[{'code':'parse_error','message':'Provider response not JSON'}]
+              print(kind, 'HTTP', open(code).read().strip(), 'errors',errors[:4])
+          PY
           python3 - <<'PY'
           import json
           worker=json.load(open('/tmp/trinity-workers.json'))
