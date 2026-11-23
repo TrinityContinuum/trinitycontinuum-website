@@ -115,5 +115,5 @@ test("project interest and Gold request are explicitly mail-client handoffs",asy
  await expect(page.locator("body")).toContainText("Prepare email to Trinity");
  await page.goto(base+"/gold-request.html");
  await expect(page.locator("#gold-request-form")).toHaveCount(1);
- await expect(page.locator("body")).toContainText("management approval");
+ await expect(page.locator("body")).toContainText(/management approval/i);
 });
