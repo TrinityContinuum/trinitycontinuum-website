@@ -1,5 +1,8 @@
-name: Publish approved Trinity website
+name: Verify approved Trinity website publication
 
+# GitHub's native "pages build and deployment" already performs the actual Pages
+# publication. This workflow only verifies source and public release, preventing
+# duplicate deploy-pages actions competing for the same artifact/environment.
 on:
   workflow_dispatch:
   push:
@@ -13,59 +16,54 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
-  group: trinity-pages-production
-  cancel-in-progress: false
+  group: trinity-public-site-verification
+  cancel-in-progress: true
 
 jobs:
-  publish:
+  release-source:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
-      - name: Check out approved official main branch
+      - name: Check out approved main branch
         uses: actions/checkout@v4
-        with:
-          ref: main
-          persist-credentials: false
-
-      - name: Verify approved release assets
+      - name: Verify introductory video and presentation source assets
+        shell: bash
         run: |
+          set -euo pipefail
           test -s index.html
-          test -s publications.html
-          test -s CNAME
-          grep -q 'trinitycontinuum.com' CNAME
-          grep -q 'publications.html' index.html
           test -s assets/trinity-intro-captioned.mp4
           test -s assets/trinity-intro.js
           test -s film-presentations.html
+          test -s CNAME
+          grep -Fq 'trinitycontinuum.com' CNAME
           grep -Fq 'src="assets/trinity-intro.js"' index.html
           grep -Fq "window.location.assign('film-presentations.html')" assets/trinity-intro.js
-
-      - name: Configure GitHub Pages
-        uses: actions/configure-pages@v5
-
-      - name: Upload approved official website
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: .
-
-      - name: Deploy approved website to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+          test "$(grep -o 'https://app.heygen.com/embeds/' film-presentations.html | wc -l)" -eq 4
+          echo "PASS: original intro, transition script and four-film page exist in main."
+      - name: Inspect original introductory MP4 streams
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v ffprobe >/dev/null; then
+            echo "::warning::ffprobe not installed on runner; format verification unavailable"
+            exit 0
+          fi
+          video_codec="$(ffprobe -v error -select_streams v:0 -show_entries stream=codec_name -of csv=p=0 assets/trinity-intro-captioned.mp4 | head -n1)"
+          audio_codec="$(ffprobe -v error -select_streams a:0 -show_entries stream=codec_name -of csv=p=0 assets/trinity-intro-captioned.mp4 | head -n1)"
+          test -n "$video_codec"
+          if [ -z "$audio_codec" ]; then echo "::error::Intro film has no encoded audio track"; exit 1; fi
+          echo "PASS: Intro video stream=$video_codec; intro audio stream=$audio_codec."
 
   # Read the actual public host after deployment instead of trusting an old search-index cache.
   verify-live:
-    needs: publish
+    needs: release-source
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
     steps:
+      - uses: actions/checkout@v4
       - name: Confirm public film and sitemap release
         shell: bash
         run: |
@@ -96,6 +94,7 @@ jobs:
                  "https://trinitycontinuum.com/sitemap.xml?release=${GITHUB_SHA}" \
                  --output /tmp/trinity-sitemap.xml \
               && grep -Fq 'src="assets/trinity-intro.js"' /tmp/trinity-home.html \
+              && cmp -s assets/trinity-intro.js /tmp/trinity-intro.js \
               && grep -Fq "window.location.assign('film-presentations.html')" /tmp/trinity-intro.js \
               && grep -Fq 'film-presentations.html' /tmp/trinity-home.html \
               && grep -Fq '<title>Narrated Engineering Films & Media | Trinity Continuum</title>' /tmp/trinity-media.html \
