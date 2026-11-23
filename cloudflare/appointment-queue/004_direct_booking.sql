@@ -41,3 +41,19 @@ BEGIN
    AND datetime(existing.slot_end,'+15 minutes') > datetime(NEW.slot_start)
  );
 END;
+
+-- A booking that was cancelled and later reactivated must obey the same
+-- atomic buffer as a new booking; otherwise UPDATE can bypass INSERT checks.
+CREATE TRIGGER IF NOT EXISTS trg_trinity_booking_buffer_on_update
+BEFORE UPDATE OF slot_start,slot_end,state ON appointment_bookings
+WHEN NEW.state IN ('processing','confirmed','needs_reconciliation')
+BEGIN
+ SELECT RAISE(ABORT,'Trinity appointment conflicts with 15-minute buffer')
+ WHERE EXISTS (
+   SELECT 1 FROM appointment_bookings existing
+   WHERE existing.id<>NEW.id
+   AND existing.state IN ('processing','confirmed','needs_reconciliation')
+   AND datetime(existing.slot_start,'-15 minutes') < datetime(NEW.slot_end)
+   AND datetime(existing.slot_end,'+15 minutes') > datetime(NEW.slot_start)
+ );
+END;
