@@ -204,3 +204,21 @@ test('privacy notice distinguishes submitted meeting requests from local email f
   await expect(page.locator('main')).toContainText('Turnstile');
   await expect(page.locator('main')).toContainText('not a confirmed booking');
 });
+
+
+test('opening film modal retains keyboard focus until visitor exits', async ({page}) => {
+  await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
+  const modal=page.locator('#trinity-film-intro');
+  await expect(modal).toHaveAttribute('aria-modal','true');
+  const skip=page.locator('#trinity-intro-skip');
+  const fullscreen=page.locator('#trinity-intro-fullscreen');
+  await expect(skip).toBeFocused();
+  await page.keyboard.press('Tab');
+  await expect(fullscreen).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(skip).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(fullscreen).toBeFocused();
+  await page.keyboard.press('Escape');
+  await expect(page).toHaveURL(/\/film-presentations\.html$/);
+});
