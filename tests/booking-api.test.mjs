@@ -138,7 +138,8 @@ test("malformed booking identifiers are rejected before Turnstile, D1 or Google 
   assert.equal(h.calls.length,0,"No Turnstile, Calendar or Google operations on malformed IDs");
  }finally{h.reset()}
 });
-\ntest("off-hours, holiday, weekend and bad-origin submissions are rejected without invitations",async()=>{
+
+test("off-hours, holiday, weekend and bad-origin submissions are rejected without invitations",async()=>{
  const h=harness();h.use();
  try{
   for(const [day,time,status] of [[date,"13:00",409],["2026-11-26","14:00",409],["2026-11-28","14:00",409]]){
