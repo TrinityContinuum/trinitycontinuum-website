@@ -46,5 +46,31 @@ jobs:
           print('Response heading:',re.sub('<[^>]+>','',heading.group(1)).strip()[:140] if heading else 'none')
           print('Cloudflare 403 markers:',[k for k in ('Access denied','Error 1020','error code:','Cloudflare Access','challenge','workers.dev','Your IP') if k.lower() in body.lower()])
           if stat!='200':raise SystemExit('Worker metadata API inaccessible')
-          print('Read-only verification complete; no appointment requests or database writes.')
+          settings=json.load(open('/tmp/cloudflare-settings.json')).get('result') or {}
+          settings=settings.get('settings') if isinstance(settings.get('settings'),dict) else settings
+          bindings=settings.get('bindings',[]) if isinstance(settings,dict) else []
+          off=[b for b in bindings if b.get('name')=='DIRECT_BOOKING_ENABLED' and str(b.get('text',b.get('value',''))).lower()=='false']
+          d1=[b for b in bindings if b.get('name')=='DB' and b.get('type')=='d1']
+          if not off or not d1:raise SystemExit('Worker lacks verified disabled flag or D1 binding')
+          import urllib.request,urllib.error
+          url='https://trinity-independent-booking.jackspurewater.workers.dev'
+          def call(path,method='GET',data=None,origin=False):
+              h={'Origin':'https://trinitycontinuum.com'} if origin else {}
+              if data is not None:h['Content-Type']='application/json'
+              req=urllib.request.Request(url+path,method=method,data=data,headers=h)
+              try:
+                  with urllib.request.urlopen(req,timeout=15) as r:return r.status,r.read().decode('utf-8')
+              except urllib.error.HTTPError as e:return e.code,e.read().decode('utf-8')
+          st,body=call('/api/public/policy')
+          assert st==200 and json.loads(body).get('instantBookingEnabled') is False, 'Disabled public policy must be false'
+          st,body=call('/api/public/slots?date=2026-11-30',origin=True)
+          assert st==200 and json.loads(body).get('slots')==[], 'Disabled public slots must be empty'
+          st,body=call('/api/public/book',method='POST',data=b'{}',origin=True)
+          assert st==503, 'Disabled booking must reject any attempt before writing'
+          st,_=call('/admin')
+          assert st==401, 'Anonymous admin must be unauthorized'
+          st,_=call('/api/admin/bookings')
+          assert st==401, 'Anonymous booking ledger must be unauthorized'
+          print('PASS: deployed Worker live smoke 5/5: policy disabled; no public slots; booking rejected; two admin paths unauthorized.')
+          print('No appointment writes, D1 migrations, calendar invitations, emails, DNS or live website changes.')
           PY
