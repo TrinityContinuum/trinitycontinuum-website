@@ -138,6 +138,15 @@
       });
     });
 
+    document.querySelectorAll('#eight-trailer-walkthrough .trailer-overview-hotspot').forEach(button => {
+      const index = trailers.findIndex(trailer => trailer.number === button.dataset.trailer);
+      if (index < 0) return;
+      button.addEventListener('click', () => {
+        opener = button;
+        show(index);
+      });
+    });
+
     function show(index) {
       current = (index + trailers.length) % trailers.length;
       const trailer = trailers[current];
