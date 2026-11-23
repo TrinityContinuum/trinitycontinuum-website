@@ -266,14 +266,16 @@ test("private administrator requires Cloudflare Access staff identity AND a stro
  // Even a correct password is useless without the verified Access identity.
  for(const [ctx,expected] of [
   [undefined,401],
-  [{access:{email:"unapproved@example.invalid"}},401],
-  [{access:{email:"jack@trinitycontinuum.com"}},200]
+  [{access:{email:"jack@trinitycontinuum.com"}},401],
+  [{access:{getIdentity:async()=>({email:"unapproved@example.invalid"})}},401],
+  [{access:{getIdentity:async()=>{throw Error("Identity service unavailable")}}},401],
+  [{access:{getIdentity:async()=>({email:"jack@trinitycontinuum.com"})}},200]
  ]){
   const response=await booking.fetch(request(),h.env,ctx);
   assert.equal(response.status,expected);
  }
  // A staff identity alone is also insufficient without the existing secret.
- const noPassword=await booking.fetch(new Request(origin+"/admin"),h.env,{access:{email:"jack@trinitycontinuum.com"}});
+ const noPassword=await booking.fetch(new Request(origin+"/admin"),h.env,{access:{getIdentity:async()=>({email:"jack@trinitycontinuum.com"})}});
  assert.equal(noPassword.status,401);
  // All private read endpoints must reject requests with no Access identity.
  for(const path of ["/api/admin/master","/api/admin/bookings","/api/admin/policy"]){
