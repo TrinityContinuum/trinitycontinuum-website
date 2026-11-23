@@ -151,6 +151,8 @@ test("public diagnostic and local approval helper are inert rather than allowing
 });
 
 async function fillInternalMeetingAudit(page){
+ // Stub Turnstile provider entirely; never request or generate a real challenge token.
+ await page.route("**/turnstile/v0/api.js",route=>route.fulfill({status:200,contentType:"application/javascript",body:""}));
  await page.goto(base+"/meetings.html",{waitUntil:"domcontentloaded"});
  await page.locator("#app-name").fill("Trinity Test — local mock only");
  await page.locator("#app-email").fill("synthetic@example.invalid");
@@ -162,6 +164,7 @@ async function fillInternalMeetingAudit(page){
  await page.locator("#app-topic").fill("Test only; no visitor record or real appointment");
  await page.evaluate(()=>{
   const form=document.querySelector("#appointment");
+  document.querySelectorAll('[name="cf-turnstile-response"]').forEach(x=>x.remove());
   const input=document.createElement("input");input.type="hidden";
   input.name="cf-turnstile-response";input.value="STUB_ONLY_NOT_VALID";
   form.appendChild(input);
