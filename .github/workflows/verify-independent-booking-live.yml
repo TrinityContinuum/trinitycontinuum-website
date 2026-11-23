@@ -1,0 +1,50 @@
+name: Verify newly deployed independent booking (read-only)
+on:
+  push:
+    branches: [feature/trinity-central-booking-policy]
+    paths:
+      - .github/workflows/verify-independent-booking-live.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Confirm Cloudflare script exists and inspect public 403 boundary
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          ACCOUNT="c1c16121076a98e0c060349aebfae11a"
+          test -n "${CF_TOKEN:-}" || exit 1
+          curl --silent --show-error --max-time 20 -D /tmp/cloudflare-headers.txt -o /tmp/cloudflare-settings.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts/trinity-independent-booking/settings" >/tmp/cloudflare-status.txt
+          curl --silent --show-error --max-time 20 -D /tmp/worker-headers.txt -o /tmp/worker-body.txt -w '%{http_code}' \
+            "https://trinity-independent-booking.jackspurewater.workers.dev/api/public/policy" >/tmp/worker-status.txt
+          python3 - <<'PY'
+          import json,re
+          stat=open('/tmp/cloudflare-status.txt').read().strip()
+          print('Worker settings API HTTP:',stat)
+          if stat=='200':
+              payload=json.load(open('/tmp/cloudflare-settings.json'))
+              result=payload.get('result') or {}
+              settings=result.get('settings') if isinstance(result.get('settings'),dict) else result
+              bindings=settings.get('bindings',[]) if isinstance(settings,dict) else []
+              print('Bindings:',[{'name':b.get('name'),'type':b.get('type'),'disabled':b.get('name')=='DIRECT_BOOKING_ENABLED' and str(b.get('text',b.get('value',''))).lower()=='false'} for b in bindings])
+          status=open('/tmp/worker-status.txt').read().strip()
+          print('Public Worker GET policy HTTP:',status)
+          for line in open('/tmp/worker-headers.txt'):
+              if line.lower().startswith(('content-type:','server:','cf-ray:','location:','cf-mitigated:')):
+                  print('Header',line.strip()[:180])
+          body=open('/tmp/worker-body.txt').read()[:1800]
+          title=re.search(r'<title[^>]*>(.*?)</title>',body,re.I|re.S)
+          heading=re.search(r'<h1[^>]*>(.*?)</h1>',body,re.I|re.S)
+          print('Response title:',re.sub('<[^>]+>','',title.group(1)).strip()[:140] if title else 'none')
+          print('Response heading:',re.sub('<[^>]+>','',heading.group(1)).strip()[:140] if heading else 'none')
+          print('Cloudflare 403 markers:',[k for k in ('Access denied','Error 1020','error code:','Cloudflare Access','challenge','workers.dev','Your IP') if k.lower() in body.lower()])
+          if stat!='200':raise SystemExit('Worker metadata API inaccessible')
+          print('Read-only verification complete; no appointment requests or database writes.')
+          PY
