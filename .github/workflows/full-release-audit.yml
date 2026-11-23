@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - '**/*.html'
+      - 'assets/**/*.js'
+      - 'assets/**/*.css'
       - 'sitemap.xml'
       - 'tests/full-release-audit.spec.cjs'
       - '.github/workflows/full-release-audit.yml'
