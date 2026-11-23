@@ -1,0 +1,46 @@
+/* Eight-trailer guided presentation, isolated from existing films and media gallery. */
+.presentation-eight-trailer{padding:50px 0 58px;background:linear-gradient(140deg,#0b1d2d,#081321);border-top:1px solid #3d5a6e;color:#e6edf4}
+.presentation-eight-trailer .trailer-intro{max-width:980px;line-height:1.6;color:#c5d8e4}
+.presentation-eight-trailer h2{font:800 clamp(24px,3vw,36px)/1.2 Manrope,Arial,sans-serif;margin:8px 0 14px}
+.presentation-eight-trailer h3{font:750 clamp(19px,2.4vw,26px)/1.3 Manrope,Arial,sans-serif;margin:32px 0 9px}
+.trailer-overview-figure{margin:22px 0}
+.trailer-overview-figure>a{display:block;border:1px solid #557487;border-radius:12px;overflow:hidden;background:#081522}
+.trailer-overview-figure img{display:block;width:100%;height:auto}
+.trailer-overview-figure figcaption{margin-top:9px;font-size:13px;line-height:1.5;color:#c3d7df}
+.trailer-walkthrough-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px;list-style:none;margin:20px 0;padding:0}
+.trailer-walkthrough-item{min-width:0;min-height:0}
+.trailer-walkthrough-card{appearance:none;display:flex;flex-direction:column;width:100%;height:100%;padding:0 0 18px;border:1px solid #527187;border-radius:13px;background:#12283a;color:#f5f8fb;text-align:left;cursor:pointer;overflow:hidden;box-shadow:0 5px 16px #0003;transition:border-color .16s ease,transform .16s ease,box-shadow .16s ease;font:inherit}
+.trailer-walkthrough-card:hover{border-color:#efd28c;transform:translateY(-2px);box-shadow:0 9px 22px #0005}
+.trailer-walkthrough-card:focus-visible,.trailer-walkthrough-dialog button:focus-visible{outline:3px solid #f4d78a;outline-offset:3px}
+.trailer-walkthrough-card img{display:block;width:100%;height:auto;aspect-ratio:940/510;background:#081522;object-fit:contain}
+.trailer-walkthrough-kind{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:800;color:#e4ca8d;margin:13px 14px 6px}
+.trailer-walkthrough-card strong{font-size:16px;line-height:1.3;padding:0 14px;min-height:2.5em}
+.trailer-walkthrough-hint{font-size:12px;font-weight:700;color:#acdceb;margin:14px 14px 0;text-decoration:underline;text-underline-offset:3px}
+.trailer-walkthrough-note{padding:12px 17px;background:#122c40;border-left:3px solid #d7b875;color:#d7e6ee;font-size:13px;line-height:1.6;border-radius:4px}
+.trailer-walkthrough-dialog{box-sizing:border-box;position:fixed;width:min(96vw,1240px);max-width:1240px;height:min(94vh,930px);height:min(94dvh,930px);max-height:94vh;max-height:94dvh;margin:auto;padding:0;border:1px solid #7997ac;border-radius:15px;background:#071624;color:#f8fbff;box-shadow:0 18px 80px #000a;overflow:hidden}
+.trailer-walkthrough-dialog::backdrop{background:#000d17e9}
+.trailer-walkthrough-dialog.trailer-walkthrough-dialog-fallback{display:block;inset:3vh 2vw;z-index:2147483400}
+.trailer-walkthrough-modal-shell{height:100%;display:flex;flex-direction:column;min-height:0}
+.trailer-walkthrough-modal-top{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:16px 22px;background:#102b3f;border-bottom:1px solid #426175}
+.trailer-walkthrough-modal-top span{font-size:14px;font-weight:700;color:#e4c887}
+.trailer-walkthrough-dialog button{appearance:none;cursor:pointer;font:700 14px/1.2 Arial,sans-serif;border:1px solid #9cafc2;border-radius:8px;padding:11px 15px;color:#fff;background:#19405a}
+.trailer-walkthrough-dialog button:hover{border-color:#efce80;background:#2b5368}
+.trailer-walkthrough-modal-top button{background:#e5c67e;color:#0a1c29;border:0}
+.trailer-walkthrough-modal-content{flex:1 1 auto;min-height:0;overflow:auto;padding:24px;overscroll-behavior:contain}
+.trailer-walkthrough-detail-layout{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(0,1fr);gap:26px;align-items:start}
+.trailer-walkthrough-detail-image{display:block;width:100%;height:auto;background:#081523;border-radius:12px;border:1px solid #577d92}
+.trailer-walkthrough-content-eyebrow{color:#f1d18b;font-size:12px;font-weight:800;letter-spacing:.12em;text-transform:uppercase}
+.trailer-walkthrough-dialog h3{font:800 clamp(22px,3vw,32px)/1.2 Manrope,Arial,sans-serif;margin:8px 0 12px}
+.trailer-walkthrough-dialog p{font-size:15px;line-height:1.65;color:#d7e3ed}
+.trailer-walkthrough-dialog h4{font:800 17px/1.3 Manrope,Arial,sans-serif;margin:24px 0 9px;color:#f0d18e}
+.trailer-walkthrough-dialog ul{margin:8px 0 18px;padding-left:23px}
+.trailer-walkthrough-dialog li{margin:10px 0;line-height:1.5;font-size:14px;color:#d3e3ec}
+.trailer-walkthrough-status{background:#132f41;border-left:3px solid #e3c481;padding:12px 14px;font-size:13px!important}
+.trailer-walkthrough-modal-actions{display:flex;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:14px 22px;background:#102b3f;border-top:1px solid #426175}
+.trailer-walkthrough-modal-actions button{flex:1 1 auto;max-width:260px}
+.trailer-walkthrough-legend{font-size:13px;color:#c0cfda;margin-top:10px}
+@media(max-width:1000px){.trailer-walkthrough-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.trailer-walkthrough-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.trailer-walkthrough-detail-layout{grid-template-columns:1fr;gap:14px}.trailer-walkthrough-modal-content{padding:16px}.trailer-walkthrough-modal-top{padding:10px 12px}.trailer-walkthrough-modal-actions{padding:10px 12px}.trailer-walkthrough-modal-actions button{max-width:none;font-size:13px}}
+@media(max-width:450px){.trailer-walkthrough-grid{grid-template-columns:1fr 1fr;gap:8px}.trailer-walkthrough-kind{margin:8px 9px 4px;font-size:9px}.trailer-walkthrough-card strong{padding:0 9px;font-size:13px}.trailer-walkthrough-hint{margin:10px 9px 0;font-size:11px}.trailer-walkthrough-card{padding-bottom:10px}.trailer-walkthrough-dialog{width:99vw;height:97dvh;max-height:97dvh;border-radius:7px}.trailer-walkthrough-modal-actions button{font-size:12px;padding:11px 7px}}
+@media(prefers-reduced-motion:reduce){.trailer-walkthrough-card{transition:none}.trailer-walkthrough-card:hover{transform:none}}
+@media print{.trailer-walkthrough-dialog{display:none!important}.trailer-walkthrough-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.trailer-walkthrough-card{box-shadow:none;color:#111;background:#fff}.trailer-walkthrough-kind,.trailer-walkthrough-card strong{color:#111}.trailer-walkthrough-hint{display:none}.presentation-eight-trailer{background:#fff;color:#111}.trailer-walkthrough-note{color:#111}}
