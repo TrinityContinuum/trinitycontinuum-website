@@ -56,13 +56,13 @@ jobs:
           url='https://trinity-independent-booking.jackspurewater.workers.dev'
           def call(path,method='GET',data=None,origin=False):
               cmd=['curl','--silent','--show-error','--max-time','20','-X',method,
-                '-w','\\n%{http_code}']
+                '-w','|STATUS:%{http_code}']
               if origin:cmd+=['-H','Origin: https://trinitycontinuum.com']
               if data is not None:
                   cmd+=['-H','Content-Type: application/json','--data-binary',data.decode('utf-8')]
               cmd.append(url+path)
               r=subprocess.run(cmd,check=True,capture_output=True,text=True)
-              body,code=r.stdout.rsplit('\\n',1)
+              body,code=r.stdout.rsplit('|STATUS:',1)
               return int(code.strip()),body
           st,body=call('/api/public/policy')
           print('Live public policy result:',st,body[:320])
