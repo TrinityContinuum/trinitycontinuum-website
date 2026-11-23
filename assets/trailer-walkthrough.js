@@ -197,6 +197,23 @@
       if (opener && opener.isConnected) opener.focus();
     }
 
+    // Public deep links used by Trinity's individually addressed email previews.
+    // Only 01–08 are accepted. No recipient identifiers or tracking data are used.
+    const linkedNumber = new URLSearchParams(window.location.search).get('trailer');
+    if (/^0[1-8]$/.test(linkedNumber || '')) {
+      const linkedIndex = trailers.findIndex(trailer => trailer.number === linkedNumber);
+      if (linkedIndex >= 0) {
+        // Do not manipulate the hash, which already identifies the overview.
+        window.requestAnimationFrame(() => {
+          const overview = document.getElementById('eight-trailer-walkthrough');
+          if (overview) overview.scrollIntoView({block:'start'});
+          opener = document.querySelector('#eight-trailer-walkthrough .trailer-overview-hotspot[data-trailer="' + linkedNumber + '"]')
+            || grid.querySelectorAll('.trailer-walkthrough-card')[linkedIndex];
+          show(linkedIndex);
+        });
+      }
+    }
+
     previous.addEventListener('click', () => show(current - 1));
     next.addEventListener('click', () => show(current + 1));
     close.addEventListener('click', exit);
