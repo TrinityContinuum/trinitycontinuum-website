@@ -59,9 +59,17 @@ function fromLocal(day,time){
 }
 const minutes=t=>{const [h,m]=t.split(":").map(Number);return h*60+m};
 function weekday(day){const p=dateParts(fromLocal(day,"12:00"));return ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(p.weekday)}
+function validClock(s,allowEndMidnight=false){
+ if(typeof s!=="string"||!/^\d{2}:\d{2}$/.test(s))return false;
+ const [hour,minute]=s.split(":").map(Number);
+ return minute>=0&&minute<60&&(hour>=0&&hour<24||(allowEndMidnight&&hour===24&&minute===0));
+}
 function validWindows(w){
  if(!Array.isArray(w)||w.length>28)return false;
- return w.every(x=>Number.isInteger(x.weekday)&&x.weekday>=0&&x.weekday<=6&&/^\d\d:\d\d$/.test(x.start)&&/^\d\d:\d\d$/.test(x.end)&&minutes(x.start)>=0&&minutes(x.end)<=1440&&minutes(x.end)-minutes(x.start)>=30&&minutes(x.start)%30===0&&minutes(x.end)%30===0);
+ return w.every(x=>x&&typeof x==="object"&&!Array.isArray(x)&&
+  Number.isInteger(x.weekday)&&x.weekday>=0&&x.weekday<=6&&
+  validClock(x.start)&&validClock(x.end,true)&&
+  minutes(x.end)-minutes(x.start)>=30&&minutes(x.start)%30===0&&minutes(x.end)%30===0);
 }
 function slotWithin(day,time,windows){
  if(!validWindows(windows)||!windows.length)return false;
