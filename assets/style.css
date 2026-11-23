@@ -34,3 +34,6 @@ body{font-family:Arial,Helvetica,sans-serif}.brand,.section h2,.page-hero h1,.he
 /* Accessibility: visible keyboard focus and reduced-motion support. */
 :where(a, button, input, select, textarea, summary):focus-visible{outline:3px solid var(--gold);outline-offset:3px}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{animation-duration:0.01ms!important;animation-iteration-count:1!important;transition-duration:0.01ms!important}}
+
+/* Privacy links must be recognizable without relying on color alone (WCAG 1.4.1). */
+a[href$="privacy.html"]{text-decoration:underline;text-underline-offset:2px}
