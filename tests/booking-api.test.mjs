@@ -139,6 +139,32 @@ test("malformed booking identifiers are rejected before Turnstile, D1 or Google 
  }finally{h.reset()}
 });
 
+test("malformed JSON primitives and arrays are rejected without provider calls or internal errors",async()=>{
+ const h=harness();h.use();
+ try{
+  for(const payload of ["null","[]","42",'"string"']){
+   const r=await booking.fetch(new Request(origin+"/api/public/book",{
+    method:"POST",headers:{Origin:origin,"content-type":"application/json"},body:payload
+   }),h.env);
+   assert.equal(r.status,400,"Invalid booking payload must return 400");
+  }
+  assert.equal(h.bookings.length,0);
+  assert.equal(h.calls.length,0,"Invalid payloads must never invoke Turnstile or Google");
+  const adminCtx={access:{getIdentity:async()=>({email:"jack@trinitycontinuum.com"})}};
+  h.env.ADMIN_PASSWORD="private-test-password-32-characters-long";
+  h.env.ADMIN_APPROVER_EMAILS="jack@trinitycontinuum.com";
+  const authorization="Basic "+Buffer.from("jack:"+h.env.ADMIN_PASSWORD).toString("base64");
+  for(const payload of ["null","[]","42",'"string"']){
+   const r=await booking.fetch(new Request(origin+"/api/admin/policy",{
+    method:"PUT",headers:{Origin:origin,authorization,"content-type":"application/json"},body:payload
+   }),h.env,adminCtx);
+   assert.equal(r.status,400,"Invalid administrator policy payload must return 400");
+  }
+  assert.equal(h.bookings.length,0);
+  assert.equal(h.calls.length,0);
+ }finally{h.reset()}
+});
+
 test("off-hours, holiday, weekend and bad-origin submissions are rejected without invitations",async()=>{
  const h=harness();h.use();
  try{
