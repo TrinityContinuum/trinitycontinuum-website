@@ -40,6 +40,11 @@ jobs:
           test -s CNAME
           grep -q 'trinitycontinuum.com' CNAME
           grep -q 'publications.html' index.html
+          test -s assets/trinity-intro-captioned.mp4
+          test -s assets/trinity-intro.js
+          test -s film-presentations.html
+          grep -Fq 'src="assets/trinity-intro.js"' index.html
+          grep -Fq "window.location.assign('film-presentations.html')" assets/trinity-intro.js
 
       - name: Configure GitHub Pages
         uses: actions/configure-pages@v5
@@ -69,6 +74,17 @@ jobs:
           for attempt in $(seq 1 12); do
             if curl --fail --silent --show-error --location --max-time 15 \
                  --header 'Cache-Control: no-cache' \
+                 "https://trinitycontinuum.com/index.html?release=${GITHUB_SHA}" \
+                 --output /tmp/trinity-home.html \
+              && curl --fail --silent --show-error --location --max-time 15 \
+                 --header 'Cache-Control: no-cache' \
+                 "https://trinitycontinuum.com/assets/trinity-intro.js?release=${GITHUB_SHA}" \
+                 --output /tmp/trinity-intro.js \
+              && curl --fail --silent --show-error --location --head --max-time 15 \
+                 "https://trinitycontinuum.com/assets/trinity-intro-captioned.mp4?release=${GITHUB_SHA}" \
+                 --output /dev/null \
+              && curl --fail --silent --show-error --location --max-time 15 \
+                 --header 'Cache-Control: no-cache' \
                  "https://trinitycontinuum.com/media.html?release=${GITHUB_SHA}" \
                  --output /tmp/trinity-media.html \
               && curl --fail --silent --show-error --location --max-time 15 \
@@ -79,6 +95,9 @@ jobs:
                  --header 'Cache-Control: no-cache' \
                  "https://trinitycontinuum.com/sitemap.xml?release=${GITHUB_SHA}" \
                  --output /tmp/trinity-sitemap.xml \
+              && grep -Fq 'src="assets/trinity-intro.js"' /tmp/trinity-home.html \
+              && grep -Fq "window.location.assign('film-presentations.html')" /tmp/trinity-intro.js \
+              && grep -Fq 'film-presentations.html' /tmp/trinity-home.html \
               && grep -Fq '<title>Narrated Engineering Films & Media | Trinity Continuum</title>' /tmp/trinity-media.html \
               && ! grep -Fq 'Narration is not embedded' /tmp/trinity-media.html \
               && ! grep -Fq 'Open individual chapter video sources (24)' /tmp/trinity-media.html \
@@ -95,5 +114,5 @@ jobs:
             echo "::error::Production host did not serve approved film/sitemap release; inspect Pages domain, CDN caching and deployment target."
             exit 1
           fi
-          echo "PASS: Public host serves current clean Media page, four narrated-review embeds, and updated sitemap."
+          echo "PASS: Public host serves homepage intro script, accessible intro MP4, film-presentations page with four players, clean Media page, and updated sitemap."
           echo "NOTE: Presence of embedded voice-configured videos does not prove their audible output; listening check remains separate."
