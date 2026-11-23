@@ -52,15 +52,18 @@ jobs:
           off=[b for b in bindings if b.get('name')=='DIRECT_BOOKING_ENABLED' and str(b.get('text',b.get('value',''))).lower()=='false']
           d1=[b for b in bindings if b.get('name')=='DB' and b.get('type')=='d1']
           if not off or not d1:raise SystemExit('Worker lacks verified disabled flag or D1 binding')
-          import urllib.request,urllib.error
+          import subprocess
           url='https://trinity-independent-booking.jackspurewater.workers.dev'
           def call(path,method='GET',data=None,origin=False):
-              h={'Origin':'https://trinitycontinuum.com'} if origin else {}
-              if data is not None:h['Content-Type']='application/json'
-              req=urllib.request.Request(url+path,method=method,data=data,headers=h)
-              try:
-                  with urllib.request.urlopen(req,timeout=15) as r:return r.status,r.read().decode('utf-8')
-              except urllib.error.HTTPError as e:return e.code,e.read().decode('utf-8')
+              cmd=['curl','--silent','--show-error','--max-time','20','-X',method,
+                '-w','\\n%{http_code}']
+              if origin:cmd+=['-H','Origin: https://trinitycontinuum.com']
+              if data is not None:
+                  cmd+=['-H','Content-Type: application/json','--data-binary',data.decode('utf-8')]
+              cmd.append(url+path)
+              r=subprocess.run(cmd,check=True,capture_output=True,text=True)
+              body,code=r.stdout.rsplit('\\n',1)
+              return int(code.strip()),body
           st,body=call('/api/public/policy')
           print('Live public policy result:',st,body[:320])
           assert st==200 and json.loads(body).get('instantBookingEnabled') is False, 'Disabled public policy must be false'
