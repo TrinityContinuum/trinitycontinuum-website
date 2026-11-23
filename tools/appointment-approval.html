@@ -1,95 +1,16 @@
 <!doctype html>
-<html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Trinity — Appointment Approval</title>
-<style>
-body{background:#07111e;color:#fff;font:16px/1.5 system-ui;margin:0}main{max-width:780px;margin:auto;padding:25px}h1{color:#e4c37f}
-section{background:#17283c;border:1px solid #40546b;border-radius:12px;padding:22px;margin:18px 0}label{display:block;font-weight:650;margin:12px 0 4px}
-input:not([type=radio]),select,textarea{width:100%;box-sizing:border-box;border:1px solid #71849b;border-radius:6px;padding:12px;background:#0c1928;color:white;font:inherit}
-textarea{min-height:95px}fieldset{border:1px solid #51657a;border-radius:8px}fieldset label{font-weight:400;cursor:pointer}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-button{padding:13px 19px;margin:8px 8px 0 0;background:#e4c37f;border:0;border-radius:6px;color:#101822;font-weight:bold;cursor:pointer}
-pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#081624;padding:14px;border-radius:8px}small{color:#cbd4e0}
-@media(max-width:600px){.grid{grid-template-columns:1fr}}
-</style>
-<main><h1>Trinity Continuum — Jack's Appointment Decisions</h1>
-<p>This is a local reply helper, not a connected approval system. It does not store data, book meetings, or send emails. Jack must review the response and press Send in his email application.</p>
-<section><h2>1. Paste the appointment email — no retyping</h2>
-<p>Open the appointment notification from Trinity's verified corporate mailbox, copy the message details, paste below and press Fill Request Automatically. Nothing here is uploaded or stored.</p>
-<label for="notification">Paste Web3Forms notification details</label>
-<textarea id="notification" rows="9" placeholder="Paste fields Name, Email, Date1, Time1, Date2, Time2, Timezone..."></textarea>
-<button id="parseButton" type="button">Fill Request Automatically</button>
-<p id="parseStatus" role="status" aria-live="polite"></p></section>
-<section><h2>2. Review imported details (edit only if necessary)</h2>
-<label>Visitor name<input id="name" placeholder="Name from request"></label>
-<label>Visitor email<input id="email" type="email" placeholder="visitor@example.com"></label>
-<div class="grid"><label>First date<input id="d1" type="date"></label><label>First time<input id="t1" type="time"></label></div>
-<div class="grid"><label>Second date<input id="d2" type="date"></label><label>Second time<input id="t2" type="time"></label></div>
-<label>Visitor time zone<select id="zone"><option>Central Time</option><option>Eastern Time</option><option>Mountain Time</option><option>Pacific Time</option><option>UTC</option><option>Other (clarify in reply)</option></select></label>
-</section>
-<section><h2>3. Select Jack's decision</h2><fieldset><legend>Appointment decision</legend>
-<label><input name="choice" type="radio" value="first" checked> Accept first-choice time</label>
-<label><input name="choice" type="radio" value="second"> Accept second-choice time</label>
-<label><input name="choice" type="radio" value="alternate"> Propose another time</label>
-<label><input name="choice" type="radio" value="decline"> Decline appointment</label>
-</fieldset>
-<label>Private Google Meet link, if already created<input id="meet" type="url" placeholder="https://meet.google.com/xxx-xxxx-xxx"></label>
-</section>
-<section><h2>4. Review the prepared reply</h2><pre id="preview"></pre>
-<button id="emailButton">Open Email to Visitor</button><button id="copyButton">Copy Reply Text for Namecheap</button>
-<p id="status" aria-live="polite"></p><small>Selecting a time does not confirm an appointment until Jack sends the email. A calendar/Google Meet invitation is a separate step.</small>
-</section></main>
-<script>
-(()=>{'use strict';
-const el=id=>document.getElementById(id),v=id=>el(id).value.trim();
-const choice=()=>document.querySelector('input[name=choice]:checked').value;
-const day=new Date();day.setHours(0,0,0,0);const end=new Date(day);end.setFullYear(end.getFullYear()+1);const iso=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');for(const k of ['d1','d2']){el(k).min=iso(day);el(k).max=iso(end);}
-const time=x=>{const a=x.split(':');if(a.length!==2)return x;const h=+a[0];return ((h+11)%12+1)+':'+a[1]+' '+(h<12?'AM':'PM')};
-function build(){
-const name=v('name'),email=v('email'),pick=choice(),meet=v('meet');
-if(!name||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))throw Error('Enter visitor name and valid email.');
-if(['first','second'].includes(pick)&&(!v('d1')||!v('d2')||!v('t1')||!v('t2')))throw Error('Enter both appointment choices.');
-if(['first','second'].includes(pick)){const today=new Date();today.setHours(0,0,0,0);const max=new Date(today);max.setFullYear(max.getFullYear()+1);for(const key of ['d1','d2']){const date=new Date(v(key)+'T12:00:00');if(!Number.isFinite(date.getTime())||date<today||date>max)throw Error('Appointment dates must be from today through the next 12 months.');}if(v('d1')===v('d2')&&v('t1')===v('t2'))throw Error('The two proposed appointment times must be different.');}
-if(['first','second'].includes(pick)&&v('zone')==='Central Time'){const conflict=t=>{const [hr,mn]=t.split(':').map(Number);const start=hr*60+mn;return start<780&&start+30>690};if(conflict(v('t1'))||conflict(v('t2')))throw Error('Trinity blocks 11:30 AM–1:00 PM Central for lunch; allow a 30-minute meeting.');}
-if(meet){let url;try{url=new URL(meet)}catch{}if(!url||url.hostname!=='meet.google.com'||url.protocol!=='https:')throw Error('Use a valid Google Meet link or leave blank.')}
-const n=pick==='first'?'1':'2',subject='Trinity Continuum — '+(pick==='decline'?'Meeting Request':pick==='alternate'?'Alternative Meeting Times':'Meeting Confirmation');
-let body='Hello '+name+',\n\n';
-if(pick==='first'||pick==='second'){
-body+='Trinity Continuum approves your '+(pick==='first'?'first':'second')+' proposed appointment:\n\n'+v('d'+n)+' at '+time(v('t'+n))+' ('+v('zone')+').\n\n';
-body+=meet?'Private Google Meet link: '+meet+'\n\n':'A separate private Google Meet invitation will follow.\n\n';
-}else if(pick==='alternate')body+='Neither requested time is available. Please reply with two alternative dates and times and your time zone.\n\n';
-else body+='Thank you for your interest. We are unable to accommodate this appointment request at this time.\n\n';
-body+='Sincerely,\nJack Ray Coates\nTrinity Continuum\njack@trinitycontinuum.com';
-return {email,subject,body};}
-function render(){try{const x=build();el('preview').textContent='To: '+x.email+'\nSubject: '+x.subject+'\n\n'+x.body;return x}catch(e){el('preview').textContent=e.message;return null}}
-document.querySelectorAll('input,select').forEach(x=>{x.addEventListener('input',render);x.addEventListener('change',render)});
-
-function parseNotification(input){
- const lines=String(input).replace(/\r/g,'').split('\n').map(x=>x.trim()).filter(Boolean);
- const keys={name:'name',email:'email',date1:'d1',time1:'t1',date2:'d2',time2:'t2',timezone:'zone'};
- const values={};let key=null;
- for(const line of lines){
-  const normalized=line.replace(/:$/,'').replace(/\s+/g,'').toLowerCase();
-  if(Object.prototype.hasOwnProperty.call(keys,normalized)){key=keys[normalized];continue;}
-  if(key&&!values[key]){values[key]=line;key=null;}
- }
- for(const k of ['name','email','d1','t1','d2','t2'])if(!values[k])throw Error('Missing '+k+'. Copy the notification body including both appointment choices.');
- for(const k of ['d1','d2'])if(!/^\d{4}-\d{2}-\d{2}$/.test(values[k]))throw Error('Invalid date '+k+'. Check the original email.');
- for(const k of ['t1','t2'])if(!/^([01]\d|2[0-3]):[0-5]\d$/.test(values[k]))throw Error('Invalid time '+k+'. Check the original email.');
- if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email))throw Error('Invalid visitor email.');
- const mapZone={'America/Chicago':'Central Time','America/New_York':'Eastern Time','America/Denver':'Mountain Time','America/Los_Angeles':'Pacific Time'};
- let zone='Other (clarify in reply)';
- if(values.zone){for(const [k,v] of Object.entries(mapZone)){if(values.zone.includes(k)){zone=v;break}}if(values.zone==='UTC')zone='UTC'}
- return {...values,zone};
-}
-el('parseButton').addEventListener('click',()=>{
- try{
-  const a=parseNotification(v('notification'));
-  for(const k of ['name','email','d1','t1','d2','t2','zone'])el(k).value=a[k];
-  const p=render();
-  el('parseStatus').textContent=p?'Details imported. Verify dates and time zone before selecting a decision.':'Values imported; check the warning below and verify the request.';
- }catch(e){el('parseStatus').textContent=e.message;}
-});
-
-el('emailButton').onclick=()=>{const x=render();if(!x)return;location.href='mailto:'+encodeURIComponent(x.email)+'?subject='+encodeURIComponent(x.subject)+'&body='+encodeURIComponent(x.body);el('status').textContent='Email app requested; nothing has been sent. Review and press Send.'};
-el('copyButton').onclick=async()=>{const x=render();if(!x)return;try{await navigator.clipboard.writeText(x.body);el('status').textContent='Message text copied. In Namecheap, click Reply on the matching request, confirm the To address is the visitor, paste this text into the reply, and press Send after Jack approves.'}catch{el('status').textContent='Clipboard access unavailable; select and copy the preview.'}};
-render();
-})();
-</script></html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow,noarchive">
+<meta http-equiv="Cache-Control" content="no-store">
+<meta name="referrer" content="no-referrer">
+<title>Appointment approval helper retired | Trinity Continuum</title>
+<style>body{background:#07111e;color:#fff;font:16px/1.55 system-ui;margin:0}main{max-width:700px;margin:8vh auto;padding:24px}section{background:#17293e;border:1px solid #60758a;border-radius:12px;padding:26px}h1{color:#e4c37f}a{color:#e4c37f}p{overflow-wrap:anywhere}</style>
+</head>
+<body><main><section role="status">
+<h1>Appointment approval helper retired</h1>
+<p>The unauthenticated public copy of the appointment decision helper has been withdrawn. Authorized reviewers should use the private appointment queue, rather than enter visitor details into a public utility.</p>
+<p>This page does not accept, transmit or store appointment data. Existing appointment records and the original helper source remain preserved in Git history; no live queue records were changed.</p>
+<p><a href="../meetings.html">Public meeting requests</a> · <a href="../contact.html">Contact Trinity</a></p>
+</section></main></body></html>
