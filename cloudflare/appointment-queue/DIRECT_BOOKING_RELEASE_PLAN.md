@@ -1,5 +1,13 @@
 # Trinity central booking — management-review implementation (NOT DEPLOYED)
 
+## Management authorization — November 22, 2026
+- **Booking hours:** Monday through Friday, `America/Chicago`, appointment START TIMES at 13:30, 14:00, 14:30, 15:00, 15:30 and 16:00, subject to actual availability. The 16:00 meeting ends 16:30. No weekend starts.
+- **Holiday rule:** Automatically exclude all observed **U.S. federal holidays**, calculated server-side across calendar-year boundaries; additional Trinity/company holidays or Jack's travel are excluded by owner-authorized busy events or a future explicit blackout policy. Public calendar holiday subscriptions alone are not assumed to mark availability busy.
+- **Meeting duration / buffer / lead:** 30-minute meeting, 15-minute intermeeting conflict buffer, minimum 24-hour notice, 60-day horizon. A 15-minute buffer means a 14:00 start will be unavailable after a 13:30 booking; do NOT promise six bookings daily.
+- **Production posture:** Policy is staged in migration 004 with `enabled=0`, so no automatic bookings have been activated. Running unit tests is **not** a substitute for a real connected business calendar, cloud D1, event creation, holidays, private master reconciliation or explicit release approval.
+- **Evidence:** `tests/booking-policy.test.mjs` covers weekday 13:30–16:00 starts, observed holidays, DST and an atomic SQLite 15-minute booking buffer; see workflow `.github/workflows/booking-policy-test.yml`.
+- **Integration gate:** Authorize `jack@trinitycontinuum.com` business calendar (or identified Trinity-controlled booking calendar) to the booking Worker with scoped Google OAuth. Reconcile all Jack's existing busy events, currently split between business and personal accounts, without exposing personal titles, attendees or data. Secure the admin surface with MFA, migrate D1 with backup, test real free/busy, booking, Meet and notifications, plus cancellations and reschedules before publishing a booking link. No password/OAuth credentials in GitHub or public files.
+
 ## Required behavior
 
 **Single source of truth:** Trinity's Cloudflare D1 private appointment data, not Jack's private/personal Google Calendar. The existing `appointments` table holds approval-required meeting requests; `appointment_bookings` holds confirmed direct bookings and uncertain-outcome records. An administrative master schedule must reconcile both with pre-existing Google invitations before cutover.
