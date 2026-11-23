@@ -138,3 +138,14 @@ test("live public deployment follows Jack intro into actual presentation",async(
  await expect(page).toHaveURL(/trinitycontinuum\.com\/full-site\.html$/,{timeout:15000});
  await expect(page.locator("#trinity-film-intro")).toHaveCount(0);
 });
+
+test("public diagnostic and local approval helper are inert rather than allowing administrative actions",async({page})=>{
+ for(const filename of ["appointment-intake-diagnostic.html","appointment-approval.html"]){
+  const response=await page.goto(base+"/tools/"+filename,{waitUntil:"domcontentloaded"});
+  expect(response.status()).toBe(200);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content",/noindex/);
+  await expect(page.locator("form, script, button, input, textarea")).toHaveCount(0);
+  await expect(page.locator("body")).toContainText(/retired/i);
+  await expect(page.locator('a[href="../meetings.html"]')).toBeVisible();
+ }
+});
