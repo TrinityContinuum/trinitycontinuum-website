@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - 'scripts/public-site-audit.mjs'
+      - 'scripts/public-edge-check.mjs'
       - 'tests/forward-site-audit.spec.cjs'
       - '.github/workflows/forward-site-audit.yml'
 permissions:
@@ -20,12 +21,16 @@ jobs:
           node-version: '22'
       - name: Audit all public routes, local links, anchors and assets (no form submits)
         run: node scripts/public-site-audit.mjs
+      - name: Check live www/apex routing and media response headers (read-only)
+        run: node scripts/public-edge-check.mjs
       - name: Preserve static/site results
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: trinity-public-site-route-audit
-          path: audit-output/public-site-audit.json
+          path: |
+            audit-output/public-site-audit.json
+            audit-output/public-edge-check.json
           retention-days: 14
   browser-readonly:
     runs-on: ubuntu-latest
