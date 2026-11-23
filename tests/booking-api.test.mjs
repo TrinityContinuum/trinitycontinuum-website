@@ -44,6 +44,7 @@ function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure
   }};
   const env={DB:db,DIRECT_BOOKING_ENABLED:"true",GOOGLE_CLIENT_ID:"synthetic",GOOGLE_CLIENT_SECRET:"synthetic",
     GOOGLE_REFRESH_TOKEN:"synthetic",GOOGLE_CALENDAR_ID:"trinity-business@example.invalid",
+    GOOGLE_BUSY_CALENDAR_IDS_JSON:JSON.stringify(["existing-jack-events@example.invalid"]),
     TURNSTILE_SECRET:"synthetic"};
   const previousFetch=globalThis.fetch;
   const fakeFetch=async(url,opts)=>{
@@ -190,4 +191,22 @@ test("a Google event without confirmed Google Meet link is held, not falsely boo
   const slots=(await check.json()).slots.map(x=>x.time);
   assert.equal(slots.includes("16:00"),false);
  }finally{h.reset();}
+});
+
+test("instant booking fails closed if the separate personal busy source is absent or empty",async()=>{
+ for(const calendarConfig of [undefined,"", "[]"]){
+  const h=harness();
+  if(calendarConfig===undefined)delete h.env.GOOGLE_BUSY_CALENDAR_IDS_JSON;
+  else h.env.GOOGLE_BUSY_CALENDAR_IDS_JSON=calendarConfig;
+  h.use();
+  try{
+   const available=await get("/api/public/slots?date="+date,h.env);
+   assert.equal(available.status,200);
+   assert.deepEqual((await available.json()).slots,[],"no free slots may appear without secondary busy source");
+   const submission=await post(date,"14:30",h.env);
+   assert.equal(submission.status,503);
+   assert.equal(h.bookings.length,0);
+   assert.equal(h.calls.some(x=>x.url.includes("/events?")),false);
+  }finally{h.reset()}
+ }
 });
