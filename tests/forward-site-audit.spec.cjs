@@ -149,3 +149,74 @@ test("public diagnostic and local approval helper are inert rather than allowing
   await expect(page.locator('a[href="../meetings.html"]')).toBeVisible();
  }
 });
+
+async function fillInternalMeetingAudit(page){
+ await page.goto(base+"/meetings.html",{waitUntil:"domcontentloaded"});
+ await page.locator("#app-name").fill("Trinity Test — local mock only");
+ await page.locator("#app-email").fill("synthetic@example.invalid");
+ await page.locator("#app-org").fill("Internal controlled acceptance");
+ await page.locator("#date1").fill("2026-12-10");
+ await page.locator("#date2").fill("2026-12-11");
+ await page.locator("#time1").fill("13:30");
+ await page.locator("#time2").fill("14:30");
+ await page.locator("#app-topic").fill("Test only; no visitor record or real appointment");
+ await page.evaluate(()=>{
+  const form=document.querySelector("#appointment");
+  const input=document.createElement("input");input.type="hidden";
+  input.name="cf-turnstile-response";input.value="STUB_ONLY_NOT_VALID";
+  form.appendChild(input);
+ });
+}
+test("mock provider round-trip: website queue then notification once, never claims auto-booking",async({page})=>{
+ const queue=[],notices=[];
+ await page.route("https://trinity-appointments.jackspurewater.workers.dev/api/intake",async route=>{
+  queue.push(JSON.parse(route.request().postData()));
+  await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({ok:true,reference:queue[0].id})});
+ });
+ await page.route("https://api.web3forms.com/submit",async route=>{
+  notices.push(JSON.parse(route.request().postData()));
+  await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true})});
+ });
+ await fillInternalMeetingAudit(page);
+ await page.locator("#submitAppointment").click();
+ await expect(page.locator("#appointmentStatus")).toContainText("Your meeting is NOT booked",{timeout:10000});
+ expect(queue).toHaveLength(1);
+ expect(notices).toHaveLength(1);
+ expect(queue[0].email).toBe("synthetic@example.invalid");
+ expect(notices[0].message).toContain("Reference: "+queue[0].id);
+ await page.locator("#submitAppointment").click({force:true});
+ expect(queue).toHaveLength(1);expect(notices).toHaveLength(1);
+});
+test("mock partial failure: D1 stored, Web3Forms fails, visitor receives safe reference and no duplicate",async({page})=>{
+ const queue=[],notices=[];
+ await page.route("https://trinity-appointments.jackspurewater.workers.dev/api/intake",async route=>{
+  queue.push(JSON.parse(route.request().postData()));
+  await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({ok:true,reference:queue[0].id})});
+ });
+ await page.route("https://api.web3forms.com/submit",async route=>{
+  notices.push(JSON.parse(route.request().postData()));
+  await route.fulfill({status:503,contentType:"application/json",body:JSON.stringify({success:false})});
+ });
+ await fillInternalMeetingAudit(page);
+ await page.locator("#submitAppointment").click();
+ await expect(page.locator("#appointmentStatus")).toContainText("notification was not confirmed",{timeout:10000});
+ await expect(page.locator("#appointmentStatus")).toContainText(queue[0].id);
+ expect(queue).toHaveLength(1);expect(notices).toHaveLength(1);
+ await page.locator("#submitAppointment").click({force:true});
+ expect(queue).toHaveLength(1);expect(notices).toHaveLength(1);
+});
+test("mock fail-closed: no confirmed D1 intake means no Web3Forms notification",async({page})=>{
+ let queue=0,notices=0;
+ await page.route("https://trinity-appointments.jackspurewater.workers.dev/api/intake",async route=>{
+  queue++;
+  await route.fulfill({status:503,contentType:"application/json",body:JSON.stringify({error:"D1 unavailable"})});
+ });
+ await page.route("https://api.web3forms.com/submit",async route=>{
+  notices++;
+  await route.fulfill({status:200,contentType:"application/json",body:JSON.stringify({success:true})});
+ });
+ await fillInternalMeetingAudit(page);
+ await page.locator("#submitAppointment").click();
+ await expect(page.locator("#appointmentStatus")).toContainText("queue could not confirm",{timeout:10000});
+ expect(queue).toBe(1);expect(notices).toBe(0);
+});
