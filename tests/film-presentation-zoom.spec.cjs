@@ -20,7 +20,7 @@ test('all four original film embeds remain intact with independent full-page con
   await expect(frames).toHaveCount(4);
   expect(await frames.evaluateAll(els => els.map(el => el.getAttribute('src')))).toEqual(knownFilms);
   await expect(page.locator('.film-presentation-viewer')).toHaveCount(4);
-  await expect(page.getByRole('button',{name:/^Expand Film .* to full page$/})).toHaveCount(4);
+  await expect(page.locator('#four-visions .film-presentation-enter')).toHaveCount(4);
   await expect(page.locator('.film-presentation-zoom-group:visible')).toHaveCount(0);
   for (const id of ['film-01','film-02','film-03','film-04']) {
     const viewer = page.locator('#'+id+' .film-presentation-viewer');
