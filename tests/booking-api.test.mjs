@@ -45,7 +45,7 @@ function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure
   const env={DB:db,DIRECT_BOOKING_ENABLED:"true",GOOGLE_CLIENT_ID:"synthetic",GOOGLE_CLIENT_SECRET:"synthetic",
     GOOGLE_REFRESH_TOKEN:"synthetic",GOOGLE_CALENDAR_ID:"trinity-business@example.invalid",
     GOOGLE_BUSY_CALENDAR_IDS_JSON:JSON.stringify(["existing-jack-events@example.invalid"]),
-    TURNSTILE_SECRET:"synthetic"};
+    TURNSTILE_SECRET:"synthetic",BOOKING_RATE_LIMITER:{limit:async()=>({success:true})}};
   const previousFetch=globalThis.fetch;
   const fakeFetch=async(url,opts)=>{
     const u=String(url);calls.push({url:u,method:opts?.method,body:opts?.body});
@@ -83,10 +83,10 @@ function harness({businessCalendarReady=true,googleBusy=false,googleEventFailure
   return {env,calls,bookings,use(){globalThis.fetch=fakeFetch;},reset(){globalThis.fetch=previousFetch}};
 }
 function get(path,env,from=origin){
- return booking.fetch(new Request(origin+path,{headers:{Origin:from}}),env);
+ return booking.fetch(new Request(origin+path,{headers:{Origin:from,"CF-Connecting-IP":"192.0.2.10"}}),env);
 }
 function post(day,time,env,{from=origin,id="11111111-1111-4111-8111-111111111111"}={}){
- return booking.fetch(new Request(origin+"/api/public/book",{method:"POST",headers:{Origin:from,"content-type":"application/json"},
+ return booking.fetch(new Request(origin+"/api/public/book",{method:"POST",headers:{Origin:from,"CF-Connecting-IP":"192.0.2.10","content-type":"application/json"},
  body:JSON.stringify({id,date:day,time,name:"Synthetic Viewer",email:"synthetic@example.invalid",organization:"Test",topic:"Technical review",turnstileToken:"synthetic-token"})}),env);
 }
 test("public slots only reflect live Google free/busy and do not reveal holiday or weekend appointments",async()=>{
@@ -160,6 +160,41 @@ test("malformed JSON primitives and arrays are rejected without provider calls o
    }),h.env,adminCtx);
    assert.equal(r.status,400,"Invalid administrator policy payload must return 400");
   }
+  assert.equal(h.bookings.length,0);
+  assert.equal(h.calls.length,0);
+ }finally{h.reset()}
+});
+
+test("missing rate limiter, missing edge identity and limiter outage fail closed before Google or D1",async()=>{
+ for(const scenario of ["missing_binding","missing_client_ip","outage","invalid_decision"]){
+  const h=harness();h.use();
+  try{
+   if(scenario==="missing_binding")delete h.env.BOOKING_RATE_LIMITER;
+   if(scenario==="outage")h.env.BOOKING_RATE_LIMITER={limit:async()=>{throw Error("Synthetic binding outage")}};
+   if(scenario==="invalid_decision")h.env.BOOKING_RATE_LIMITER={limit:async()=>({})};
+   const r=scenario==="missing_client_ip"
+    ?await booking.fetch(new Request(origin+"/api/public/book",{method:"POST",headers:{Origin:origin,"content-type":"application/json"},body:JSON.stringify({
+      id:"11111111-1111-4111-8111-111111111111",date,time:"14:00",name:"Synthetic Viewer",email:"synthetic@example.invalid",topic:"Technical review",turnstileToken:"synthetic-token"})}),h.env)
+    :await post(date,"14:00",h.env);
+   assert.equal(r.status,503,scenario);
+   assert.equal(h.bookings.length,0,scenario);
+   assert.equal(h.calls.length,0,scenario);
+   const slots=await get("/api/public/slots?date="+date,h.env);
+   if(scenario!=="missing_client_ip")assert.equal(slots.status,503,scenario+" slots");
+  }finally{h.reset()}
+ }
+});
+test("rate limited slots and bookings return 429 before any calendar or Turnstile access",async()=>{
+ const h=harness();
+ const keys=[];
+ h.env.BOOKING_RATE_LIMITER={limit:async({key})=>{keys.push(key);return {success:false}}};
+ h.use();
+ try{
+  const s=await get("/api/public/slots?date="+date,h.env);
+  assert.equal(s.status,429);
+  const b=await post(date,"14:00",h.env);
+  assert.equal(b.status,429);
+  assert.deepEqual(keys,["slots:192.0.2.10","book:192.0.2.10"]);
   assert.equal(h.bookings.length,0);
   assert.equal(h.calls.length,0);
  }finally{h.reset()}
