@@ -1,0 +1,57 @@
+name: Whole public-facing site acceptance audit
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'scripts/public-site-audit.mjs'
+      - 'tests/forward-site-audit.spec.cjs'
+      - '.github/workflows/forward-site-audit.yml'
+permissions:
+  contents: read
+jobs:
+  static-live-routes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Audit all public routes, local links, anchors and assets (no form submits)
+        run: node scripts/public-site-audit.mjs
+      - name: Preserve static/site results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trinity-public-site-route-audit
+          path: audit-output/public-site-audit.json
+          retention-days: 14
+  browser-readonly:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install browser test runner
+        run: npm install --no-save @playwright/test
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Serve versioned site without external writes
+        run: |
+          python3 -m http.server 8765 --bind 127.0.0.1 > /tmp/trinity-audit-http.log 2>&1 &
+          for i in $(seq 1 30); do curl -fsS http://127.0.0.1:8765/ >/dev/null && exit 0; sleep 1; done
+          exit 1
+      - name: Browser-check desktop and mobile pages, videos, images and form safety
+        run: npx playwright test tests/forward-site-audit.spec.cjs --reporter=line
+      - name: Preserve browser diagnostics and visual captures
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trinity-public-site-browser-audit
+          path: |
+            audit-output/browser/
+            test-results/
+          retention-days: 14
