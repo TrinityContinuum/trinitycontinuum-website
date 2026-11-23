@@ -140,3 +140,36 @@ test('superseded four-trailer technical media is clearly identified as historica
   await expect(page.locator('#four-trailer')).toContainText('Historical reference');
   await expect(page.locator('#four-trailer')).toContainText('not the current Texas configuration');
 });
+
+
+// Focused WCAG-oriented release checks (automated subset only, not full certification).
+test('Gold and project inquiry controls expose programmatic labels', async ({page}) => {
+  for (const path of ['gold-request.html', 'project-interest.html']) {
+    await page.goto(BASE+'/'+path,{waitUntil:'domcontentloaded'});
+    const unlabeled = await page.locator('main input, main select, main textarea').evaluateAll(els =>
+      els.filter(el => el.type !== 'hidden' && !(
+        (el.labels && [...el.labels].some(l => l.textContent.trim())) ||
+        el.getAttribute('aria-label')?.trim() ||
+        (el.getAttribute('aria-labelledby') && document.getElementById(el.getAttribute('aria-labelledby')))
+      )).map(el=>el.outerHTML.slice(0,150))
+    );
+    expect(unlabeled, path + ' unlabeled form controls').toEqual([]);
+  }
+});
+test('film frames have nonblank distinct accessible titles', async ({page}) => {
+  await page.goto(BASE+'/film-presentations.html',{waitUntil:'domcontentloaded'});
+  const titles=await page.locator('iframe[src*="app.heygen.com/embeds/"]').evaluateAll(els=>els.map(el=>el.title.trim()));
+  expect(titles.length).toBe(4);
+  expect(titles.every(Boolean)).toBe(true);
+  expect(new Set(titles).size).toBe(4);
+});
+test('keyboard skip link focuses primary content on supporting and main routes', async ({page}) => {
+  for(const path of ['index.html','full-site.html','engineering-overview.html','gold-request.html','project-interest.html']){
+    await page.goto(BASE+'/'+path,{waitUntil:'domcontentloaded'});
+    await page.keyboard.press('Tab');
+    await expect(page.locator('a.skip')).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(page).toHaveURL(/#main$/);
+    await expect(page.locator('main#main')).toBeVisible();
+  }
+});
