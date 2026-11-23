@@ -41,7 +41,7 @@ test('consent banner is usable on narrow screens', async ({page})=>{
 test('homepage introduction keeps access to presentations, full site and privacy choices', async ({page}) => {
  await page.emulateMedia({reducedMotion:'no-preference'});
  await page.goto(BASE+'/index.html',{waitUntil:'domcontentloaded'});
- await expect(page.locator('main h1')).toContainText('Three Essential Utilities');
+ await expect(page.locator('main h1')).toContainText('Four Essential Utilities');
  await expect(page.locator('#trinity-film-intro')).toBeVisible();
  await expect(page.getByRole('button',{name:/Skip Intro/i})).toBeVisible();
  await page.getByRole('button',{name:/Skip Intro/i}).click();
