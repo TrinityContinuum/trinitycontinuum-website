@@ -156,7 +156,8 @@ test("all authorized Jack busy calendars are checked, including existing commitm
   const response=await r.json();
   // The secondary calendar has an event at 15:00 UTC-equivalent, and the
   // 15-minute buffer excludes adjacent meeting starts around that event.
-  assert.equal(response.slots.length,0,"Any busy calendar must block direct booking");
+  const times=response.slots.map(x=>x.time);
+  assert.deepEqual(times,["13:30","14:00","16:00"],"All slots overlapping the existing event or 15-minute buffer must be excluded");
   const calls=h.calls.filter(x=>x.url.includes("/freeBusy"));
   assert(calls.length>0);
   assert(calls.every(x=>JSON.parse(x.body).items.some(z=>z.id==="existing-jack-events@example.invalid")));
