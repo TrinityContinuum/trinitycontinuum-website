@@ -1,0 +1,80 @@
+name: Verify Trinity independent booking stays disabled (read-only)
+on:
+  push:
+    branches: [feature/trinity-central-booking-policy]
+    paths:
+      - .github/workflows/verify-independent-booking-live.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Verify existing Worker settings and five live HTTP safety gates
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          ACCOUNT="c1c16121076a98e0c060349aebfae11a"
+          test -n "${CF_TOKEN:-}" || exit 1
+          curl --silent --show-error --max-time 20 -D /tmp/cloudflare-headers.txt -o /tmp/cloudflare-settings.json -w '%{http_code}' \
+            -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/workers/scripts/trinity-independent-booking/settings" >/tmp/cloudflare-status.txt
+          curl --silent --show-error --max-time 20 -D /tmp/worker-headers.txt -o /tmp/worker-body.txt -w '%{http_code}' \
+            "https://trinity-independent-booking.jackspurewater.workers.dev/api/public/policy" >/tmp/worker-status.txt
+          python3 - <<'PY'
+          import json,re
+          stat=open('/tmp/cloudflare-status.txt').read().strip()
+          print('Worker settings API HTTP:',stat)
+          if stat=='200':
+              payload=json.load(open('/tmp/cloudflare-settings.json'))
+              result=payload.get('result') or {}
+              settings=result.get('settings') if isinstance(result.get('settings'),dict) else result
+              bindings=settings.get('bindings',[]) if isinstance(settings,dict) else []
+              print('Bindings:',[{'name':b.get('name'),'type':b.get('type'),'disabled':b.get('name')=='DIRECT_BOOKING_ENABLED' and str(b.get('text',b.get('value',''))).lower()=='false'} for b in bindings])
+          status=open('/tmp/worker-status.txt').read().strip()
+          print('Public Worker GET policy HTTP:',status)
+          for line in open('/tmp/worker-headers.txt'):
+              if line.lower().startswith(('content-type:','server:','cf-ray:','location:','cf-mitigated:')):
+                  print('Header',line.strip()[:180])
+          body=open('/tmp/worker-body.txt').read()[:1800]
+          title=re.search(r'<title[^>]*>(.*?)</title>',body,re.I|re.S)
+          heading=re.search(r'<h1[^>]*>(.*?)</h1>',body,re.I|re.S)
+          print('Response title:',re.sub('<[^>]+>','',title.group(1)).strip()[:140] if title else 'none')
+          print('Response heading:',re.sub('<[^>]+>','',heading.group(1)).strip()[:140] if heading else 'none')
+          print('Public endpoint content type:', next((line.strip() for line in open('/tmp/worker-headers.txt') if line.lower().startswith('content-type:')), 'unreported'))
+          if stat!='200':raise SystemExit('Worker metadata API inaccessible')
+          settings=json.load(open('/tmp/cloudflare-settings.json')).get('result') or {}
+          settings=settings.get('settings') if isinstance(settings.get('settings'),dict) else settings
+          bindings=settings.get('bindings',[]) if isinstance(settings,dict) else []
+          off=[b for b in bindings if b.get('name')=='DIRECT_BOOKING_ENABLED' and str(b.get('text',b.get('value',''))).lower()=='false']
+          d1=[b for b in bindings if b.get('name')=='DB' and b.get('type')=='d1']
+          if not off or not d1:raise SystemExit('Worker lacks verified disabled flag or D1 binding')
+          import subprocess
+          url='https://trinity-independent-booking.jackspurewater.workers.dev'
+          def call(path,method='GET',data=None,origin=False):
+              cmd=['curl','--silent','--show-error','--max-time','20','-X',method,
+                '-w','|STATUS:%{http_code}']
+              if origin:cmd+=['-H','Origin: https://trinitycontinuum.com']
+              if data is not None:
+                  cmd+=['-H','Content-Type: application/json','--data-binary',data.decode('utf-8')]
+              cmd.append(url+path)
+              r=subprocess.run(cmd,check=True,capture_output=True,text=True)
+              body,code=r.stdout.rsplit('|STATUS:',1)
+              return int(code.strip()),body
+          st,body=call('/api/public/policy')
+          print('Live public policy result:',st,body[:320])
+          assert st==200 and json.loads(body).get('instantBookingEnabled') is False, 'Disabled public policy must be false'
+          st,body=call('/api/public/slots?date=2026-11-30',origin=True)
+          assert st==200 and json.loads(body).get('slots')==[], 'Disabled public slots must be empty'
+          st,body=call('/api/public/book',method='POST',data=b'{}',origin=True)
+          assert st==503, 'Disabled booking must reject any attempt before writing'
+          st,_=call('/admin')
+          assert st==401, 'Anonymous admin must be unauthorized'
+          st,_=call('/api/admin/bookings')
+          assert st==401, 'Anonymous booking ledger must be unauthorized'
+          print('PASS: deployed Worker live smoke 5/5: policy disabled; no public slots; booking rejected; two admin paths unauthorized.')
+          print('No appointment writes, D1 migrations, calendar invitations, emails, DNS or live website changes.')
+          PY

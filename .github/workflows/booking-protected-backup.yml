@@ -1,0 +1,90 @@
+name: Protect Trinity D1 before booking migrations
+on:
+  push:
+    branches: [feature/trinity-central-booking-policy]
+    paths:
+      - .github/workflows/booking-protected-backup.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: trinity-appointments-protected-backup
+  cancel-in-progress: false
+jobs:
+  secure-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Confirm original D1 and retrieve pre-migration recovery bookmark
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${CF_TOKEN:-}" || { echo "::error::Cloudflare deployment credential missing"; exit 1; }
+          ACCOUNT="c1c16121076a98e0c060349aebfae11a"
+          D1_ID="5bb3ab47-f258-4ce3-8545-605cb2a158d0"
+          curl --fail --silent --show-error --max-time 20 \
+            -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database/${D1_ID}/time_travel/bookmark" \
+            -o /tmp/trinity-prebooking-bookmark.json
+          python3 - <<'PY'
+          import json
+          data=json.load(open('/tmp/trinity-prebooking-bookmark.json'))
+          if not data.get('success') or not (data.get('result') or {}).get('bookmark'):
+              raise SystemExit('No valid recovery bookmark; abort before export and migration')
+          print('PASS: private Cloudflare Time Travel recovery bookmark captured, value not logged.')
+          PY
+      - name: Export entire original D1 privately
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          export CLOUDFLARE_API_TOKEN="${CF_TOKEN}"
+          export CLOUDFLARE_ACCOUNT_ID="c1c16121076a98e0c060349aebfae11a"
+          npx --yes wrangler@4 d1 export trinity-appointments-db --remote \
+            --output=/tmp/trinity-prebooking.sql > /tmp/export-log.txt 2>&1 \
+            || { echo "::error::D1 export failed; no backup archived and NO migration authorized"; exit 1; }
+          test -s /tmp/trinity-prebooking.sql
+          python3 - <<'PY'
+          import sqlite3
+          path='/tmp/trinity-prebooking.sql'
+          connection=sqlite3.connect(':memory:')
+          with open(path,encoding='utf-8') as f:connection.executescript(f.read())
+          tables={row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
+          needed={'appointments','appointment_decisions'}
+          if not needed.issubset(tables):raise SystemExit('Restore rehearsal missing original tables')
+          print('PASS: full original SQL export rehearsed successfully in isolated SQLite memory, tables present.')
+          print('No appointment rows, names, emails or backup SQL printed.')
+          PY
+      - name: Encrypt and independently authenticate backup
+        env:
+          TRINITY_BACKUP_PASSPHRASE: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          node cloudflare/appointment-queue/protected-backup.mjs encrypt \
+            /tmp/trinity-prebooking.sql /tmp/trinity-prebooking-bookmark.json \
+            /tmp/trinity-prebooking.sql.enc
+          node cloudflare/appointment-queue/protected-backup.mjs verify \
+            /tmp/trinity-prebooking.sql.enc /tmp/trinity-prebooking.sql
+          test -s /tmp/trinity-prebooking.sql.enc
+      - name: Upload ONLY encrypted SQL and bookmark (14-day recovery artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: trinity-d1-prebooking-encrypted-${{ github.run_id }}
+          path: /tmp/trinity-prebooking.sql.enc
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+      - name: Confirm backup artifact upload finished
+        run: |
+          echo "PASS: encrypted, authenticated, restore-rehearsed backup uploaded as private GitHub Actions artifact."
+          echo "No migration executed. Protect the original Cloudflare token value to recover this backup after credential rotation."
+      - name: Remove ephemeral unencrypted copies from runner
+        if: always()
+        run: |
+          rm -f /tmp/trinity-prebooking.sql /tmp/trinity-prebooking-bookmark.json \
+            /tmp/trinity-prebooking.sql.enc /tmp/export-log.txt /tmp/trinity-prebooking-bookmark.json

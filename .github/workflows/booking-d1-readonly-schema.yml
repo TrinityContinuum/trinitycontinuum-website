@@ -1,0 +1,59 @@
+name: Inspect Trinity booking D1 schema safely (read-only)
+on:
+  push:
+    branches: [feature/trinity-central-booking-policy]
+    paths: [.github/workflows/booking-d1-readonly-schema.yml]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Inspect live appointments schema and backup readiness without reading PII
+        env:
+          CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "${CF_TOKEN:-}" || { echo "::error::Missing Cloudflare credential"; exit 1; }
+          ACCOUNT="c1c16121076a98e0c060349aebfae11a"
+          D1_ID="5bb3ab47-f258-4ce3-8545-605cb2a158d0"
+          python3 - <<'PY'
+          import json
+          sql="SELECT type,name FROM sqlite_master WHERE type IN ('table','index','trigger') AND name NOT LIKE 'sqlite_%' ORDER BY type,name"
+          with open('/tmp/query.json','w') as f:json.dump({'sql':sql},f)
+          PY
+          # Wrangler is Cloudflare's supported D1 administration client.
+          # Only schema metadata is queried; personal appointment rows are not.
+          CLOUDFLARE_API_TOKEN="${CF_TOKEN}" CLOUDFLARE_ACCOUNT_ID="${ACCOUNT}" \
+            npx --yes wrangler@4 d1 execute trinity-appointments-db --remote --json \
+            --command "SELECT type,name FROM sqlite_master WHERE type IN ('table','index','trigger') AND name NOT LIKE 'sqlite_%' ORDER BY type,name" \
+            > /tmp/schema-result.json
+          printf '200' > /tmp/schema-status.txt
+          curl --silent --show-error --max-time 20 -w '%{http_code}' \
+            -H "Authorization: Bearer ${CF_TOKEN}" \
+            "https://api.cloudflare.com/client/v4/accounts/${ACCOUNT}/d1/database/${D1_ID}/time_travel/bookmark" \
+            -o /tmp/bookmark-result.json > /tmp/bookmark-status.txt
+          python3 - <<'PY'
+          import json
+          for typ,file,stat in [('schema','/tmp/schema-result.json','/tmp/schema-status.txt'),('bookmark','/tmp/bookmark-result.json','/tmp/bookmark-status.txt')]:
+              data=json.load(open(file))
+              errors=[] if isinstance(data,list) else [(e.get('code'),str(e.get('message',''))[:180]) for e in data.get('errors',[])][:4]
+              print(typ,'HTTP',open(stat).read().strip(),'errors',errors)
+          q=json.load(open('/tmp/schema-result.json'))
+          if not isinstance(q,list):raise SystemExit('Unexpected D1 Wrangler schema response; no changes')
+          rows=[]
+          for result in q:
+              if not result.get('success',False):raise SystemExit('D1 query rejected')
+              rows+=result.get('results',[])
+          schema={k:sorted(x.get('name') for x in rows if x.get('type')==k) for k in ('table','index','trigger')}
+          print('D1 schema object names only, no row contents:',schema)
+          required=('appointments','appointment_decisions')
+          print('Required baseline tables:',{name:name in schema['table'] for name in required})
+          migrations=('booking_policy','appointment_bookings','appointment_external')
+          print('Staged booking migration tables already present:',{name:name in schema['table'] for name in migrations})
+          bk=json.load(open('/tmp/bookmark-result.json'))
+          print('D1 automatic Time Travel bookmark available:',bool(bk.get('success') and (bk.get('result') or {}).get('bookmark')))
+          print('No personal records, row data, or bookmark values printed; no D1 writes performed.')
+          PY
