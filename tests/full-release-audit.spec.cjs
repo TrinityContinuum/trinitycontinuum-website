@@ -162,6 +162,12 @@ test('film frames have nonblank distinct accessible titles', async ({page}) => {
   expect(titles.length).toBe(4);
   expect(titles.every(Boolean)).toBe(true);
   expect(new Set(titles).size).toBe(4);
+  expect(titles).toEqual([
+    'Film 01 — Engineered to Endure',
+    'Film 02 — Six Trailers. One Continuum.',
+    'Film 03 — Pure Water. Protected by Design.',
+    'Film 04 — Built to Move. Designed to Last.'
+  ]);
 });
 test('keyboard skip link focuses primary content on supporting and main routes', async ({page}) => {
   for(const path of ['index.html','full-site.html','engineering-overview.html','gold-request.html','project-interest.html']){
