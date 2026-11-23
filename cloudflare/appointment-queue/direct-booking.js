@@ -173,7 +173,23 @@ async function createInvitation(env,token,id,request,start,end){
  if(!/^https:\/\/meet\.google\.com\/[a-z0-9-]+(?:[/?#].*)?$/i.test(meetLink))throw Error("Meet link not ready; reconcile event before confirming");
  return {eventId,meetLink,htmlLink:b.htmlLink||""};
 }
-async function handleSlots(url,env,origin){
+// Cloudflare's native Rate Limiting binding is deliberately required before
+// any expensive public slot discovery or booking action. Enforcement is
+// approximate per Cloudflare location, and does not replace Turnstile or D1.
+async function publicRateGuard(req,env,origin,route){
+ const ip=String(req.headers.get("CF-Connecting-IP")||"").trim();
+ if(!ip||ip.length>64||typeof env.BOOKING_RATE_LIMITER?.limit!=="function")
+  return json({error:"Booking request protection is unavailable; use the manual appointment form"},503,origin);
+ let result;
+ try{result=await env.BOOKING_RATE_LIMITER.limit({key:route+":"+ip})}
+ catch{return json({error:"Booking request protection is unavailable; use the manual appointment form"},503,origin)}
+ if(result?.success===false)return json({error:"Too many appointment requests; please use the manual form or try later"},429,origin);
+ if(result?.success!==true)return json({error:"Booking request protection is unavailable; use the manual appointment form"},503,origin);
+ return null;
+}
+async function handleSlots(req,url,env,origin){
+ const guard=await publicRateGuard(req,env,origin,"slots");
+ if(guard)return guard;
  const p=await policy(env);
  if(!p.enabled||env.DIRECT_BOOKING_ENABLED!=="true")return json({enabled:false,slots:[]},200,origin);
  const day=url.searchParams.get("date")||"";if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return json({error:"Choose a date"},400,origin);
@@ -198,6 +214,8 @@ async function handleBook(req,env,origin){
  const id=String(body.id||""),day=String(body.date||""),time=String(body.time||"");
  const name=String(body.name||"").trim(),email=String(body.email||"").trim(),organization=String(body.organization||"").trim(),topic=String(body.topic||"").trim();
  if(!/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id)||name.length<2||name.length>120||organization.length>150||topic.length<3||topic.length>2500||email.length>254||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:"Invalid details"},400,origin);
+ const guard=await publicRateGuard(req,env,origin,"book");
+ if(guard)return guard;
  if(!(await verifyTurnstile(req,env,String(body.turnstileToken||""))))return json({error:"Security verification failed"},403,origin);
  let start,end,p;
  try{p=await policy(env);if(!p.enabled||!slotWithin(day,time,p.windows))return json({error:"This time needs Jack's approval"},409,origin);
@@ -277,7 +295,7 @@ export default {async fetch(req,env,ctx){
  if(url.pathname==="/api/public/policy"&&req.method==="GET"){
   const p=await policy(env);return json({instantBookingEnabled:p.enabled&&env.DIRECT_BOOKING_ENABLED==="true",timezone:ZONE,minutes:30},200,origin);
  }
- if(url.pathname==="/api/public/slots"&&req.method==="GET"&&ORIGINS.has(origin))return handleSlots(url,env,origin);
+ if(url.pathname==="/api/public/slots"&&req.method==="GET"&&ORIGINS.has(origin))return handleSlots(req,url,env,origin);
  if(url.pathname==="/api/public/book"&&req.method==="POST"){
   if(!ORIGINS.has(origin))return json({error:"Forbidden origin"},403,origin);
   return handleBook(req,env,origin);
