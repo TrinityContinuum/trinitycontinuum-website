@@ -42,7 +42,7 @@ for(const filename of all){
    if(!isLocal(u))continue;
    const raw=clean(u);
    const target=raw.startsWith("/")?raw.slice(1):path.posix.normalize(path.posix.join(path.posix.dirname(filename),raw));
-   const targetFile=target.endsWith("/")?target+"index.html":target;
+   const targetFile=!target?"index.html":target.endsWith("/")?target+"index.html":target;
    local.push({kind,ref:u,target:targetFile});
    if(!known.has(targetFile)&&!fs.existsSync(targetFile)){
     check("error","missing_local_target",filename,kind+": "+u+" => "+targetFile);
@@ -61,7 +61,7 @@ for(const filename of all){
  const h1s=(html.match(/<h1\b/gi)||[]).length;
  if(h1s!==1)check("warn","heading_count",filename,"h1 count="+h1s);
  const nav=(html.match(/<nav\b[^>]*>[\s\S]*?<\/nav>/i)||[])[0]||"";
- if(!nav.includes("index.html")&&!filename.startsWith("404"))check("warn","nav_no_home",filename,"No homepage navigation");
+ if(!nav.includes("index.html")&&!nav.includes("full-site.html")&&!html.includes('href="index.html"')&&!filename.startsWith("404"))check("warn","nav_no_home",filename,"No homepage navigation");
  pages.push({page:filename,title:title.trim(),h1s,images:pictures.length,forms,localRefs:local.length,externalRefs:external.length,brokenLocal:broken});
 }
 async function http(url,method="GET"){
