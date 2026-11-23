@@ -4,6 +4,41 @@
 // and conflict-checking transport. Default policy: NO automatic booking.
 const ORIGINS=new Set(["https://trinitycontinuum.com","https://www.trinitycontinuum.com"]);
 const ZONE="America/Chicago";
+
+const BUFFER_MINUTES=15;
+// Exclude U.S. federal holidays, including adjacent observed dates. Business
+// calendar busy events can block additional owner-approved company holidays.
+const iso=(y,m,d)=>new Date(Date.UTC(y,m-1,d)).toISOString().slice(0,10);
+function nthWeekday(y,m,weekday,n){
+ const first=new Date(Date.UTC(y,m-1,1)).getUTCDay();
+ return iso(y,m,1+(weekday-first+7)%7+7*(n-1));
+}
+function lastWeekday(y,m,weekday){
+ const end=new Date(Date.UTC(y,m,0)),day=end.getUTCDay();
+ return iso(y,m,end.getUTCDate()-(day-weekday+7)%7);
+}
+function observed(day){
+ const [y,m,d]=day.split("-").map(Number),w=new Date(Date.UTC(y,m-1,d)).getUTCDay();
+ if(w===6)return iso(y,m,d-1);if(w===0)return iso(y,m,d+1);
+ return day;
+}
+function federalHolidays(year){
+ const raw=[
+  iso(year,1,1),nthWeekday(year,1,1,3),nthWeekday(year,2,1,3),
+  lastWeekday(year,5,1),iso(year,6,19),iso(year,7,4),
+  nthWeekday(year,9,1,1),nthWeekday(year,10,1,2),iso(year,11,11),
+  nthWeekday(year,11,4,4),iso(year,12,25)
+ ];
+ return raw.map(observed);
+}
+function isFederalHoliday(day){
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return true;
+ const year=Number(day.slice(0,4));
+ return [year-1,year,year+1].some(y=>federalHolidays(y).includes(day));
+}
+const bufferStart=d=>new Date(d.getTime()-BUFFER_MINUTES*60000);
+const bufferEnd=d=>new Date(d.getTime()+BUFFER_MINUTES*60000);
+
 const H=Object.freeze({"content-type":"application/json","cache-control":"no-store"});
 function json(obj,status=200,origin=""){return new Response(JSON.stringify(obj),{status,headers:{...H,...(ORIGINS.has(origin)?{"access-control-allow-origin":origin,"vary":"Origin"}:{})}})}
 function dateParts(date,zone=ZONE){
@@ -30,7 +65,7 @@ function validWindows(w){
 }
 function slotWithin(day,time,windows){
  if(!validWindows(windows)||!windows.length)return false;
- const start=minutes(time),end=start+30;if(end>1440||start%30)return false;
+ const start=minutes(time),end=start+30;if(end>1440||start%30||isFederalHoliday(day))return false;
  // Central lunch is a hard block regardless of configured availability.
  if(start<780&&end>690)return false;
  return windows.some(w=>w.weekday===weekday(day)&&start>=minutes(w.start)&&end<=minutes(w.end));
@@ -100,9 +135,9 @@ async function handleSlots(url,env,origin){
    if(!slotWithin(day,time,p))continue;
    const start=fromLocal(day,time),end=new Date(start.getTime()+1800000);
    if(!inRange(start,p))continue;
-   const reserved=await env.DB.prepare("SELECT id FROM appointment_bookings WHERE slot_start < ? AND slot_end > ? AND state IN ('processing','confirmed','needs_reconciliation') LIMIT 1").bind(end.toISOString(),start.toISOString()).first();
-   const legacy=await env.DB.prepare("SELECT id FROM appointment_external WHERE start_utc < ? AND end_utc > ? AND status IN ('invited','accepted','completed','tentative') LIMIT 1").bind(end.toISOString(),start.toISOString()).first();
-   if(!reserved&&!legacy&&await freeBusy(env,tok,start,end))slots.push({time,zone:ZONE});
+   const reserved=await env.DB.prepare("SELECT id FROM appointment_bookings WHERE slot_start < ? AND slot_end > ? AND state IN ('processing','confirmed','needs_reconciliation') LIMIT 1").bind(bufferEnd(end).toISOString(),bufferStart(start).toISOString()).first();
+   const legacy=await env.DB.prepare("SELECT id FROM appointment_external WHERE start_utc < ? AND end_utc > ? AND status IN ('invited','accepted','completed','tentative') LIMIT 1").bind(bufferEnd(end).toISOString(),bufferStart(start).toISOString()).first();
+   if(!reserved&&!legacy&&await freeBusy(env,tok,bufferStart(start),bufferEnd(end)))slots.push({time,zone:ZONE});
   }catch{/* Skip ambiguous or unavailable slots safely. */}
  }
  return json({enabled:true,date:day,timezone:ZONE,slots},200,origin);
@@ -120,9 +155,9 @@ async function handleBook(req,env,origin){
  if(!inRange(start,p))return json({error:"Outside booking window"},409,origin);
  }catch{return json({error:"Invalid or ambiguous time"},400,origin)}
  let token;try{token=await googleToken(env);
-  const previous=await env.DB.prepare("SELECT id FROM appointment_external WHERE start_utc < ? AND end_utc > ? AND status IN ('invited','accepted','completed','tentative') LIMIT 1").bind(end.toISOString(),start.toISOString()).first();
+  const previous=await env.DB.prepare("SELECT id FROM appointment_external WHERE start_utc < ? AND end_utc > ? AND status IN ('invited','accepted','completed','tentative') LIMIT 1").bind(bufferEnd(end).toISOString(),bufferStart(start).toISOString()).first();
   if(previous)return json({error:"Existing Trinity meeting conflicts with selected time"},409,origin);
-  if(!await freeBusy(env,token,start,end))return json({error:"Time no longer available"},409,origin)}
+  if(!await freeBusy(env,token,bufferStart(start),bufferEnd(end)))return json({error:"Time no longer available"},409,origin)}
  catch{return json({error:"Could not verify business calendar; no booking made"},503,origin)}
  // D1 unique index on slot_start serializes simultaneous submissions.
  try{
@@ -141,8 +176,8 @@ async function handleBook(req,env,origin){
 
 const ADMIN_HTML=String.raw`<!doctype html><html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trinity — Scheduling Policy</title>
 <style>body{margin:0;background:#07111e;color:#e9f0f6;font:16px/1.5 system-ui}main{max-width:940px;margin:auto;padding:28px}h1{color:#dfc17d}fieldset{border:1px solid #6a7a8b;border-radius:10px;padding:16px;margin:18px 0}table{width:100%;border-collapse:collapse}th,td{border-bottom:1px solid #43576d;text-align:left;padding:10px}input{font:inherit;padding:7px}input[type=time]{width:115px;background:#10253a;color:white}button{background:#dfc17d;color:#07111e;border:0;padding:12px 18px;border-radius:7px;font-weight:700;cursor:pointer}p{max-width:780px}.muted{color:#bbcbd8}#message{padding:14px;border:1px solid #43576d;border-radius:6px}a{color:#dfc17d}@media(max-width:600px){table{font-size:13px}input[type=time]{width:85px}}</style>
-<main><h1>Trinity · Central Scheduling Controls</h1><p>Jack chooses the hours available for direct booking. Outside these hours, visitors request approval. <strong>Hours are in America/Chicago (Central), including DST.</strong></p>
-<p class="muted">The appointment register remains Trinity's authority. No direct booking is active unless the policy is enabled AND the separate server deployment switch and verified business calendar are available. New direct bookings are 30 minutes. 11:30 AM–1 PM Central is always blocked.</p>
+<main><h1>Trinity · Central Scheduling Controls</h1><p>Jack chooses the hours available for direct booking. The staged weekday rule permits starts from 1:30 PM to 4:00 PM Central, inclusive, with the 4:00 PM meeting finishing at 4:30 PM. Outside these hours, visitors request approval. <strong>Hours are in America/Chicago (Central), including DST.</strong></p>
+<p class="muted">The appointment register remains Trinity's authority. No direct booking is active unless the policy is enabled AND the separate server deployment switch and verified business calendar are available. New direct bookings are 30 minutes with a 15-minute buffer. U.S. federal observed holidays are automatically blocked; business-calendar busy events block other closures. 11:30 AM–1 PM Central is always blocked.</p>
 <form id="policy"><fieldset><legend>Automatic confirmation policy</legend><label><input id="enabled" type="checkbox"> Allow automatic booking during the selected hours</label><table><thead><tr><th>Day</th><th>On</th><th>Start (Central)</th><th>End (Central)</th></tr></thead><tbody id="days"></tbody></table>
 <label>Minimum lead time (hours) <input id="lead" type="number" min="1" max="720" value="24"></label> <label>Booking horizon (days) <input id="horizon" type="number" min="1" max="365" value="60"></label>
 </fieldset><button type="submit">Save Jack's booking hours</button></form><p id="message" role="status">Loading private schedule...</p><h2>Confirmed or reconciliation-needed direct bookings</h2><div id="bookings">Loading records...</div></main>
@@ -170,6 +205,8 @@ document.getElementById('policy').addEventListener('submit',async e=>{
  msg.textContent=r.ok?'Hours saved in Trinity policy; no invitations sent.':(j.error||'Could not save');});
 load().catch(e=>msg.textContent=e.message);
 </script></html>`;
+
+export const _bookingPolicyTest={isFederalHoliday,slotWithin,validWindows,fromLocal};
 
 export default {async fetch(req,env){
  const url=new URL(req.url),origin=req.headers.get("Origin")||"";
