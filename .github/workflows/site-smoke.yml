@@ -1,5 +1,14 @@
 name: Website browser smoke tests
 on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'full-site.html'
+      - 'film-presentations.html'
+      - 'assets/trinity-intro.js'
+      - 'tests/site.spec.cjs'
+      - '.github/workflows/site-smoke.yml'
   pull_request:
     paths:
       - '**/*.html'
