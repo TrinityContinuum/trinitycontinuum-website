@@ -8,6 +8,7 @@ on:
       - 'sitemap.xml'
       - 'tests/full-release-audit.spec.cjs'
       - 'tests/axe-audit.spec.cjs'
+      - 'tests/public-link-policy.test.cjs'
       - '.github/workflows/full-release-audit.yml'
   workflow_dispatch:
 jobs:
@@ -19,6 +20,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Guard confidential public source links and preserve original film embeds
+        run: node tests/public-link-policy.test.cjs
       - run: npm install --no-save --no-package-lock @playwright/test axe-core
       - run: npx playwright install --with-deps chromium
       - name: Serve reviewed draft locally
