@@ -184,6 +184,33 @@ test("missing rate limiter, missing edge identity and limiter outage fail closed
   }finally{h.reset()}
  }
 });
+test("policy windows reject invalid clock minutes, null objects and invalid midnight boundaries",async()=>{
+ for(const window of [
+  null,42,{},[],{weekday:1,start:"13:90",end:"15:00"},
+  {weekday:1,start:"13:30",end:"14:60"},
+  {weekday:1,start:"24:00",end:"24:30"},
+  {weekday:1,start:"13:00",end:"24:30"},
+  {weekday:1,start:"13:30",end:"13:30"}
+ ]){
+  assert.equal(p.validWindows([window]),false,"Unexpected valid window: "+JSON.stringify(window));
+ }
+ assert.equal(p.validWindows([{weekday:1,start:"23:30",end:"24:00"}]),true);
+ const h=harness();
+ h.env.ADMIN_PASSWORD="private-test-password-32-characters-long";
+ h.env.ADMIN_APPROVER_EMAILS="jack@trinitycontinuum.com";
+ const auth="Basic "+Buffer.from("jack:"+h.env.ADMIN_PASSWORD).toString("base64");
+ const ctx={access:{getIdentity:async()=>({email:"jack@trinitycontinuum.com"})}};
+ for(const windowsInput of [[null],[{weekday:1,start:"13:90",end:"15:00"}]]){
+  const req=new Request(origin+"/api/admin/policy",{method:"PUT",headers:{Origin:origin,authorization:auth,"content-type":"application/json"},body:JSON.stringify({
+   enabled:true,windows:windowsInput,minNoticeHours:24,maxDays:60
+  })});
+  const response=await booking.fetch(req,h.env,ctx);
+  assert.equal(response.status,400,"Malformed admin window must not reach D1");
+ }
+ assert.equal(h.bookings.length,0);
+ assert.equal(h.calls.length,0);
+});
+
 test("rate limited slots and bookings return 429 before any calendar or Turnstile access",async()=>{
  const h=harness();
  const keys=[];
