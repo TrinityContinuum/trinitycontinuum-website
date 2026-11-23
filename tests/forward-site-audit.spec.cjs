@@ -7,7 +7,7 @@ const base="http://127.0.0.1:8765";
 const pages=fs.readdirSync(".").filter(x=>/^[a-z0-9-]+\.html$/i.test(x)).sort();
 const capture=path.resolve("audit-output/browser");
 fs.mkdirSync(capture,{recursive:true});
-test.describe.configure({mode:"serial"});
+// Tests remain independent so one page defect does not suppress other audit evidence.
 test.setTimeout(60000);
 
 for(const [device,viewport] of [["desktop",{width:1440,height:900}],["mobile",{width:390,height:844}]]){
