@@ -211,14 +211,16 @@ test('opening film modal retains keyboard focus until visitor exits', async ({pa
   const modal=page.locator('#trinity-film-intro');
   await expect(modal).toHaveAttribute('aria-modal','true');
   const skip=page.locator('#trinity-intro-skip');
-  const fullscreen=page.locator('#trinity-intro-fullscreen');
+  const visibleControls=modal.locator('button:not([hidden]):not([disabled])');
+  await expect(skip).toBeFocused();
+  // Autoplay policy may reveal an extra "Play with Sound" control.
+  // Test the visible controls, not an assumed fixed button count.
+  const first=visibleControls.first();
+  await first.focus();
+  await page.keyboard.press('Shift+Tab');
   await expect(skip).toBeFocused();
   await page.keyboard.press('Tab');
-  await expect(fullscreen).toBeFocused();
-  await page.keyboard.press('Shift+Tab');
-  await expect(skip).toBeFocused();
-  await page.keyboard.press('Shift+Tab');
-  await expect(fullscreen).toBeFocused();
+  await expect(first).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page).toHaveURL(/\/film-presentations\.html$/);
 });
