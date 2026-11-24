@@ -1,3 +1,4 @@
+import {bookingOptions,calendarFor,sessionAt,mayJoin,scheduleSession,reconcileSessions} from './session-service.js';
 import {dispatchNotifications} from './notification-dispatcher.js';
 // Trinity-owned appointment engine. Deploy as a NEW isolated Worker after migration.
 // No Google Calendar, Google booking page, or third-party scheduling dependency.
@@ -28,30 +29,25 @@ async function verifyTurnstile(req,env,token){
  const result=await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify',{method:'POST',body:form});
  return result.ok&&(await result.json()).success===true;
 }
+function configured(env){return !!(env.TURNSTILE_SECRET&&env.GOOGLE_CLIENT_ID&&env.GOOGLE_CLIENT_SECRET&&env.GOOGLE_REFRESH_TOKEN&&env.MAIL_GATEWAY_URL&&env.MAIL_GATEWAY_TOKEN&&env.ADMIN_TOKEN&&env.MEET_CONNECTION_LIMIT);}
 async function available(env,input){
  const slot=parseSlot(input),p=await policy(env);
- return {slot,eligible:classifySlot(slot.starts_at,slot.ends_at,p)==='automatic_candidate'&&!await blocked(env.DB,slot.starts_at,slot.ends_at)};
+ if(!configured(env)||classifySlot(slot.starts_at,slot.ends_at,p)!=='automatic_candidate'||slot.b-slot.a!==1800000)return {slot,eligible:false};
+ const opts=bookingOptions(input,env);
+ const s=await sessionAt(env,slot);
+ return {slot,eligible:s?mayJoin(s,slot,opts):!await blocked(env.DB,slot.starts_at,slot.ends_at)&&await calendarFor(env).isFree(slot.starts_at,slot.ends_at)};
 }
 async function book(req,env){
  if(!validOrigin(req,env))return json({error:'Origin not allowed'},403);
- if(!env.TURNSTILE_SECRET)return json({error:'Booking unavailable'},503);
- if(!(await policy(env)).automatic_enabled)return json({error:'Automatic booking is not enabled'},503);
- return json({error:'Automatic booking awaits verified calendar integration'},503);
-}
-// Retained for review only; never route requests here until the provider and reconciliation are integrated.
-async function unintegratedBooking(req,env){
- let input;try{input=await req.json();}catch{return json({error:'Invalid request'},400);}
+ if(!configured(env)||!(await policy(env)).automatic_enabled)return json({error:'Automatic booking unavailable; please request an appointment manually'},503);
+ let input,b,slot,opts;
+ try{input=await req.json();b=normalizeBooking(input);slot=parseSlot(input);opts=bookingOptions(input,env);}catch{return json({error:'Invalid booking details'},400);}
  if(!await verifyTurnstile(req,env,input.turnstile_token))return json({error:'Security verification failed'},403);
- let b,slot;try{b=normalizeBooking(input);slot=parseSlot(input);}catch{return json({error:'Invalid booking details'},400);}
- if(b.starts_at!==slot.starts_at||b.ends_at!==slot.ends_at)return json({error:'Invalid slot'},400);
- if(!(await available(env,input)).eligible)return json({error:'Slot unavailable; please request an alternate time'},409);
- const bookingId=id(),parts=segments(slot.a,slot.b);
- const statements=[env.DB.prepare(`INSERT INTO automatic_bookings(id,slot_key,visitor_name,visitor_email,visitor_organization,topic,starts_at,ends_at,status,calendar_sync_status) VALUES(?,?,?,?,?,?,?,?, 'confirmed','pending')`).bind(bookingId,slot.starts_at,b.name,b.email,b.organization,b.topic,b.starts_at,b.ends_at),
- ...parts.map(t=>env.DB.prepare('INSERT INTO automatic_booking_slot_locks(slot_start,booking_id) VALUES(?,?)').bind(t,bookingId)),
- env.DB.prepare("INSERT INTO booking_actions(id,booking_id,actor,action) VALUES(?,?,'visitor','booked')").bind(id(),bookingId),
- env.DB.prepare("INSERT INTO booking_notifications(id,booking_id,kind,recipient) VALUES(?,?,'confirmation',?)").bind(id(),bookingId,b.email)];
- try{await env.DB.batch(statements);}catch(e){if(/unique|constraint/i.test(String(e)))return json({error:'Slot just booked; please choose another'},409);throw e;}
- return json({confirmed:true,booking_id:bookingId,starts_at:b.starts_at,ends_at:b.ends_at,time_zone:TIME_ZONE,notification_status:'pending'},201);
+ if(slot.b-slot.a!==1800000||classifySlot(slot.starts_at,slot.ends_at,await policy(env))!=='automatic_candidate')return json({error:'Outside automatic hours; request manual approval'},409);
+ let result;
+ try{result=await scheduleSession(env,b,slot,opts);}catch(e){if(/unique|constraint|capacity exceeded/i.test(String(e)))return json({error:'Slot unavailable or already booked'},409);throw e;}
+ if(result.conflict)return json({error:'Slot unavailable'},409);
+ return json({...result,starts_at:slot.starts_at,ends_at:slot.ends_at,time_zone:TIME_ZONE,notification_status:result.confirmed?'pending':'not_confirmed'},result.confirmed?201:202);
 }
 async function owner(req,env,url){
  const token=req.headers.get('authorization')?.replace(/^Bearer /i,'');
@@ -72,6 +68,7 @@ async function owner(req,env,url){
   const instructions=String(body.instructions||'').trim();if(instructions.length>2000)return json({error:'Instructions too long'},400);
   const booking=await env.DB.prepare('SELECT id,status,visitor_email FROM automatic_bookings WHERE id=?').bind(bookingId).first();
   if(!booking)return json({error:'Booking not found'},404);
+  if(await env.DB.prepare('SELECT booking_id FROM booking_session_members_v2 WHERE booking_id=?').bind(bookingId).first())return json({error:'Calendar-linked video URL cannot be manually replaced'},409);
   if(booking.status!=='confirmed')return json({error:'Only confirmed appointments can receive a video link'},409);
   const statements=[env.DB.prepare("INSERT INTO booking_video_links(booking_id,meeting_url,instructions) VALUES(?,?,?) ON CONFLICT(booking_id) DO UPDATE SET meeting_url=excluded.meeting_url,instructions=excluded.instructions,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(bookingId,meetingUrl.href,instructions),
    env.DB.prepare("INSERT INTO booking_notifications(id,booking_id,kind,recipient) VALUES(?,?,'video_link',?) ON CONFLICT(booking_id,kind,recipient) DO UPDATE SET status='pending',attempts=0,provider_message_id=NULL").bind(id(),bookingId,booking.visitor_email),
@@ -84,6 +81,7 @@ async function owner(req,env,url){
   if(typeof body.booking_id!=='string'||!body.booking_id)return json({error:'Booking ID required'},400);
   const existing=await env.DB.prepare("SELECT id,status FROM automatic_bookings WHERE id=?").bind(body.booking_id).first();
   if(!existing)return json({error:'Booking not found'},404);
+  if(await env.DB.prepare('SELECT booking_id FROM booking_session_members_v2 WHERE booking_id=?').bind(body.booking_id).first())return json({error:'Calendar-linked cancellation requires coordinated administrator action'},409);
   if(existing.status==='cancelled')return json({cancelled:true,already_cancelled:true});
   if(existing.status!=='confirmed')return json({error:'Booking is not cancellable'},409);
   const actions=[env.DB.prepare("UPDATE automatic_bookings SET status='cancelled',updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now') WHERE id=? AND status='confirmed'").bind(body.booking_id),
@@ -98,6 +96,7 @@ async function owner(req,env,url){
   if(typeof body.booking_id!=='string'||!body.booking_id)return json({error:'Booking ID required'},400);
   const current=await env.DB.prepare('SELECT * FROM automatic_bookings WHERE id=?').bind(body.booking_id).first();
   if(!current)return json({error:'Booking not found'},404);
+  if(await env.DB.prepare('SELECT booking_id FROM booking_session_members_v2 WHERE booking_id=?').bind(body.booking_id).first())return json({error:'Calendar-linked rescheduling requires coordinated administrator action'},409);
   if(current.status!=='confirmed')return json({error:'Only confirmed appointments can be moved'},409);
   if(classifySlot(slot.starts_at,slot.ends_at,await policy(env))!=='automatic_candidate')return json({error:'New time is outside automatic hours'},409);
   const conflict=await env.DB.prepare('SELECT COUNT(*) AS n FROM automatic_booking_slot_locks WHERE slot_start>=? AND slot_start<? AND booking_id<>?').bind(slot.starts_at,slot.ends_at,current.id).first();
@@ -120,7 +119,7 @@ async function owner(req,env,url){
  }
  return json({error:'Unknown owner action'},404);
 }
-export default {async scheduled(_event,env,ctx){ctx.waitUntil(dispatchNotifications(env));},async fetch(req,env){
+export default {async scheduled(_event,env,ctx){ctx.waitUntil((async()=>{if(configured(env))await reconcileSessions(env);await dispatchNotifications(env);})());},async fetch(req,env){
  const response=await handle(req,env);
  if(validOrigin(req,env)){const headers=new Headers(response.headers);headers.set('access-control-allow-origin',req.headers.get('origin'));headers.set('vary','Origin');return new Response(response.body,{status:response.status,headers});}
  return response;
@@ -130,9 +129,9 @@ async function handle(req,env){
   const origin=req.headers.get('origin')||'';
   if(req.method==='OPTIONS')return validOrigin(req,env)?new Response(null,{status:204,headers:{'access-control-allow-origin':origin,'access-control-allow-methods':'GET, POST, PUT','access-control-allow-headers':'content-type, authorization','access-control-max-age':'600','vary':'Origin'}}):new Response(null,{status:403});
   const url=new URL(req.url);
-  if(url.pathname==='/api/health'&&req.method==='GET')return json({service:'trinity-independent-booking',status:'staged',automatic_enabled:(await policy(env)).automatic_enabled});
+  if(url.pathname==='/api/health'&&req.method==='GET')return json({service:'trinity-independent-booking',status:'integration_review',automatic_enabled:configured(env)&&(await policy(env)).automatic_enabled});
   if(url.pathname.startsWith('/api/owner/'))return owner(req,env,url);
-  if(url.pathname==='/api/policy'&&req.method==='GET'){const p=await policy(env);return json({time_zone:TIME_ZONE,automatic_enabled:p.automatic_enabled,weekdays:p.weekdays,durations:[30,60]});}
+  if(url.pathname==='/api/policy'&&req.method==='GET'){const p=await policy(env);return json({time_zone:TIME_ZONE,automatic_enabled:configured(env)&&p.automatic_enabled,weekdays:p.weekdays,durations:[30],meeting_formats:['one_on_one','private_group','open_group']});}
   if(url.pathname==='/api/availability'&&req.method==='POST'){
    if(!validOrigin(req,env))return json({error:'Origin not allowed'},403);
    const input=await req.json();const result=await available(env,input);
