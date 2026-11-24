@@ -1,0 +1,18 @@
+import assert from 'node:assert/strict';
+import {CENTRAL_STARTS,validCentralSlot,canJoinSlot,slotKey,requiresDistinctMeet,MEET_CONNECTION_LIMIT} from '../cloudflare/appointment-queue/booking-rules.mjs';
+assert.deepEqual(CENTRAL_STARTS,['13:30','14:00','14:30','15:00','15:30']);
+assert.equal(validCentralSlot('2026-11-24','13:30'),true);
+assert.equal(validCentralSlot('2026-11-28','13:30'),false);
+assert.equal(validCentralSlot('2026-11-24','16:00'),false);
+assert.equal(validCentralSlot('2026-02-30','13:30'),false);
+assert.equal(slotKey('2026-11-24','14:00'),'2026-11-24T14:00[America/Chicago]');
+assert.equal(canJoinSlot(null,'open_group',0),true);
+assert.equal(canJoinSlot({status:'confirmed',format:'open_group'},'open_group',10),true);
+assert.equal(canJoinSlot({status:'confirmed',format:'open_group'},'private_group',10),false);
+assert.equal(canJoinSlot({status:'confirmed',format:'private_group'},'open_group',1),false);
+assert.equal(canJoinSlot({status:'confirmed',format:'one_on_one'},'one_on_one',1),false);
+assert.equal(canJoinSlot({status:'confirmed',format:'open_group'},'open_group',MEET_CONNECTION_LIMIT-1),false);
+assert.equal(requiresDistinctMeet('open_group'),false);
+assert.equal(requiresDistinctMeet('private_group'),true);
+assert.equal(requiresDistinctMeet('one_on_one'),true);
+console.log('Trinity booking policy checks passed');
