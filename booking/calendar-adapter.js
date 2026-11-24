@@ -29,8 +29,8 @@ export function calendarAdapter({getAccessToken, transport=fetch, calendarId='pr
  }
  function verifiedMeeting(data){
   const link=data.hangoutLink||data.conferenceData?.entryPoints?.find(e=>e.entryPointType==='video')?.uri;
-  let validLink=false;try{const u=new URL(link);validLink=u.protocol==='https:'&&u.hostname==='meet.google.com'&&!u.port&&!u.username&&!u.password&&/^[/][a-z-]+$/.test(u.pathname)&&!u.search&&!u.hash;}catch{}
-  return {eventId:data.id,meetUrl:validLink?link:null,ready:validLink};
+  const validLink=typeof link==='string'&&/^https:[/][/]meet[.]google[.]com[/][a-z]{3}-[a-z]{4}-[a-z]{3}$/.test(link);
+  return {eventId:data.id,meetUrl:validLink?link:null,ready:validLink&&data.status!=='cancelled',start:data.start?.dateTime,end:data.end?.dateTime};
  }
  async function getMeeting(bookingId){
   const eventId=String(bookingId).replaceAll('-','').toLowerCase();
