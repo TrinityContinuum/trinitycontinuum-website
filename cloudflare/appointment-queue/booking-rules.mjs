@@ -5,7 +5,7 @@ export const CENTRAL_STARTS=Object.freeze(['13:30','14:00','14:30','15:00','15:3
 export const DURATION_MINUTES=30;
 export const MEET_CONNECTION_LIMIT=500; // includes host and any co-hosts
 export function validCentralSlot(date,time){
- if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!CENTRAL_STARTS.includes(time))return false;
+ if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||!CENTRAL_STARTS.includes(time))return false;
  const [y,m,d]=date.split('-').map(Number);
  const dt=new Date(Date.UTC(y,m-1,d,12));
  return dt.getUTCFullYear()===y&&dt.getUTCMonth()+1===m&&dt.getUTCDate()===d&&dt.getUTCDay()!==0&&dt.getUTCDay()!==6;
