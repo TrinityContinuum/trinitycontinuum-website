@@ -36,6 +36,10 @@ async function book(req,env){
  if(!validOrigin(req,env))return json({error:'Origin not allowed'},403);
  if(!env.TURNSTILE_SECRET)return json({error:'Booking unavailable'},503);
  if(!(await policy(env)).automatic_enabled)return json({error:'Automatic booking is not enabled'},503);
+ return json({error:'Automatic booking awaits verified calendar integration'},503);
+}
+// Retained for review only; never route requests here until the provider and reconciliation are integrated.
+async function unintegratedBooking(req,env){
  let input;try{input=await req.json();}catch{return json({error:'Invalid request'},400);}
  if(!await verifyTurnstile(req,env,input.turnstile_token))return json({error:'Security verification failed'},403);
  let b,slot;try{b=normalizeBooking(input);slot=parseSlot(input);}catch{return json({error:'Invalid booking details'},400);}
