@@ -24,6 +24,12 @@ jobs:
           node --experimental-default-type=module --check booking/independent-worker.js
           node --experimental-default-type=module --check assets/trinity-booking.js
           node --experimental-default-type=module --test booking/booking-policy.test.mjs
+          test -s booking/notification-dispatcher.js
+          test -s booking/001_automatic_booking.sql
+          test -s booking/002_interval_locks.sql
+          test -s booking/003_independent_settings.sql
+          test -s booking/004_video_links.sql
+          echo 'Isolated booking source and schema preflight passed; live automatic booking remains disabled by default.'
       - name: Resolve existing Trinity Cloudflare D1 database
         env:
           CF_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
