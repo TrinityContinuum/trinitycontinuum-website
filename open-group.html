@@ -1,0 +1,58 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Reserve a place in a shared Trinity Continuum Google Meet presentation."><title>Open group presentations | Trinity Continuum</title><link rel="stylesheet" href="assets/style.css"><script defer src="assets/config.js"></script><script defer src="assets/site.js"></script><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script><style>.meeting-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:22px}.meeting-grid input,.meeting-grid select,.meeting-grid textarea{width:100%;background:#091728;color:white;border:1px solid #52677d;border-radius:6px;padding:11px;font:inherit}.meeting-grid label{display:block;margin:12px 0;font-weight:700;font-size:14px}.meeting-grid button{cursor:pointer}.meeting-grid .btn{margin:7px 7px 7px 0}.meeting-grid .note{color:#c7d5df;font-size:14px}.meeting-grid .btn[hidden]{display:none}@media(max-width:800px){.meeting-grid{grid-template-columns:1fr}}</style><link rel="canonical" href="https://trinitycontinuum.com/open-group.html"><style>
+.meeting-layout{max-width:780px;margin:auto}.appointment-form label{display:block;font-size:14px;font-weight:700;margin:14px 0 6px}.appointment-form input,.appointment-form select,.appointment-form textarea{display:block;width:100%;background:#091728;color:#fff;border:1px solid #52677d;border-radius:6px;padding:12px;font:inherit}.appointment-form input:focus,.appointment-form select:focus,.appointment-form textarea:focus{outline:2px solid #d9b977;outline-offset:1px}.appointment-form .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}.appointment-form .btn{cursor:pointer;margin-top:14px}.appointment-form .btn[disabled]{opacity:.55;cursor:wait}.appointment-form .note{color:#c7d5df}.appointment-form .notice{border:1px solid #52677d;padding:14px;border-radius:8px;margin-top:15px}.appointment-form .secondary-action{background:transparent;color:#fff}.appointment-form .card{min-height:0}@media(max-width:640px){.appointment-form .two{grid-template-columns:1fr}.appointment-form .btn{width:100%}}
+</style></head><body><a class="skip" href="#main">Skip to content</a><header class="site-header"><div class="wrap nav"><a class="brand" href="index.html">TRINITY <span>CONTINUUM</span></a><button class="menu" type="button" aria-expanded="false" aria-label="Toggle navigation">Menu ☰</button><nav class="links" aria-label="Primary navigation" id="primary-navigation"><a href="index.html">Home</a><a href="technology.html">Technology</a><a href="water.html">Water</a><a href="energy.html">Power &amp; Thermal</a><a href="manufacturing.html">Manufacturing</a><a href="industries.html">Industries</a><a href="global.html">Global</a><a href="investors.html">Investors</a><a href="contact.html">Contact</a><a href="documents.html">Documents</a><a href="media.html">Media</a><a href="publications.html">Publications</a></nav></div></header>
+<main id="main">
+<section class="page-hero"><div class="wrap"><div class="eyebrow">Professional collaboration</div><h1>Open group presentations</h1><p class="lead">Reserve your own place in a shared 30-minute Google Meet with Trinity Continuum. Other interested organizations may independently reserve places in the same session.</p></div></section>
+<section class="section"><div class="wrap meeting-layout"><div class="card appointment-form">
+<p><a href="meetings.html">Return to all meeting options</a></p>
+<h2>Reserve your place</h2><p>Monday through Friday, 1:30 PM through 4:00 PM Central starting times, excluding observed US federal holidays. Each reservation is for one participant. Up to 20 individual reservations are offered per automatic session; larger groups may <a href="meetings.html">request a custom appointment</a>.</p>
+<form id="openGroupForm">
+<label for="groupSlot">Available session (Central Time)</label><select id="groupSlot" name="slot" required disabled><option value="">Loading availability…</option></select><button type="button" id="reloadSlots" class="btn secondary-action">Refresh available times</button>
+<p class="note">A shared session may already have other participants. If you start a new open session, other visitors will be able to join it. Times are shown for the next 14 days.</p>
+<label for="groupName">Your name</label><input id="groupName" name="name" autocomplete="name" required maxlength="120">
+<label for="groupEmail">Your email address</label><input id="groupEmail" type="email" name="email" autocomplete="email" required maxlength="200">
+<label for="groupOrg">Organization (optional)</label><input id="groupOrg" name="organization" autocomplete="organization" maxlength="150">
+<label for="groupTopic">What would you like to discuss?</label><textarea id="groupTopic" name="topic" required maxlength="2500" rows="4"></textarea>
+<div class="cf-turnstile" data-sitekey="0x4AAAAAAGBTprzSAt5m98MQ" data-theme="dark"></div>
+<button class="btn primary" id="groupSubmit" type="submit" disabled>Reserve a place</button>
+<div class="notice" id="groupStatus" role="status" aria-live="polite">Checking availability. Your reservation is confirmed only when Trinity's system accepts it.</div>
+</form><p class="note">Your individual calendar invitation contains the shared Google Meet link. Your contact details are not published in the participant list. Please contact <a href="mailto:jack@trinitycontinuum.com">jack@trinitycontinuum.com</a> for changes or cancellations.</p>
+</div></div></section></main><footer class="footer"><div class="wrap footer-inner"><div>© 2026 Trinity Continuum · Jack Ray Coates</div><div><a href="contact.html">Contact</a> · <a href="privacy.html">Privacy</a></div></div><div class="wrap resource-footer" style="margin-top:16px"><a href="investor-packages.html">Investor packages</a> · <a href="engineering-packages.html">Engineering packages</a> · <a href="golden-library.html">Golden Library</a></div></footer><script>
+(function(){
+'use strict';
+const base='https://trinity-independent-booking.jackspurewater.workers.dev/api/open-group';
+const form=document.getElementById('openGroupForm'),select=document.getElementById('groupSlot'),submit=document.getElementById('groupSubmit'),status=document.getElementById('groupStatus'),refresh=document.getElementById('reloadSlots');
+let slots=[],busy=false,completed=false;
+const show=t=>{status.textContent=t;};
+const fmt=new Intl.DateTimeFormat('en-US',{timeZone:'America/Chicago',weekday:'short',month:'short',day:'numeric',hour:'numeric',minute:'2-digit',timeZoneName:'short'});
+async function load(){
+ if(busy||completed)return;
+ busy=true;refresh.disabled=true;submit.disabled=true;select.disabled=true;show('Checking available sessions…');
+ try{
+  const r=await fetch(base+'/slots',{cache:'no-store',signal:AbortSignal.timeout(20000)}),j=await r.json();
+  if(!r.ok||!j.enabled||!Array.isArray(j.slots))throw Error('Unavailable');
+  slots=j.slots;select.replaceChildren(new Option('Choose a session',''));
+  slots.forEach((s,i)=>select.add(new Option(fmt.format(new Date(s.starts_at))+(s.shared?' · Join existing session':' · Start open session')+' · '+s.remaining+' places available',String(i))));
+  select.disabled=!slots.length;submit.disabled=!slots.length;
+  show(slots.length?'Select a session and complete your reservation.':'No open sessions available in the next 14 days. Please check again or request a custom appointment.');
+ }catch(e){select.replaceChildren(new Option('Availability unavailable',''));show('Automatic group availability could not be loaded. Please refresh or request a custom appointment.');}
+ finally{busy=false;refresh.disabled=false;}
+}
+refresh.addEventListener('click',load);
+form.addEventListener('submit',async e=>{
+ e.preventDefault();if(busy||completed)return;
+ const f=new FormData(form),slot=slots[Number(f.get('slot'))];
+ if(!f.get('slot')||!slot){show('Choose an available session.');return;}
+ const token=String(f.get('cf-turnstile-response')||'');if(!token){show('Complete the security verification.');return;}
+ busy=true;submit.disabled=true;refresh.disabled=true;show('Reserving your place…');
+ try{
+  const r=await fetch(base+'/reserve',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({starts_at:slot.starts_at,ends_at:slot.ends_at,name:f.get('name'),email:f.get('email'),organization:f.get('organization'),topic:f.get('topic'),turnstile_token:token}),signal:AbortSignal.timeout(45000)});
+  const j=await r.json();
+  if(r.ok&&j.confirmed){completed=true;show('Reservation confirmed for '+fmt.format(new Date(j.starts_at))+'. A Google Calendar invitation with the shared Meet link has been requested. Reference: '+j.reservation_id+'. Check your inbox and spam folder.');form.querySelectorAll('input,select,textarea,button').forEach(el=>el.disabled=true);submit.textContent='Reservation confirmed';return;}
+  if(j.reservation_id){completed=true;show((j.error||'Reservation requires review.')+' Reference: '+j.reservation_id);submit.textContent='Reservation pending review';return;}
+  show(j.error||'Reservation unavailable. Refresh availability and try again.');
+ }catch(e){completed=true;show('The request could not be confirmed. Contact Trinity before retrying to avoid duplicate reservations.');}
+ finally{busy=false;if(!completed){submit.disabled=false;refresh.disabled=false;if(window.turnstile)window.turnstile.reset();}}
+});
+load();
+})();</script></body></html>
