@@ -191,10 +191,10 @@ test('home to contact to meetings keeps manual request truthful and reachable', 
   await page.goto(BASE+'/index.html?view=site',{waitUntil:'domcontentloaded'});
   await page.getByRole('link',{name:'Request a meeting'}).click();
   await expect(page).toHaveURL(/\/contact\.html$/);
-  await expect(page.locator('main')).toContainText('not an automatic booking');
+  await expect(page.locator('main')).toContainText('does not reserve a calendar slot automatically');
   await page.getByRole('link',{name:'Request an appointment'}).click();
   await expect(page).toHaveURL(/\/meetings\.html$/);
-  await expect(page.locator('main')).toContainText('confirm an available time');
+  await expect(page.locator('main')).toContainText('not booked until Trinity responds');
   await expect(page.locator('main')).toContainText('meeting');
 });
 test('privacy notice distinguishes submitted meeting requests from local email forms', async ({page}) => {
